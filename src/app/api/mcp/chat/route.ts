@@ -22,7 +22,13 @@ async function executeMCPCommand(command: string, params: any, userId: string): 
         return await crmMCP.getContracts({ ...params, userId })
       
       case 'get_payments':
-        return await crmMCP.getPayments({ ...params, userId })
+        // Converter status "overdue" para parâmetro overdue: true
+        const paymentParams = { ...params, userId }
+        if (params.status === 'overdue') {
+          paymentParams.overdue = true
+          delete paymentParams.status
+        }
+        return await crmMCP.getPayments(paymentParams)
       
       case 'get_financial_summary':
         return await crmMCP.getFinancialSummary(userId, params.month, params.year)
