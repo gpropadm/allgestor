@@ -17,6 +17,34 @@ export async function POST(request: NextRequest) {
     // Usar um userId fixo para teste (admin user)
     const testUserId = 'cmdusefap0002uc3tnmol495a'
 
+    // Se a mensagem menciona pagamentos ou atraso
+    if (message.toLowerCase().includes('pagamento') || 
+        message.toLowerCase().includes('atraso') ||
+        message.toLowerCase().includes('vencido') ||
+        message.toLowerCase().includes('pendente')) {
+      
+      const payments = await crmMCP.getPayments({ 
+        userId: testUserId, 
+        overdue: true 
+      })
+      
+      if (payments.success && payments.data.length > 0) {
+        const totalOverdue = payments.data.reduce((sum, payment) => sum + payment.amount, 0)
+        
+        return NextResponse.json({ 
+          response: `🚨 Encontrei ${payments.data.length} pagamentos em atraso totalizando R$ ${totalOverdue.toLocaleString('pt-BR')}`,
+          data: payments.data,
+          success: true
+        })
+      } else {
+        return NextResponse.json({ 
+          response: `✅ Parabéns! Não há pagamentos em atraso no momento.`,
+          data: [],
+          success: true
+        })
+      }
+    }
+    
     // Se a mensagem menciona "leads" e "matches", buscar leads e matches
     if (message.toLowerCase().includes('lead') && message.toLowerCase().includes('match')) {
       const leads = await crmMCP.getLeads({ userId: testUserId })
