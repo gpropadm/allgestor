@@ -24,12 +24,14 @@ import {
   CreditCard,
   Shield,
   Wallet,
-  TestTube
+  TestTube,
+  Bot
 } from 'lucide-react'
 
 // OPÇÃO 1: Ícones mais modernos
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
+  { icon: Bot, label: '🤖 Assistente IA', href: '/ai-assistant', featured: true },
   { icon: Users, label: 'Proprietários', href: '/owners' },
   { icon: Building, label: 'Imóveis', href: '/properties' },
   { icon: User, label: 'Inquilinos', href: '/tenants' },
@@ -164,6 +166,8 @@ export function Sidebar() {
                     className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors border-r-2 ${
                       isActive
                         ? ''
+                        : item.featured
+                        ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border-blue-200 hover:from-blue-100 hover:to-blue-200'
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-transparent'
                     }`}
                     style={isActive ? {backgroundColor: '#fef2f2', color: '#f63c6a', borderColor: '#f63c6a'} : {}}
