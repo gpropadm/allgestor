@@ -74,13 +74,14 @@ FORMATO DE RESPOSTA:
 Exemplo de análise:
 "Com base nos dados do seu portfólio, identifiquei que você tem 3 propriedades com contratos vencendo em 30 dias. Sugiro entrar em contato com os inquilinos para renovação..."
 
-IMPORTANTE: Quando identificar a necessidade de buscar dados, responda APENAS com um JSON no formato:
+IMPORTANTE: Quando identificar a necessidade de buscar dados, responda APENAS com um JSON válido no formato:
 {
   "action": "mcp_command",
   "command": "nome_do_comando",
   "params": { "parametro": "valor" }
 }
 
+NUNCA inclua explicações, markdown, ou texto adicional. Apenas o JSON puro.
 Caso contrário, responda normalmente analisando os dados fornecidos.`
 
 export async function POST(request: NextRequest) {
@@ -115,7 +116,7 @@ export async function POST(request: NextRequest) {
 
     const gptResponse = initialResponse.choices[0]?.message?.content || ''
 
-    // Verificar se GPT quer executar um comando MCP
+    // Verificar se GPT quer executar um comando MCP ou detectar intenção
     let mcpResult = null
     try {
       const mcpRequest = JSON.parse(gptResponse)
@@ -127,7 +128,25 @@ export async function POST(request: NextRequest) {
         )
       }
     } catch (e) {
-      // Se não for JSON, GPT respondeu diretamente
+      // Se não for JSON, usar detecção inteligente
+      const messageLC = message.toLowerCase()
+      
+      if (messageLC.includes('pagamento') && (messageLC.includes('atraso') || messageLC.includes('vencido') || messageLC.includes('pendente'))) {
+        mcpResult = await executeMCPCommand('get_payments', { overdue: true }, session.user.id)
+      } else if (messageLC.includes('lead') && messageLC.includes('match')) {
+        mcpResult = await executeMCPCommand('get_leads', {}, session.user.id)
+        // Depois processar matches se houver leads
+      } else if (messageLC.includes('propriedade') || messageLC.includes('portfólio') || messageLC.includes('imóv')) {
+        mcpResult = await executeMCPCommand('get_properties', {}, session.user.id)
+      } else if (messageLC.includes('contrato')) {
+        mcpResult = await executeMCPCommand('get_contracts', {}, session.user.id)
+      } else if (messageLC.includes('financeiro') || messageLC.includes('receita') || messageLC.includes('faturamento')) {
+        const now = new Date()
+        mcpResult = await executeMCPCommand('get_financial_summary', { 
+          month: now.getMonth() + 1, 
+          year: now.getFullYear() 
+        }, session.user.id)
+      }
     }
 
     // Se executou comando MCP, enviar dados para GPT para análise final
