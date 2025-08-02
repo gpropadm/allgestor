@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { crmMCP } from '@/lib/mcp-server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
 })
 
 // Função para executar comandos MCP baseados na requisição do Claude
@@ -96,13 +96,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Mensagem é obrigatória' }, { status: 400 })
     }
 
-    // Primeiro, enviar para Claude para identificar se precisa buscar dados
-    const initialResponse = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20241022",
+    // Primeiro, enviar para GPT para identificar se precisa buscar dados
+    const initialResponse = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
       max_tokens: 1000,
       temperature: 0.1,
-      system: SYSTEM_PROMPT,
       messages: [
+        {
+          role: "system",
+          content: SYSTEM_PROMPT
+        },
         {
           role: "user",
           content: `Usuário perguntou: "${message}"\n\nContexto anterior: ${context || 'Nenhum'}\n\nAnálise: O que você precisa saber para responder esta pergunta?`
@@ -110,13 +113,12 @@ export async function POST(request: NextRequest) {
       ]
     })
 
-    const claudeResponse = initialResponse.content[0]?.type === 'text' ? 
-      initialResponse.content[0].text : ''
+    const gptResponse = initialResponse.choices[0]?.message?.content || ''
 
-    // Verificar se Claude quer executar um comando MCP
+    // Verificar se GPT quer executar um comando MCP
     let mcpResult = null
     try {
-      const mcpRequest = JSON.parse(claudeResponse)
+      const mcpRequest = JSON.parse(gptResponse)
       if (mcpRequest.action === 'mcp_command') {
         mcpResult = await executeMCPCommand(
           mcpRequest.command, 
@@ -125,18 +127,21 @@ export async function POST(request: NextRequest) {
         )
       }
     } catch (e) {
-      // Se não for JSON, Claude respondeu diretamente
+      // Se não for JSON, GPT respondeu diretamente
     }
 
-    // Se executou comando MCP, enviar dados para Claude para análise final
-    let finalResponse = claudeResponse
+    // Se executou comando MCP, enviar dados para GPT para análise final
+    let finalResponse = gptResponse
     if (mcpResult) {
-      const analysisResponse = await anthropic.messages.create({
-        model: "claude-3-5-sonnet-20241022",
+      const analysisResponse = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
         max_tokens: 2000,
         temperature: 0.3,
-        system: SYSTEM_PROMPT,
         messages: [
+          {
+            role: "system",
+            content: SYSTEM_PROMPT
+          },
           {
             role: "user",
             content: `Pergunta do usuário: "${message}"
@@ -149,8 +154,7 @@ Por favor, analise estes dados e forneça uma resposta completa e útil para o u
         ]
       })
 
-      finalResponse = analysisResponse.content[0]?.type === 'text' ? 
-        analysisResponse.content[0].text : 'Erro ao processar resposta'
+      finalResponse = analysisResponse.choices[0]?.message?.content || 'Erro ao processar resposta'
     }
 
     return NextResponse.json({ 
@@ -162,9 +166,9 @@ Por favor, analise estes dados e forneça uma resposta completa e útil para o u
   } catch (error) {
     console.error('Erro na API MCP Chat:', error)
     
-    if (error instanceof Error && error.message.includes('credit balance')) {
+    if (error instanceof Error && (error.message.includes('insufficient_quota') || error.message.includes('rate_limit'))) {
       return NextResponse.json({ 
-        error: 'Créditos insuficientes na conta Anthropic. Configure os créditos para usar o assistente IA.',
+        error: 'Créditos insuficientes na conta OpenAI ou limite de taxa excedido. Verifique sua conta.',
         type: 'credits'
       }, { status: 402 })
     }
