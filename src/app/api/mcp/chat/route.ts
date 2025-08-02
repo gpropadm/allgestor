@@ -119,7 +119,9 @@ export async function POST(request: NextRequest) {
     // Verificar se GPT quer executar um comando MCP ou detectar intenção
     let mcpResult = null
     try {
-      const mcpRequest = JSON.parse(gptResponse)
+      // Limpar resposta GPT de markdown e espaços
+      const cleanResponse = gptResponse.replace(/```json\n?|\n?```/g, '').trim()
+      const mcpRequest = JSON.parse(cleanResponse)
       if (mcpRequest.action === 'mcp_command') {
         mcpResult = await executeMCPCommand(
           mcpRequest.command, 
