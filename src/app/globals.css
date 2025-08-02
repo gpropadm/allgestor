@@ -1,0 +1,272 @@
+@import "tailwindcss";
+
+/* Gia Variable Font - For "AV" */
+@font-face {
+  font-family: 'Gia Variable';
+  src: url('/fonts/Gia_Variable.otf') format('opentype');
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Alliance No.2 Font - For "SISTEM" */
+@font-face {
+  font-family: 'Alliance No.2';
+  src: url('/fonts/Alliance No.2 ExtraBold.otf') format('opentype');
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Definir fonte personalizada para logo */
+@font-face {
+  font-family: 'Alliance';
+  src: url('data:font/woff2;base64,') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+/* Dark theme */
+.dark {
+  --background: #000000;
+  --foreground: #ffffff;
+}
+
+/* Theme variables */
+body.dark {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+/* Dark theme card backgrounds */
+.dark .bg-white {
+  background-color: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+.dark .bg-gray-50 {
+  background-color: #0a0a0a !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: #1a1a1a !important;
+}
+
+.dark .text-gray-900 {
+  color: #ffffff !important;
+}
+
+.dark .text-gray-700 {
+  color: #d1d5db !important;
+}
+
+.dark .text-gray-600 {
+  color: #9ca3af !important;
+}
+
+.dark .text-gray-500 {
+  color: #6b7280 !important;
+}
+
+.dark .border-gray-200 {
+  border-color: #374151 !important;
+}
+
+.dark .border-gray-300 {
+  border-color: #4b5563 !important;
+}
+
+/* Dark theme input fields */
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #1a1a1a !important;
+  color: #ffffff !important;
+  border-color: #374151 !important;
+}
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  border-color: #f63c6a !important;
+  box-shadow: 0 0 0 2px rgba(255, 67, 82, 0.2) !important;
+}
+
+/* Dark theme shadows */
+.dark .shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark .shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(255, 255, 255, 0.1) !important;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Classes personalizadas para a logo */
+.logo-font {
+  font-family: 'Alliance', 'Montserrat', 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.logo-text {
+  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Toast animations */
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: translateX(100%) scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-10%) scale(1.05);
+  }
+  70% {
+    transform: translateX(5%) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0%) scale(1);
+  }
+}
+
+@keyframes slideOut {
+  0% {
+    opacity: 1;
+    transform: translateX(0%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100%) scale(0.9);
+  }
+}
+
+@keyframes progressPulseSuccess {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(34, 197, 94, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.8);
+  }
+}
+
+@keyframes progressPulseError {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.8);
+  }
+}
+
+.animate-bounce-in {
+  animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.animate-slide-out {
+  animation: slideOut 0.3s ease-in;
+}
+
+.animate-progress-pulse-success {
+  animation: progressPulseSuccess 1.5s ease-in-out infinite;
+}
+
+.animate-progress-pulse-error {
+  animation: progressPulseError 1.5s ease-in-out infinite;
+}
+
+/* Custom animations for lead generation bullets */
+@keyframes slideInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes bounceDelayed {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+/* Animation classes with delays */
+.animate-slide-in-right {
+  animation: slideInRight 0.8s ease-out 0.5s both;
+}
+
+.animate-slide-in-right-2 {
+  animation: slideInRight 0.8s ease-out 1s both;
+}
+
+.animate-slide-in-right-3 {
+  animation: slideInRight 0.8s ease-out 1.5s both;
+}
+
+.animate-bounce-delayed {
+  animation: bounceDelayed 2s infinite 0.5s;
+}
+
+.animate-bounce-delayed-2 {
+  animation: bounceDelayed 2s infinite 1s;
+}
+
+.animate-bounce-delayed-3 {
+  animation: bounceDelayed 2s infinite 1.5s;
+}
+
+.animate-pulse-slow {
+  animation: pulseGlow 3s ease-in-out infinite 0.5s;
+}
+
+.animate-pulse-slow-2 {
+  animation: pulseGlow 3s ease-in-out infinite 1s;
+}
+
+.animate-pulse-slow-3 {
+  animation: pulseGlow 3s ease-in-out infinite 1.5s;
+}

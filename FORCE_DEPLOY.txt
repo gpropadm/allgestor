@@ -1,0 +1,30 @@
+FORCE DEPLOY - PAYMENTS VIEW OPTIMIZATION  
+Timestamp: 2025-08-02 13:15:00
+Commit: payments-monthly-view-with-expansion
+
+✅ NOVA FEATURE: Visualização inteligente de pagamentos por mês!
+
+Deploy deve incluir:
+- Página /payments agora mostra apenas MÊS ATUAL por padrão
+- Sistema de expansão clicável no nome do inquilino
+- Clique no nome do inquilino = mostra TODOS os meses daquele inquilino
+- Indicador visual com seta que gira quando expandido
+- Contador de quantos inquilinos estão expandidos
+- Feedback visual "Mostrando todos os meses" vs "Clique para ver todos os meses"
+- Interface muito mais limpa e organizada
+
+BENEFÍCIOS PARA O USUÁRIO:
+- Página não fica mais "bagunçada" com muitos meses
+- Foco no mês atual que é o mais importante
+- Expansão sob demanda quando precisar ver histórico
+- Interface mais rápida e responsiva
+- Facilita identificação de pagamentos do mês corrente
+
+MELHORIAS TÉCNICAS:
+- Estado expandedTenants controlado por Set()
+- Filtro inteligente por mês atual + inquilinos expandidos  
+- Animações suaves com transition-transform
+- Feedback visual imediato ao usuário
+- Performance otimizada mostrando menos dados inicialmente
+
+Vercel deve detectar este arquivo e fazer novo deploy.
