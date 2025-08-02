@@ -34,6 +34,7 @@
     "backup:status": "node scripts/backup-scheduler.js status"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.57.0",
     "@hookform/resolvers": "^5.1.1",
     "@langchain/core": "^0.3.57",
     "@langchain/openai": "^0.5.12",
