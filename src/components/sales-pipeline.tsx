@@ -289,10 +289,6 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
                         <span className="bg-white bg-opacity-20 px-2 py-1 rounded text-xs">
                           {stage.opportunities.length}
                         </span>
-                        {/* Probabilidade padrão do estágio */}
-                        <span className="bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs font-bold">
-                          {getStageProbability(stage.name)}%
-                        </span>
                       </div>
                     </div>
                   </div>
@@ -523,7 +519,7 @@ function OpportunityCard({
           </div>
           <div className="flex items-center space-x-1">
             <span 
-              className="text-xs font-bold px-2 py-1 rounded" 
+              className="text-sm font-bold px-2 py-1 rounded" 
               style={{ color: stageColor, backgroundColor: stageColor + '20' }}
             >
               {opportunity.probability}%
