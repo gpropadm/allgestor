@@ -583,7 +583,7 @@ function OpportunityCard({
   onUpdate?: (id: string, updates: Partial<SalesOpportunity>) => void
   onDelete?: (id: string) => void
 }) {
-  const [isEditing, setIsEditing] = useState(false)
+  const [isViewing, setIsViewing] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
   const [leadData, setLeadData] = useState<any>(null)
   const [editForm, setEditForm] = useState({
@@ -609,14 +609,13 @@ function OpportunityCard({
     }
   }
 
-  const handleEdit = () => {
-    setIsEditing(true)
+  const handleView = () => {
+    setIsViewing(true)
     loadLeadData()
   }
 
-  const handleSave = () => {
-    // Não há mais campos para editar, apenas fechar o modal
-    setIsEditing(false)
+  const handleClose = () => {
+    setIsViewing(false)
   }
 
   const handleDelete = () => {
@@ -643,14 +642,14 @@ function OpportunityCard({
     window.open(`/simulador-financeiro?value=${opportunity.value}&leadId=${opportunity.leadId}`, '_blank')
   }
 
-  if (isEditing) {
+  if (isViewing) {
     return (
-      <div className="space-y-3 bg-blue-50 p-3 rounded-lg border-2 border-blue-200">
+      <div className="space-y-3 bg-blue-50 p-3 rounded-lg border-2 border-blue-200 max-w-full overflow-hidden">
         <div className="flex items-center justify-between mb-2">
           <h4 className="font-medium text-blue-900">Informações da Oportunidade</h4>
           <div className="flex space-x-1">
             <button 
-              onClick={handleSave}
+              onClick={handleClose}
               className="p-1 text-blue-600 hover:bg-blue-100 rounded"
               title="Fechar"
             >
@@ -663,7 +662,7 @@ function OpportunityCard({
         {leadData ? (
           <div className="bg-white p-4 rounded-lg border">
             <h5 className="font-semibold text-gray-900 mb-4">Informações do Lead</h5>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 text-sm">
               <div className="bg-gray-50 p-3 rounded-lg">
                 <span className="text-gray-600 text-xs font-medium block mb-1">INTERESSE</span>
                 <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
@@ -692,17 +691,17 @@ function OpportunityCard({
               </div>
               <div className="bg-gray-50 p-3 rounded-lg">
                 <span className="text-gray-600 text-xs font-medium block mb-1">EMAIL</span>
-                <span className="font-medium text-gray-900 text-xs">{leadData.email}</span>
+                <span className="font-medium text-gray-900 text-xs break-all">{leadData.email}</span>
               </div>
               <div className="bg-gray-50 p-3 rounded-lg">
                 <span className="text-gray-600 text-xs font-medium block mb-1">NOME</span>
-                <span className="font-medium text-gray-900">{leadData.name}</span>
+                <span className="font-medium text-gray-900 break-words">{leadData.name}</span>
               </div>
             </div>
             {leadData.notes && (
               <div className="mt-4 bg-blue-50 p-3 rounded-lg">
                 <span className="text-blue-800 text-xs font-medium block mb-2">OBSERVAÇÕES DO LEAD</span>
-                <p className="text-sm text-blue-900 leading-relaxed">{leadData.notes}</p>
+                <p className="text-sm text-blue-900 leading-relaxed break-words">{leadData.notes}</p>
               </div>
             )}
           </div>
@@ -730,11 +729,11 @@ function OpportunityCard({
         </div>
         <div className="flex space-x-1 flex-shrink-0 ml-2">
           <button 
-            onClick={handleEdit}
+            onClick={handleView}
             className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-full transition-colors"
-            title="Editar"
+            title="Ver informações do lead"
           >
-            <Settings className="h-3.5 w-3.5" />
+            <Eye className="h-3.5 w-3.5" />
           </button>
           <button 
             onClick={handleDelete}
