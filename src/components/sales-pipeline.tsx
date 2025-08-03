@@ -324,6 +324,7 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
                               >
                                 <OpportunityCard 
                                   opportunity={opportunity} 
+                                  stageColor={stage.color}
                                   onUpdate={updateOpportunity}
                                   onDelete={deleteOpportunity}
                                 />
@@ -355,10 +356,12 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
 
 function OpportunityCard({ 
   opportunity, 
+  stageColor,
   onUpdate, 
   onDelete 
 }: { 
   opportunity: SalesOpportunity
+  stageColor: string
   onUpdate?: (id: string, updates: Partial<SalesOpportunity>) => void
   onDelete?: (id: string) => void
 }) {
@@ -510,12 +513,22 @@ function OpportunityCard({
           </div>
         )}
 
-        {/* Valor */}
-        <div className="flex items-center space-x-2">
-          <DollarSign className="h-4 w-4 text-green-500" />
-          <span className="font-semibold text-gray-900">
-            {opportunity.value ? `R$ ${opportunity.value.toLocaleString()}` : 'Sem valor'}
-          </span>
+        {/* Valor e Probabilidade */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <DollarSign className="h-4 w-4 text-green-500" />
+            <span className="font-semibold text-gray-900">
+              {opportunity.value ? `R$ ${opportunity.value.toLocaleString()}` : 'Sem valor'}
+            </span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <span 
+              className="text-xs font-bold px-2 py-1 rounded" 
+              style={{ color: stageColor, backgroundColor: stageColor + '20' }}
+            >
+              {opportunity.probability}%
+            </span>
+          </div>
         </div>
 
         {/* Data de Fechamento */}
