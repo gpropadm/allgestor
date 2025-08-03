@@ -17,7 +17,14 @@ export async function GET() {
         name: true,
         email: true,
         phone: true,
-        role: true
+        role: true,
+        company: {
+          select: {
+            id: true,
+            name: true,
+            tradeName: true
+          }
+        }
       }
     })
 
@@ -72,7 +79,14 @@ export async function PUT(request: NextRequest) {
         name: true,
         email: true,
         phone: true,
-        role: true
+        role: true,
+        company: {
+          select: {
+            id: true,
+            name: true,
+            tradeName: true
+          }
+        }
       }
     })
 

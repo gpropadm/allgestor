@@ -45,11 +45,11 @@ export default function AIAssistant() {
 
   const fetchCompanyName = async () => {
     try {
-      const response = await fetch('/api/companies')
+      const response = await fetch('/api/users/profile')
       if (response.ok) {
-        const companies = await response.json()
-        if (companies.length > 0) {
-          setCompanyName(companies[0].name)
+        const userProfile = await response.json()
+        if (userProfile.company && userProfile.company.name) {
+          setCompanyName(userProfile.company.name)
         }
       }
     } catch (error) {
