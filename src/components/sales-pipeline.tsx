@@ -205,41 +205,6 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
     }
   }
 
-  const addOpportunityNew = async (leadData: any) => {
-    const futureDate = new Date()
-    futureDate.setDate(futureDate.getDate() + 30)
-    const expectedCloseDate = futureDate.toISOString().split('T')[0]
-
-    const opportunity = {
-      leadName: leadData.name,
-      value: leadData.value || 100000,
-      probability: 10,
-      expectedCloseDate,
-      notes: leadData.notes || 'À vista? Financiamento Aprovado? Urgente?'
-    }
-
-    try {
-      const response = await fetch('/api/sales-pipeline', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'create-with-lead',
-          stageId: selectedStageId,
-          opportunity,
-          leadData,
-          companyId,
-          userId
-        })
-      })
-      
-      if (response.ok) {
-        setShowAddModal(false)
-        loadPipelineData()
-      }
-    } catch (error) {
-      console.error('Erro ao criar oportunidade:', error)
-    }
-  }
 
   const updateOpportunity = async (opportunityId: string, updates: Partial<SalesOpportunity>) => {
     try {
@@ -411,7 +376,6 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
           stageId={selectedStageId}
           existingLeads={existingLeads}
           onAddFromExisting={addOpportunityFromExisting}
-          onAddNew={addOpportunityNew}
         />
       )}
     </div>
@@ -423,25 +387,15 @@ function AddOpportunityModal({
   onClose,
   stageId,
   existingLeads,
-  onAddFromExisting,
-  onAddNew
+  onAddFromExisting
 }: {
   isOpen: boolean
   onClose: () => void
   stageId: string
   existingLeads: any[]
   onAddFromExisting: (leadId: string, leadName: string) => void
-  onAddNew: (leadData: any) => void
 }) {
   const [selectedLead, setSelectedLead] = useState('')
-  const [showNewLeadForm, setShowNewLeadForm] = useState(false)
-  const [newLeadForm, setNewLeadForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    value: 100000,
-    notes: ''
-  })
 
   if (!isOpen) return null
 
@@ -452,10 +406,9 @@ function AddOpportunityModal({
     }
   }
 
-  const handleAddNew = () => {
-    if (newLeadForm.name.trim()) {
-      onAddNew(newLeadForm)
-    }
+  const handleGoToLeads = () => {
+    window.open('/leads', '_blank')
+    onClose()
   }
 
   return (
@@ -468,111 +421,60 @@ function AddOpportunityModal({
           </button>
         </div>
 
-        {!showNewLeadForm ? (
-          <div className="space-y-4">
-            {/* Opção 1: Lead Existente */}
-            <div className="border rounded-lg p-4">
-              <h4 className="font-medium mb-3 flex items-center">
-                <User className="h-4 w-4 mr-2" />
-                Selecionar Lead Existente
-              </h4>
-              <select
-                value={selectedLead}
-                onChange={(e) => setSelectedLead(e.target.value)}
-                className="w-full p-2 border rounded text-sm mb-3"
-              >
-                <option value="">Escolha um lead...</option>
-                {existingLeads.map(lead => (
-                  <option key={lead.id} value={lead.id}>
-                    {lead.name} - {lead.phone || 'Sem telefone'}
-                  </option>
-                ))}
-              </select>
-              <button
-                onClick={handleAddExisting}
-                disabled={!selectedLead}
-                className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-gray-300"
-              >
-                Adicionar ao Pipeline
-              </button>
-            </div>
-
-            <div className="text-center text-gray-500 text-sm">ou</div>
-
-            {/* Opção 2: Novo Lead */}
-            <div className="border rounded-lg p-4">
-              <h4 className="font-medium mb-3 flex items-center">
-                <User className="h-4 w-4 mr-2" />
-                Criar Novo Lead
-              </h4>
-              <button
-                onClick={() => setShowNewLeadForm(true)}
-                className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
-              >
-                + Criar Lead Completo
-              </button>
-            </div>
+        <div className="space-y-4">
+          {/* Opção 1: Lead Existente */}
+          <div className="border rounded-lg p-4">
+            <h4 className="font-medium mb-3 flex items-center">
+              <User className="h-4 w-4 mr-2" />
+              Selecionar Lead Existente
+            </h4>
+            
+            {existingLeads.length > 0 ? (
+              <>
+                <select
+                  value={selectedLead}
+                  onChange={(e) => setSelectedLead(e.target.value)}
+                  className="w-full p-2 border rounded text-sm mb-3"
+                >
+                  <option value="">Escolha um lead...</option>
+                  {existingLeads.map(lead => (
+                    <option key={lead.id} value={lead.id}>
+                      {lead.name} - {lead.phone || lead.email || 'Sem contato'}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={handleAddExisting}
+                  disabled={!selectedLead}
+                  className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-gray-300"
+                >
+                  Adicionar ao Pipeline
+                </button>
+              </>
+            ) : (
+              <p className="text-gray-500 text-sm mb-3">Nenhum lead cadastrado ainda.</p>
+            )}
           </div>
-        ) : (
-          <div className="space-y-4">
+
+          <div className="text-center text-gray-500 text-sm">ou</div>
+
+          {/* Opção 2: Ir para Leads */}
+          <div className="border rounded-lg p-4">
+            <h4 className="font-medium mb-3 flex items-center">
+              <User className="h-4 w-4 mr-2" />
+              Cadastrar Novo Lead Completo
+            </h4>
+            <p className="text-sm text-gray-600 mb-3">
+              Cadastre um lead completo com todos os dados para melhor matching
+            </p>
             <button
-              onClick={() => setShowNewLeadForm(false)}
-              className="text-blue-600 text-sm mb-4 flex items-center"
+              onClick={handleGoToLeads}
+              className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
             >
-              ← Voltar para opções
-            </button>
-            
-            <input
-              type="text"
-              placeholder="Nome do Lead"
-              value={newLeadForm.name}
-              onChange={(e) => setNewLeadForm({...newLeadForm, name: e.target.value})}
-              className="w-full p-2 border rounded text-sm"
-            />
-            
-            <input
-              type="email"
-              placeholder="Email"
-              value={newLeadForm.email}
-              onChange={(e) => setNewLeadForm({...newLeadForm, email: e.target.value})}
-              className="w-full p-2 border rounded text-sm"
-            />
-            
-            <input
-              type="tel"
-              placeholder="Telefone"
-              value={newLeadForm.phone}
-              onChange={(e) => setNewLeadForm({...newLeadForm, phone: e.target.value})}
-              className="w-full p-2 border rounded text-sm"
-            />
-            
-            <input
-              type="text"
-              placeholder="R$ 100.000"
-              value={newLeadForm.value ? `R$ ${newLeadForm.value.toLocaleString('pt-BR')}` : ''}
-              onChange={(e) => {
-                const value = e.target.value.replace(/[^\d]/g, '')
-                setNewLeadForm({...newLeadForm, value: value ? Number(value) : 0})
-              }}
-              className="w-full p-2 border rounded text-sm"
-            />
-            
-            <textarea
-              placeholder="Notas sobre o lead..."
-              value={newLeadForm.notes}
-              onChange={(e) => setNewLeadForm({...newLeadForm, notes: e.target.value})}
-              className="w-full p-2 border rounded text-sm h-16 resize-none"
-            />
-            
-            <button
-              onClick={handleAddNew}
-              disabled={!newLeadForm.name.trim()}
-              className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:bg-gray-300"
-            >
-              Criar Lead e Adicionar ao Pipeline
+              🔗 Ir para Página de Leads
             </button>
           </div>
-        )}
+        </div>
       </div>
     </div>
   )

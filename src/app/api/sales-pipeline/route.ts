@@ -22,9 +22,6 @@ export async function POST(request: NextRequest) {
       case 'create':
         return await createOpportunity(data, session.user.companyId, session.user.id)
       
-      case 'create-with-lead':
-        return await createOpportunityWithLead(data, session.user.companyId, session.user.id)
-      
       case 'update':
         return await updateOpportunity(data, session.user.companyId)
       
@@ -328,57 +325,3 @@ async function deleteOpportunity(data: any, companyId: string) {
   }
 }
 
-async function createOpportunityWithLead(data: any, companyId: string, userId: string) {
-  try {
-    const { stageId, opportunity, leadData } = data
-
-    // Verificar se o estágio pertence à empresa
-    const stage = await prisma.salesStage.findFirst({
-      where: {
-        id: stageId,
-        companyId
-      }
-    })
-
-    if (!stage) {
-      return NextResponse.json({ error: 'Estágio não encontrado' }, { status: 404 })
-    }
-
-    // Criar o lead completo primeiro
-    const newLead = await prisma.lead.create({
-      data: {
-        name: leadData.name,
-        email: leadData.email || 'temp@temp.com',
-        phone: leadData.phone || '(00) 00000-0000',
-        interest: 'BUY',
-        propertyType: 'APARTMENT',
-        maxPrice: leadData.value || 0,
-        preferredCities: '[]',
-        preferredStates: '[]',
-        status: 'ACTIVE',
-        companyId,
-        userId
-      }
-    })
-
-    // Criar a oportunidade vinculada ao lead
-    const newOpportunity = await prisma.salesOpportunity.create({
-      data: {
-        leadId: newLead.id,
-        propertyId: opportunity.propertyId,
-        stageId,
-        value: opportunity.value,
-        probability: opportunity.probability || 10,
-        expectedCloseDate: opportunity.expectedCloseDate ? new Date(opportunity.expectedCloseDate) : null,
-        notes: opportunity.notes,
-        companyId,
-        userId
-      }
-    })
-
-    return NextResponse.json({ success: true, data: { lead: newLead, opportunity: newOpportunity } })
-  } catch (error) {
-    console.error('Erro ao criar oportunidade com lead:', error)
-    return NextResponse.json({ error: 'Erro ao criar oportunidade com lead' }, { status: 500 })
-  }
-}
