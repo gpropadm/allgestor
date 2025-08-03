@@ -660,12 +660,17 @@ function OpportunityCard({
 
         {/* Informações do Lead */}
         {leadData ? (
-          <div className="bg-white p-4 rounded-lg border">
+          <div className="bg-white p-4 rounded-lg border-2 border-gray-400">
             <h5 className="font-semibold text-gray-900 mb-4">Informações do Lead</h5>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 text-sm">
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <span className="text-gray-600 text-xs font-medium block mb-1">INTERESSE</span>
-                <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <span className="text-gray-700 font-medium">Nome:</span>
+                <span className="font-semibold text-gray-900 break-words text-right">{leadData.name}</span>
+              </div>
+              
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <span className="text-gray-700 font-medium">Interesse:</span>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                   leadData.interest === 'BUY' 
                     ? 'bg-green-100 text-green-800' 
                     : 'bg-blue-100 text-blue-800'
@@ -673,37 +678,38 @@ function OpportunityCard({
                   {leadData.interest === 'BUY' ? 'Comprar' : 'Alugar'}
                 </span>
               </div>
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <span className="text-gray-600 text-xs font-medium block mb-1">TIPO IMÓVEL</span>
-                <span className="font-medium text-gray-900">
+
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <span className="text-gray-700 font-medium">Tipo de Imóvel:</span>
+                <span className="font-semibold text-gray-900">
                   {leadData.propertyType === 'APARTMENT' ? 'Apartamento' : 
                    leadData.propertyType === 'HOUSE' ? 'Casa' : 
                    leadData.propertyType === 'COMMERCIAL' ? 'Comercial' : leadData.propertyType}
                 </span>
               </div>
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <span className="text-gray-600 text-xs font-medium block mb-1">ORÇAMENTO</span>
-                <span className="font-semibold text-green-600">R$ {leadData.maxPrice?.toLocaleString()}</span>
+
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <span className="text-gray-700 font-medium">Orçamento:</span>
+                <span className="font-bold text-green-700 text-lg">R$ {leadData.maxPrice?.toLocaleString()}</span>
               </div>
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <span className="text-gray-600 text-xs font-medium block mb-1">TELEFONE</span>
-                <span className="font-medium text-gray-900">{leadData.phone}</span>
+
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <span className="text-gray-700 font-medium">Telefone:</span>
+                <span className="font-semibold text-gray-900">{leadData.phone}</span>
               </div>
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <span className="text-gray-600 text-xs font-medium block mb-1">EMAIL</span>
-                <span className="font-medium text-gray-900 text-xs break-all">{leadData.email}</span>
+
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <span className="text-gray-700 font-medium">Email:</span>
+                <span className="font-semibold text-gray-900 text-sm break-all text-right">{leadData.email}</span>
               </div>
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <span className="text-gray-600 text-xs font-medium block mb-1">NOME</span>
-                <span className="font-medium text-gray-900 break-words">{leadData.name}</span>
-              </div>
+
+              {leadData.notes && (
+                <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                  <span className="text-blue-800 font-medium block mb-2">Observações:</span>
+                  <p className="text-sm text-blue-900 leading-relaxed break-words">{leadData.notes}</p>
+                </div>
+              )}
             </div>
-            {leadData.notes && (
-              <div className="mt-4 bg-blue-50 p-3 rounded-lg">
-                <span className="text-blue-800 text-xs font-medium block mb-2">OBSERVAÇÕES DO LEAD</span>
-                <p className="text-sm text-blue-900 leading-relaxed break-words">{leadData.notes}</p>
-              </div>
-            )}
           </div>
         ) : (
           <div className="bg-gray-100 p-4 rounded-lg text-center">
