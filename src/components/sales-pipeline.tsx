@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 import { 
-  Edit, 
-  Trash2, 
+  Settings, 
+  Trash, 
   FileText, 
   X,
   Save,
@@ -272,11 +272,11 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
       </div>
 
       {/* Pipeline Kanban */}
-      <div className="p-6">
+      <div className="p-3 sm:p-6">
         <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="flex space-x-6 overflow-x-auto pb-4">
+          <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-6 overflow-x-auto pb-4">
             {stages.map((stage) => (
-              <div key={stage.id} className="flex-shrink-0 w-80">
+              <div key={stage.id} className="flex-shrink-0 w-full lg:w-80">
                 <div className="bg-gray-50 rounded-lg">
                   {/* Header do Estágio */}
                   <div 
@@ -290,7 +290,7 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
                           {stage.opportunities.length}
                         </span>
                         {/* Probabilidade padrão do estágio */}
-                        <span className="bg-white bg-opacity-30 px-2 py-1 rounded text-xs font-bold">
+                        <span className="bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs font-bold">
                           {getStageProbability(stage.name)}%
                         </span>
                       </div>
@@ -318,7 +318,7 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
-                                className={`bg-white p-4 rounded-lg border shadow-sm cursor-move hover:shadow-md transition-shadow ${
+                                className={`bg-white p-4 rounded-lg border border-gray-300 shadow-sm cursor-move hover:shadow-md transition-shadow ${
                                   snapshot.isDragging ? 'rotate-2 shadow-lg' : ''
                                 }`}
                               >
@@ -488,14 +488,14 @@ function OpportunityCard({
             className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-full transition-colors"
             title="Editar"
           >
-            <Edit className="h-3.5 w-3.5" />
+            <Settings className="h-3.5 w-3.5" />
           </button>
           <button 
             onClick={handleDelete}
             className="p-1.5 text-red-600 hover:bg-red-100 rounded-full transition-colors"
             title="Deletar"
           >
-            <Trash2 className="h-3.5 w-3.5" />
+            <Trash className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>
@@ -540,7 +540,7 @@ function OpportunityCard({
       )}
 
       {/* Ações Funcionais */}
-      <div className="grid grid-cols-3 gap-1 pt-3 border-t border-gray-100">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 pt-3 border-t border-gray-100">
         <button 
           onClick={handleViewLead}
           className="flex items-center justify-center space-x-1 text-xs bg-blue-50 text-blue-700 py-2 rounded-md hover:bg-blue-100 transition-colors"
