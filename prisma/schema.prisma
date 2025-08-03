@@ -73,6 +73,8 @@ model Company {
   iptuData      IPTUData[]
   marketAnalyses MarketAnalysis[]
   scrapingJobs  ScrapingJob[]
+  followUpSequences FollowUpSequence[]
+  salesStages   SalesStage[]
 
   @@map("companies")
 }
@@ -702,6 +704,294 @@ model ScrapingJob {
   user        User?    @relation(fields: [userId], references: [id])
 
   @@map("scraping_jobs")
+}
+
+// === SALES AUTOMATION MODELS ===
+
+// 1. Follow-up Automático
+model FollowUpSequence {
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  triggerEvent String   // 'lead_created', 'visit_scheduled', etc
+  active       Boolean  @default(true)
+  companyId    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  company      Company         @relation(fields: [companyId], references: [id])
+  steps        FollowUpStep[]
+  
+  @@map("follow_up_sequences")
+}
+
+model FollowUpStep {
+  id              String   @id @default(cuid())
+  sequenceId      String
+  stepOrder       Int
+  delayDays       Int
+  delayHours      Int      @default(0)
+  actionType      String   // 'email', 'whatsapp', 'call_reminder'
+  templateSubject String?
+  templateContent String?
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  
+  sequence        FollowUpSequence     @relation(fields: [sequenceId], references: [id])
+  executions      FollowUpExecution[]
+  
+  @@map("follow_up_steps")
+}
+
+model FollowUpExecution {
+  id           String    @id @default(cuid())
+  leadId       String
+  stepId       String
+  scheduledFor DateTime
+  executedAt   DateTime?
+  status       String    @default("pending") // 'pending', 'executed', 'failed', 'cancelled'
+  result       String?
+  createdAt    DateTime  @default(now())
+  
+  step         FollowUpStep @relation(fields: [stepId], references: [id])
+  
+  @@map("follow_up_executions")
+}
+
+// 2. Lead Scoring
+model LeadScore {
+  id           String   @id @default(cuid())
+  leadId       String
+  scoreValue   Int
+  factors      String   // JSON
+  calculatedAt DateTime @default(now())
+  validUntil   DateTime?
+  
+  @@map("lead_scores")
+}
+
+model LeadActivity {
+  id           String   @id @default(cuid())
+  leadId       String
+  activityType String   // 'email_opened', 'whatsapp_replied', 'property_viewed'
+  activityData String?  // JSON
+  scoreImpact  Int      @default(0)
+  createdAt    DateTime @default(now())
+  
+  @@map("lead_activities")
+}
+
+// 3. Pipeline Visual (Kanban)
+model SalesStage {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  stageOrder  Int
+  color       String   @default("#3B82F6")
+  companyId   String
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  
+  company       Company            @relation(fields: [companyId], references: [id])
+  opportunities SalesOpportunity[]
+  
+  @@map("sales_stages")
+}
+
+model SalesOpportunity {
+  id                String    @id @default(cuid())
+  leadId            String
+  propertyId        String?
+  stageId           String
+  value             Float?
+  probability       Int       @default(50) // 0-100%
+  expectedCloseDate DateTime?
+  notes             String?
+  companyId         String
+  userId            String
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  stage             SalesStage @relation(fields: [stageId], references: [id])
+  
+  @@map("sales_opportunities")
+}
+
+// 4. WhatsApp Integration
+model WhatsAppSession {
+  id            String   @id @default(cuid())
+  leadId        String
+  phoneNumber   String
+  sessionStatus String   @default("active") // 'active', 'expired', 'blocked'
+  lastMessageAt DateTime?
+  companyId     String
+  createdAt     DateTime @default(now())
+  
+  messages      WhatsAppMessage[]
+  
+  @@map("whatsapp_sessions")
+}
+
+model WhatsAppMessage {
+  id           String   @id @default(cuid())
+  sessionId    String
+  messageType  String   // 'text', 'image', 'document', 'template'
+  content      String?
+  direction    String   // 'sent', 'received'
+  status       String   @default("sent") // 'sent', 'delivered', 'read', 'failed'
+  templateName String?
+  mediaUrl     String?
+  createdAt    DateTime @default(now())
+  
+  session      WhatsAppSession @relation(fields: [sessionId], references: [id])
+  
+  @@map("whatsapp_messages")
+}
+
+// 5. Simulador Financeiro
+model FinancingSimulation {
+  id               String    @id @default(cuid())
+  leadId           String
+  propertyId       String
+  propertyValue    Float
+  downPayment      Float
+  loanAmount       Float
+  interestRate     Float
+  loanTermMonths   Int
+  monthlyPayment   Float
+  totalInterest    Float
+  bankName         String?
+  approved         Boolean   @default(false)
+  approvalDate     DateTime?
+  createdAt        DateTime  @default(now())
+  
+  @@map("financing_simulations")
+}
+
+// 6. Tours Virtuais 360°
+model VirtualTour {
+  id           String   @id @default(cuid())
+  propertyId   String
+  tourName     String
+  tourUrl      String?
+  thumbnailUrl String?
+  tourType     String   @default("360") // '360', 'video', 'interactive'
+  viewCount    Int      @default(0)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  
+  views        TourView[]
+  
+  @@map("virtual_tours")
+}
+
+model TourView {
+  id           String   @id @default(cuid())
+  tourId       String
+  leadId       String?
+  ipAddress    String?
+  userAgent    String?
+  viewDuration Int?     // em segundos
+  completed    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  
+  tour         VirtualTour @relation(fields: [tourId], references: [id])
+  
+  @@map("tour_views")
+}
+
+// 7. Análise Preditiva
+model PredictionModel {
+  id          String    @id @default(cuid())
+  modelName   String
+  modelType   String    // 'lead_conversion', 'price_prediction', 'time_to_close'
+  modelData   String    // JSON - Parâmetros do modelo ML
+  accuracy    Float?
+  lastTrained DateTime?
+  active      Boolean   @default(true)
+  companyId   String?
+  
+  predictions Prediction[]
+  
+  @@map("prediction_models")
+}
+
+model Prediction {
+  id              String   @id @default(cuid())
+  modelId         String
+  targetId        String   // lead_id ou property_id
+  targetType      String   // 'lead', 'property'
+  predictionValue Float?
+  confidence      Float?
+  factors         String?  // JSON
+  createdAt       DateTime @default(now())
+  
+  model           PredictionModel @relation(fields: [modelId], references: [id])
+  
+  @@map("predictions")
+}
+
+// 8. Automação de Documentos
+model DocumentTemplate {
+  id              String   @id @default(cuid())
+  name            String
+  documentType    String   // 'contract', 'proposal', 'receipt'
+  templateContent String   // HTML com placeholders
+  variables       String   // JSON - Lista de variáveis disponíveis
+  companyId       String
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  
+  generatedDocs   GeneratedDocument[]
+  
+  @@map("document_templates")
+}
+
+model GeneratedDocument {
+  id             String   @id @default(cuid())
+  templateId     String
+  leadId         String?
+  propertyId     String?
+  documentUrl    String?
+  documentStatus String   @default("draft") // 'draft', 'sent', 'signed', 'rejected'
+  variablesUsed  String?  // JSON
+  createdAt      DateTime @default(now())
+  
+  template       DocumentTemplate @relation(fields: [templateId], references: [id])
+  
+  @@map("generated_documents")
+}
+
+// 9. Geolocalização
+model LocationData {
+  id                String   @id @default(cuid())
+  propertyId        String   @unique
+  latitude          Float?
+  longitude         Float?
+  addressFormatted  String?
+  neighborhood      String?
+  nearbyPoints      String?  // JSON - Escolas, hospitais, etc
+  walkabilityScore  Int?
+  lastUpdated       DateTime @default(now())
+  
+  @@map("location_data")
+}
+
+// 10. Relatórios e Analytics
+model ConversionMetric {
+  id               String   @id @default(cuid())
+  metricDate       DateTime
+  companyId        String
+  userId           String?
+  source           String?  // 'website', 'facebook', 'google'
+  leadsGenerated   Int      @default(0)
+  leadsConverted   Int      @default(0)
+  conversionRate   Float?
+  averageDealValue Float?
+  totalRevenue     Float?
+  createdAt        DateTime @default(now())
+  
+  @@map("conversion_metrics")
 }
 
 
