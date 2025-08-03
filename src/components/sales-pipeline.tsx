@@ -179,13 +179,17 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
     futureDate.setDate(futureDate.getDate() + 30)
     const expectedCloseDate = futureDate.toISOString().split('T')[0]
 
+    // Encontrar os dados completos do lead
+    const selectedLeadData = existingLeads.find(lead => lead.id === leadId)
+    console.log('Selected lead full data:', selectedLeadData)
+
     const opportunity = {
       leadId,
       leadName,
-      value: 100000,
+      value: selectedLeadData?.maxPrice || 100000,
       probability: 10,
       expectedCloseDate,
-      notes: 'À vista? Financiamento Aprovado? Urgente?'
+      notes: selectedLeadData?.notes || 'À vista? Financiamento Aprovado? Urgente?'
     }
 
     try {
@@ -440,7 +444,9 @@ function AddOpportunityModal({
               </p>
               
               <div className="space-y-3 mb-6 max-h-60 overflow-y-auto">
-                {existingLeads.map(lead => (
+                {existingLeads.map(lead => {
+                  console.log('Lead data:', lead)
+                  return (
                   <div 
                     key={lead.id}
                     onClick={() => setSelectedLead(lead.id)}
@@ -520,7 +526,8 @@ function AddOpportunityModal({
                       </div>
                     </div>
                   </div>
-                ))}
+                  )
+                })}
               </div>
               
               <div className="flex justify-end space-x-3">
