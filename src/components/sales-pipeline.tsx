@@ -161,7 +161,7 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
     const expectedCloseDate = futureDate.toISOString().split('T')[0]
 
     const opportunity = {
-      leadName: 'Novo Lead',
+      leadName: 'Nome do Lead',
       value: 100000,
       probability: 10, // Sempre começa baixo na qualificação
       expectedCloseDate,
@@ -440,16 +440,16 @@ function OpportunityCard({
         />
 
         <input
-          type="number"
-          value={editForm.value}
-          onChange={(e) => setEditForm({...editForm, value: Number(e.target.value)})}
+          type="text"
+          value={editForm.value ? `R$ ${editForm.value.toLocaleString('pt-BR')}` : ''}
+          onChange={(e) => {
+            const value = e.target.value.replace(/[^\d]/g, '')
+            setEditForm({...editForm, value: value ? Number(value) : 0})
+          }}
           className="w-full p-2 border rounded text-sm"
-          placeholder="Valor (R$)"
+          placeholder="R$ 0"
         />
         
-        <div className="bg-blue-50 p-2 rounded text-sm text-blue-700">
-          💡 <strong>Probabilidade:</strong> {opportunity.probability}% (automática baseada no estágio)
-        </div>
 
 
         <textarea
