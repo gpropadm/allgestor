@@ -213,7 +213,7 @@ async function createOpportunity(data: any, companyId: string, userId: string) {
     if (!leadId) {
       const tempLead = await prisma.lead.create({
         data: {
-          name: opportunity.leadName || 'Novo Lead',
+          name: opportunity.leadName || 'Nome do Lead',
           email: 'temp@temp.com',
           phone: '(00) 00000-0000',
           interest: 'BUY',
