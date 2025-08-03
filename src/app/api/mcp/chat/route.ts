@@ -59,48 +59,52 @@ async function executeMCPCommand(command: string, params: any, userId: string, c
   }
 }
 
-// Sistema de prompt inteligente para análise de requisições
-const SYSTEM_PROMPT = `Você é um assistente especialista em CRM imobiliário. Você tem acesso a um sistema MCP (Model Context Protocol) que conecta você aos dados do CRM.
+// Sistema de prompt restritivo para SOFIA - CRM Imobiliário
+const SYSTEM_PROMPT = `Você é SOFIA, assistente especializada EXCLUSIVAMENTE em CRM imobiliário. Você APENAS responde perguntas relacionadas aos dados das seguintes tabelas do CRM:
+
+📊 **DADOS DISPONÍVEIS NO CRM:**
+- **Propriedades**: imóveis, portfólio, disponibilidade, preços
+- **Contratos**: locações, renovações, vencimentos  
+- **Pagamentos**: recebimentos, inadimplência, boletos
+- **Leads**: prospects, interessados em imóveis
+- **Proprietários**: donos dos imóveis
+- **Inquilinos**: locatários atuais
+- **Análises Financeiras**: receitas, despesas, relatórios
+
+🚫 **RESTRIÇÕES IMPORTANTES:**
+1. **NÃO responda perguntas fora do contexto imobiliário/CRM**
+2. **NÃO forneça informações gerais, receitas, piadas, ou assuntos não relacionados**
+3. **SE não houver dados suficientes nas tabelas, informe claramente**
+4. **SEMPRE base suas respostas nos dados reais do sistema**
+
+⚠️ **QUANDO NÃO HÁ DADOS SUFICIENTES, responda:**
+"🏠 **Dados Insuficientes** - Para fornecer uma análise precisa sobre [tópico], preciso que você cadastre mais dados no sistema:
+• Propriedades no módulo de Imóveis
+• Contratos no módulo de Contratos  
+• Leads na página de Leads
+• Pagamentos registrados
+
+Cadastre essas informações primeiro para eu poder ajudar com insights valiosos! 📊"
+
+⚠️ **PARA PERGUNTAS FORA DO CONTEXTO, responda:**
+"🤖 Sou SOFIA, especialista em CRM imobiliário. Só posso ajudar com:
+• 📊 Análise de propriedades e portfólio
+• 💰 Controle de pagamentos e inadimplência  
+• 🎯 Gestão de leads e oportunidades
+• 📈 Relatórios financeiros imobiliários
+• 📋 Contratos e renovações
+
+Para outras questões, consulte outros recursos. Como posso ajudar com seu CRM imobiliário?"
 
 COMANDOS MCP DISPONÍVEIS:
-- get_properties: Buscar propriedades (filtros: available, type, city, minPrice, maxPrice)
-- get_property_analytics: Análise de propriedade específica (propertyId)
-- get_contracts: Buscar contratos (filtros: active, expiringSoon, propertyId)
-- get_payments: Buscar pagamentos (filtros: status, overdue, contractId, fromDate, toDate)
-- get_financial_summary: Resumo financeiro (month, year)
-- get_leads: Buscar leads (filtros: status, budget, location)
-- find_property_matches: Encontrar propriedades para um lead (leadId)
-- get_market_analysis: Análise de mercado (location, propertyType)
-- get_hot_leads: Analisar leads quentes com score de urgência
-- get_sales_arguments: Gerar argumentos personalizados de venda (leadId, propertyId)
-- get_daily_sales_opportunities: Alertas e oportunidades diárias de vendas
+- get_properties, get_contracts, get_payments, get_leads
+- get_financial_summary, get_hot_leads, find_property_matches
+- get_property_analytics, get_market_analysis, get_sales_arguments
 
-INSTRUÇÕES:
-1. Analise a pergunta do usuário e identifique quais dados são necessários
-2. Use os comandos MCP apropriados para buscar os dados
-3. Analise os dados retornados e forneça insights valiosos
-4. Seja proativo em sugerir ações baseadas nos dados
-5. Use linguagem natural e amigável
+IMPORTANTE: Quando identificar necessidade de dados, responda APENAS com JSON:
+{"action": "mcp_command", "command": "nome_comando", "params": {}}
 
-FORMATO DE RESPOSTA:
-- Use Markdown para formatação
-- Inclua emojis relevantes para melhor visualização
-- Destaque informações importantes
-- Forneça insights acionáveis
-- Sugira próximos passos quando apropriado
-
-Exemplo de análise:
-"Com base nos dados do seu portfólio, identifiquei que você tem 3 propriedades com contratos vencendo em 30 dias. Sugiro entrar em contato com os inquilinos para renovação..."
-
-IMPORTANTE: Quando identificar a necessidade de buscar dados, responda APENAS com um JSON válido no formato:
-{
-  "action": "mcp_command",
-  "command": "nome_do_comando",
-  "params": { "parametro": "valor" }
-}
-
-NUNCA inclua explicações, markdown, ou texto adicional. Apenas o JSON puro.
-Caso contrário, responda normalmente analisando os dados fornecidos.`
+Caso contrário, analise os dados fornecidos ou informe sobre dados insuficientes.`
 
 export async function POST(request: NextRequest) {
   try {
@@ -181,28 +185,47 @@ export async function POST(request: NextRequest) {
     // Se executou comando MCP, enviar dados para GPT para análise final
     let finalResponse = gptResponse
     if (mcpResult) {
-      const analysisResponse = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        max_tokens: 2000,
-        temperature: 0.3,
-        messages: [
-          {
-            role: "system",
-            content: SYSTEM_PROMPT
-          },
-          {
-            role: "user",
-            content: `Pergunta do usuário: "${message}"
+      // Verificar se há dados suficientes
+      const hasData = mcpResult.data && 
+        ((Array.isArray(mcpResult.data) && mcpResult.data.length > 0) ||
+         (typeof mcpResult.data === 'object' && Object.keys(mcpResult.data).length > 0))
+
+      if (!hasData) {
+        // Resposta padrão quando não há dados
+        finalResponse = `🏠 **Dados Insuficientes** - Para fornecer uma análise precisa sobre sua consulta, preciso que você cadastre mais dados no sistema:
+
+• **Propriedades** no módulo de Imóveis
+• **Contratos** no módulo de Contratos  
+• **Leads** na página de Leads
+• **Pagamentos** registrados
+
+Cadastre essas informações primeiro para eu poder ajudar com insights valiosos! 📊
+
+💡 **Dica**: Comece cadastrando algumas propriedades e leads para ver análises detalhadas.`
+      } else {
+        const analysisResponse = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          max_tokens: 2000,
+          temperature: 0.3,
+          messages: [
+            {
+              role: "system",
+              content: SYSTEM_PROMPT
+            },
+            {
+              role: "user",
+              content: `Pergunta do usuário: "${message}"
 
 Dados obtidos via MCP:
 ${JSON.stringify(mcpResult.data, null, 2)}
 
-Por favor, analise estes dados e forneça uma resposta completa e útil para o usuário. Inclua insights, tendências e sugestões de ação quando apropriado.`
-          }
-        ]
-      })
+IMPORTANTE: Se os dados estiverem vazios ou insuficientes, informe que precisa de mais dados cadastrados no sistema. Caso contrário, analise estes dados e forneça uma resposta completa e útil. Inclua insights, tendências e sugestões de ação quando apropriado.`
+            }
+          ]
+        })
 
-      finalResponse = analysisResponse.choices[0]?.message?.content || 'Erro ao processar resposta'
+        finalResponse = analysisResponse.choices[0]?.message?.content || 'Erro ao processar resposta'
+      }
     }
 
     return NextResponse.json({ 
