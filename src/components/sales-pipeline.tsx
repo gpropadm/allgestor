@@ -178,6 +178,8 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
     const futureDate = new Date()
     futureDate.setDate(futureDate.getDate() + 30)
     const expectedCloseDate = futureDate.toISOString().split('T')[0]
+    
+    console.log('Generated future date:', expectedCloseDate)
 
     // Encontrar os dados completos do lead
     const selectedLeadData = existingLeads.find(lead => lead.id === leadId)
@@ -191,6 +193,8 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
       expectedCloseDate,
       notes: selectedLeadData?.notes || 'À vista? Financiamento Aprovado? Urgente?'
     }
+    
+    console.log('Opportunity being created:', opportunity)
 
     try {
       const response = await fetch('/api/sales-pipeline', {
@@ -693,15 +697,15 @@ function OpportunityCard({
     <div className="space-y-3">
       {/* Header com ações */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2 cursor-pointer" onClick={() => setShowDetails(!showDetails)}>
-          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+        <div className="flex items-center space-x-2 cursor-pointer flex-1 min-w-0" onClick={() => setShowDetails(!showDetails)}>
+          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
             <User className="h-4 w-4 text-blue-600" />
           </div>
           <h4 className="font-medium text-gray-900 truncate">
             {opportunity.leadName}
           </h4>
         </div>
-        <div className="flex space-x-1">
+        <div className="flex space-x-1 flex-shrink-0 ml-2">
           <button 
             onClick={() => setIsEditing(true)}
             className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-full transition-colors"
