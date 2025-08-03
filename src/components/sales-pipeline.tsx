@@ -411,74 +411,114 @@ function AddOpportunityModal({
     }
   }
 
-  const handleGoToLeads = () => {
-    window.open('/leads', '_blank')
-    onClose()
-  }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Adicionar Oportunidade</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            <X className="h-5 w-5" />
-          </button>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 rounded-t-xl">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-semibold text-white flex items-center">
+              <User className="h-6 w-6 mr-3" />
+              Adicionar Oportunidade ao Pipeline
+            </h3>
+            <button 
+              onClick={onClose} 
+              className="text-white hover:text-gray-200 transition-colors"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
         </div>
 
-        <div className="space-y-4">
-          {/* Opção 1: Lead Existente */}
-          <div className="border rounded-lg p-4">
-            <h4 className="font-medium mb-3 flex items-center">
-              <User className="h-4 w-4 mr-2" />
-              Selecionar Lead Existente
-            </h4>
-            
-            {existingLeads.length > 0 ? (
-              <>
-                <select
-                  value={selectedLead}
-                  onChange={(e) => setSelectedLead(e.target.value)}
-                  className="w-full p-2 border rounded text-sm mb-3"
+        {/* Content */}
+        <div className="p-6">
+          {existingLeads.length > 0 ? (
+            <>
+              <p className="text-gray-600 mb-4">
+                Selecione um lead existente para adicionar ao pipeline de vendas:
+              </p>
+              
+              <div className="space-y-3 mb-6 max-h-60 overflow-y-auto">
+                {existingLeads.map(lead => (
+                  <div 
+                    key={lead.id}
+                    onClick={() => setSelectedLead(lead.id)}
+                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md ${
+                      selectedLead === lead.id 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-semibold text-gray-900">{lead.name}</h4>
+                        <div className="flex items-center space-x-4 mt-1 text-sm text-gray-600">
+                          {lead.phone && (
+                            <span className="flex items-center">
+                              <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                              {lead.phone}
+                            </span>
+                          )}
+                          {lead.email && (
+                            <span className="flex items-center">
+                              <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                              {lead.email}
+                            </span>
+                          )}
+                          {lead.maxPrice && (
+                            <span className="flex items-center">
+                              <DollarSign className="h-3 w-3 mr-1" />
+                              R$ {lead.maxPrice.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                        selectedLead === lead.id
+                          ? 'border-blue-500 bg-blue-500'
+                          : 'border-gray-300'
+                      }`}>
+                        {selectedLead === lead.id && (
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={onClose}
+                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  <option value="">Escolha um lead...</option>
-                  {existingLeads.map(lead => (
-                    <option key={lead.id} value={lead.id}>
-                      {lead.name} - {lead.phone || lead.email || 'Sem contato'}
-                    </option>
-                  ))}
-                </select>
+                  Cancelar
+                </button>
                 <button
                   onClick={handleAddExisting}
                   disabled={!selectedLead}
-                  className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-gray-300"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
                 >
                   Adicionar ao Pipeline
                 </button>
-              </>
-            ) : (
-              <p className="text-gray-500 text-sm mb-3">Nenhum lead cadastrado ainda.</p>
-            )}
-          </div>
-
-          <div className="text-center text-gray-500 text-sm">ou</div>
-
-          {/* Opção 2: Ir para Leads */}
-          <div className="border rounded-lg p-4">
-            <h4 className="font-medium mb-3 flex items-center">
-              <User className="h-4 w-4 mr-2" />
-              Cadastrar Novo Lead Completo
-            </h4>
-            <p className="text-sm text-gray-600 mb-3">
-              Cadastre um lead completo com todos os dados para melhor matching
-            </p>
-            <button
-              onClick={handleGoToLeads}
-              className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
-            >
-              🔗 Ir para Página de Leads
-            </button>
-          </div>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-8">
+              <User className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+              <h4 className="text-lg font-medium text-gray-900 mb-2">Nenhum lead encontrado</h4>
+              <p className="text-gray-600 mb-6">
+                Cadastre leads primeiro na página de Leads para poder adicioná-los ao pipeline.
+              </p>
+              <button
+                onClick={() => window.open('/leads', '_blank')}
+                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+              >
+                Ir para Leads
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
