@@ -161,11 +161,16 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
     try {
       const response = await fetch('/api/leads')
       if (response.ok) {
-        const data = await response.json()
-        setExistingLeads(data.leads || [])
+        const leads = await response.json()
+        console.log('Leads carregados:', leads)
+        setExistingLeads(Array.isArray(leads) ? leads : [])
+      } else {
+        console.error('Erro na resposta:', response.status)
+        setExistingLeads([])
       }
     } catch (error) {
       console.error('Erro ao carregar leads:', error)
+      setExistingLeads([])
     }
   }
 
