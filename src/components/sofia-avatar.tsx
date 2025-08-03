@@ -28,96 +28,108 @@ export function SofiaAvatar({ size = 'md', className = '' }: SofiaAvatarProps) {
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          {/* Background gradient moderno */}
+          {/* Background gradient roxo moderno */}
           <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#667eea" />
-            <stop offset="100%" stopColor="#764ba2" />
+            <stop offset="0%" stopColor="#8B5CF6" />
+            <stop offset="50%" stopColor="#A855F7" />
+            <stop offset="100%" stopColor="#C084FC" />
           </linearGradient>
           
-          {/* Cabelo castanho claro moderno */}
+          {/* Cabelo castanho natural */}
           <linearGradient id="hairGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#8B4513" />
-            <stop offset="100%" stopColor="#A0522D" />
+            <stop offset="0%" stopColor="#92400E" />
+            <stop offset="100%" stopColor="#B45309" />
           </linearGradient>
           
-          {/* Pele natural */}
+          {/* Pele clara e natural */}
           <linearGradient id="skinGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#FDBCB4" />
-            <stop offset="100%" stopColor="#F8AFA6" />
+            <stop offset="0%" stopColor="#FEF3C7" />
+            <stop offset="100%" stopColor="#FDE68A" />
+          </linearGradient>
+          
+          {/* Camiseta roxa */}
+          <linearGradient id="shirtGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#7C3AED" />
+            <stop offset="100%" stopColor="#8B5CF6" />
           </linearGradient>
         </defs>
         
-        {/* Background elegante */}
+        {/* Background roxo elegante */}
         <circle cx="50" cy="50" r="48" fill="url(#bgGradient)" />
         
-        {/* Rosto mais bonito */}
-        <ellipse cx="50" cy="48" rx="20" ry="22" fill="url(#skinGradient)" />
-        
-        {/* Cabelo longo e elegante - parte de trás */}
+        {/* Camiseta roxa */}
         <path 
-          d="M30 40 Q25 30 30 25 Q40 15 50 18 Q60 15 70 25 Q75 30 70 40 Q72 55 70 65 Q65 70 60 68 Q50 70 40 68 Q35 70 30 65 Q28 55 30 40 Z" 
+          d="M25 75 Q30 70 40 72 L60 72 Q70 70 75 75 L75 95 L25 95 Z" 
+          fill="url(#shirtGradient)"
+        />
+        
+        {/* Logo branco na camiseta */}
+        <circle cx="50" cy="80" r="3" fill="white" opacity="0.9" />
+        <path d="M48 78 L52 78 L50 82 Z" fill="url(#shirtGradient)" />
+        
+        {/* Pescoço */}
+        <ellipse cx="50" cy="65" rx="6" ry="8" fill="url(#skinGradient)" />
+        
+        {/* Rosto jovem e amigável */}
+        <ellipse cx="50" cy="45" rx="16" ry="18" fill="url(#skinGradient)" />
+        
+        {/* Cabelo castanho curto moderno */}
+        <path 
+          d="M34 35 Q34 25 42 22 Q50 18 58 22 Q66 25 66 35 Q66 40 64 45 Q62 50 58 52 L42 52 Q38 50 36 45 Q34 40 34 35 Z" 
           fill="url(#hairGradient)"
         />
         
-        {/* Franja moderna e feminina */}
+        {/* Franja lateral moderna */}
         <path 
-          d="M35 32 Q40 25 45 27 Q50 22 55 27 Q60 25 65 32 Q62 35 58 34 Q54 32 50 33 Q46 32 42 34 Q38 35 35 32 Z" 
+          d="M36 32 Q40 28 44 30 Q48 27 52 29 Q56 28 60 30 Q58 33 55 34 Q52 32 48 33 Q44 32 40 34 Q38 33 36 32 Z" 
           fill="url(#hairGradient)"
         />
         
-        {/* Olhos grandes e expressivos */}
-        <ellipse cx="44" cy="44" rx="3" ry="4" fill="white" />
-        <ellipse cx="56" cy="44" rx="3" ry="4" fill="white" />
-        <ellipse cx="44" cy="44" rx="2" ry="3" fill="#2D3748" />
-        <ellipse cx="56" cy="44" rx="2" ry="3" fill="#2D3748" />
+        {/* Olhos claros e expressivos */}
+        <ellipse cx="45" cy="42" rx="2.5" ry="3" fill="white" />
+        <ellipse cx="55" cy="42" rx="2.5" ry="3" fill="white" />
+        <ellipse cx="45" cy="42" rx="1.8" ry="2.2" fill="#3B82F6" />
+        <ellipse cx="55" cy="42" rx="1.8" ry="2.2" fill="#3B82F6" />
         
-        {/* Pupilas e brilho */}
-        <circle cx="44" cy="44" r="1.2" fill="black" />
-        <circle cx="56" cy="44" r="1.2" fill="black" />
-        <circle cx="44.5" cy="43" r="0.6" fill="white" opacity="0.9" />
-        <circle cx="56.5" cy="43" r="0.6" fill="white" opacity="0.9" />
+        {/* Pupilas */}
+        <circle cx="45" cy="42" r="0.8" fill="#1E40AF" />
+        <circle cx="55" cy="42" r="0.8" fill="#1E40AF" />
         
-        {/* Cílios superiores */}
-        <path d="M41 41 Q42 40 43 41" stroke="#2D3748" strokeWidth="0.8" strokeLinecap="round" fill="none" />
-        <path d="M45 40 Q46 39 47 40" stroke="#2D3748" strokeWidth="0.8" strokeLinecap="round" fill="none" />
-        <path d="M53 40 Q54 39 55 40" stroke="#2D3748" strokeWidth="0.8" strokeLinecap="round" fill="none" />
-        <path d="M57 41 Q58 40 59 41" stroke="#2D3748" strokeWidth="0.8" strokeLinecap="round" fill="none" />
+        {/* Brilho nos olhos */}
+        <circle cx="45.3" cy="41.5" r="0.4" fill="white" />
+        <circle cx="55.3" cy="41.5" r="0.4" fill="white" />
         
-        {/* Sobrancelhas bem feitas */}
-        <path d="M41 39 Q44 37.5 47 38.5" stroke="#8B4513" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-        <path d="M53 38.5 Q56 37.5 59 39" stroke="#8B4513" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+        {/* Sobrancelhas bem definidas */}
+        <path d="M42 38 Q45 37 48 38" stroke="#92400E" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+        <path d="M52 38 Q55 37 58 38" stroke="#92400E" strokeWidth="1.2" strokeLinecap="round" fill="none" />
         
         {/* Nariz delicado */}
-        <ellipse cx="50" cy="48" rx="1" ry="1.5" fill="#F8AFA6" opacity="0.7" />
+        <ellipse cx="50" cy="46" rx="0.8" ry="1.2" fill="#FDE68A" opacity="0.8" />
         
-        {/* Boca sorridente e bonita */}
-        <path d="M46 52 Q50 55 54 52" stroke="#E53E3E" strokeWidth="2" strokeLinecap="round" fill="none" />
-        <ellipse cx="50" cy="54" rx="2.5" ry="1" fill="#E53E3E" opacity="0.6" />
+        {/* Sorriso gentil e confiante */}
+        <path d="M46 50 Q50 53 54 50" stroke="#DC2626" strokeWidth="1.8" strokeLinecap="round" fill="none" />
         
-        {/* Blush sutil */}
-        <circle cx="40" cy="50" r="2" fill="#F687B3" opacity="0.3" />
-        <circle cx="60" cy="50" r="2" fill="#F687B3" opacity="0.3" />
+        {/* Dentes brancos */}
+        <ellipse cx="50" cy="51.5" rx="3" ry="0.8" fill="white" opacity="0.9" />
         
-        {/* Brincos elegantes */}
-        <circle cx="36" cy="48" r="1.5" fill="#FFD700" />
-        <circle cx="64" cy="48" r="1.5" fill="#FFFd700" />
+        {/* Maquiagem leve - sombra */}
+        <ellipse cx="45" cy="40" rx="2" ry="1" fill="#C084FC" opacity="0.2" />
+        <ellipse cx="55" cy="40" rx="2" ry="1" fill="#C084FC" opacity="0.2" />
         
-        {/* Símbolo AI discreto */}
-        <circle cx="75" cy="25" r="6" fill="white" opacity="0.9" />
-        <text x="75" y="27.5" textAnchor="middle" fontSize="6" fill="#667eea" fontWeight="bold">AI</text>
+        {/* Batom discreto */}
+        <ellipse cx="50" cy="51" rx="2.5" ry="0.8" fill="#F87171" opacity="0.6" />
         
-        {/* Sparkles mágicos */}
-        <g fill="white" opacity="0.9">
-          <path d="M25 25 L26 27 L25 29 L24 27 Z">
-            <animateTransform attributeName="transform" type="rotate" values="0 25 27;360 25 27" dur="4s" repeatCount="indefinite" />
-          </path>
-          <path d="M80 60 L81 62 L80 64 L79 62 Z">
-            <animateTransform attributeName="transform" type="rotate" values="0 80 62;360 80 62" dur="3s" repeatCount="indefinite" />
-          </path>
-          <circle cx="20" cy="60" r="1">
-            <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite" />
-          </circle>
-        </g>
+        {/* Badge AI moderno */}
+        <circle cx="75" cy="25" r="7" fill="white" opacity="0.95" />
+        <text x="75" y="28" textAnchor="middle" fontSize="7" fill="#8B5CF6" fontWeight="bold">AI</text>
+        
+        {/* Efeito profissional sutil */}
+        <circle cx="30" cy="30" r="1" fill="white" opacity="0.6">
+          <animate attributeName="opacity" values="0.3;0.8;0.3" dur="3s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="70" cy="70" r="0.8" fill="white" opacity="0.5">
+          <animate attributeName="opacity" values="0.5;1;0.5" dur="2.5s" repeatCount="indefinite" />
+        </circle>
       </svg>
       
       {/* Badge de status online */}
