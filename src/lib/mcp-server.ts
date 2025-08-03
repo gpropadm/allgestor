@@ -326,7 +326,190 @@ export class CRMMCPServer {
     }
   }
 
-  // === MATCHING INTELIGENTE ===
+  // === SISTEMA DE VENDAS INTELIGENTE ===
+
+  // NOVO: Análise de leads quentes para vendas
+  async getHotLeads(userId: string): Promise<MCPResponse> {
+    try {
+      const leads = await prisma.lead.findMany({
+        where: { userId, status: 'ACTIVE' },
+        orderBy: { createdAt: 'desc' }
+      })
+
+      // Calcular score de urgência para cada lead
+      const hotLeads = leads.map(lead => {
+        let urgencyScore = 0
+        let reasons = []
+
+        // Tempo no funil (mais antigo = mais urgente)
+        const daysInFunnel = Math.floor((new Date().getTime() - lead.createdAt.getTime()) / (1000 * 60 * 60 * 24))
+        if (daysInFunnel > 7) {
+          urgencyScore += 30
+          reasons.push(`${daysInFunnel} dias no funil`)
+        }
+
+        // Orçamento realista
+        if (lead.maxPrice && lead.maxPrice >= 3000) {
+          urgencyScore += 25
+          reasons.push('Orçamento adequado')
+        }
+
+        // Especificações claras
+        if (lead.minBedrooms && lead.maxBedrooms) {
+          urgencyScore += 15
+          reasons.push('Critérios definidos')
+        }
+
+        // Interesse específico
+        if (lead.preferredCities && JSON.parse(lead.preferredCities).length <= 2) {
+          urgencyScore += 20
+          reasons.push('Localização focada')
+        }
+
+        // Base score para leads ativos
+        urgencyScore += 10
+
+        return {
+          ...lead,
+          urgencyScore,
+          urgencyReasons: reasons,
+          priority: urgencyScore >= 70 ? 'ALTA' : urgencyScore >= 40 ? 'MÉDIA' : 'BAIXA'
+        }
+      }).sort((a, b) => b.urgencyScore - a.urgencyScore)
+
+      return { success: true, data: hotLeads }
+    } catch (error) {
+      return { success: false, error: `Erro ao analisar leads quentes: ${error}` }
+    }
+  }
+
+  // NOVO: Gerador de argumentos personalizados de venda
+  async getSalesArguments(leadId: string, propertyId: string): Promise<MCPResponse> {
+    try {
+      const lead = await prisma.lead.findUnique({
+        where: { id: leadId }
+      })
+
+      const property = await prisma.property.findUnique({
+        where: { id: propertyId },
+        include: { owner: true }
+      })
+
+      if (!lead || !property) {
+        return { success: false, error: 'Lead ou propriedade não encontrados' }
+      }
+
+      const salesArguments = {
+        leadProfile: {
+          name: lead.name,
+          budget: lead.maxPrice,
+          needs: `${lead.minBedrooms || 0}-${lead.maxBedrooms || 'N/A'} quartos`,
+          location: JSON.parse(lead.preferredCities || '[]').join(', ')
+        },
+        propertyHighlights: [],
+        personalizedPitch: '',
+        objectionHandling: [],
+        valueProposition: '',
+        nextSteps: []
+      }
+
+      // Destacar pontos fortes da propriedade
+      if (property.amenities) {
+        const amenities = JSON.parse(property.amenities)
+        salesArguments.propertyHighlights.push(...amenities.slice(0, 3))
+      }
+
+      // Proposta de valor personalizada
+      const priceMatch = lead.maxPrice >= property.rentPrice
+      const bedroomMatch = !lead.minBedrooms || property.bedrooms >= lead.minBedrooms
+
+      if (priceMatch && bedroomMatch) {
+        salesArguments.personalizedPitch = `${lead.name}, encontrei o imóvel perfeito para você! Este ${property.propertyType.toLowerCase()} em ${property.city} tem exatamente ${property.bedrooms} quartos dentro do seu orçamento de R$ ${lead.maxPrice?.toLocaleString()}.`
+      }
+
+      // Tratamento de objeções
+      if (property.rentPrice > (lead.maxPrice || 0) * 0.9) {
+        salesArguments.objectionHandling.push('Preço: "O valor está dentro da faixa de mercado para esta localização premium. Considere o custo-benefício da localização e amenidades."')
+      }
+
+      // Próximos passos
+      salesArguments.nextSteps = [
+        'Agendar visita presencial',
+        'Enviar mais fotos e vídeo do imóvel',
+        'Apresentar documentação necessária',
+        'Discutir condições de contrato'
+      ]
+
+      return { success: true, data: salesArguments }
+    } catch (error) {
+      return { success: false, error: `Erro ao gerar argumentos de venda: ${error}` }
+    }
+  }
+
+  // NOVO: Alertas de oportunidades diárias
+  async getDailySalesOpportunities(userId: string): Promise<MCPResponse> {
+    try {
+      const opportunities = {
+        urgentActions: [],
+        hotLeads: [],
+        availableProperties: [],
+        suggestedActions: [],
+        kpis: {
+          totalLeads: 0,
+          hotLeads: 0,
+          availableProperties: 0,
+          potentialRevenue: 0
+        }
+      }
+
+      // Buscar leads quentes
+      const hotLeadsResult = await this.getHotLeads(userId)
+      if (hotLeadsResult.success) {
+        opportunities.hotLeads = hotLeadsResult.data.slice(0, 5)
+        opportunities.kpis.hotLeads = hotLeadsResult.data.filter(l => l.priority === 'ALTA').length
+      }
+
+      // Buscar propriedades disponíveis
+      const propertiesResult = await this.getProperties({ userId, available: true })
+      if (propertiesResult.success) {
+        opportunities.availableProperties = propertiesResult.data.slice(0, 3)
+        opportunities.kpis.availableProperties = propertiesResult.data.length
+        opportunities.kpis.potentialRevenue = propertiesResult.data.reduce((sum, p) => sum + (p.rentPrice || 0), 0)
+      }
+
+      // Ações urgentes
+      const leadsResult = await this.getLeads({ userId })
+      if (leadsResult.success) {
+        opportunities.kpis.totalLeads = leadsResult.data.length
+        
+        leadsResult.data.forEach(lead => {
+          const daysInFunnel = Math.floor((new Date().getTime() - lead.createdAt.getTime()) / (1000 * 60 * 60 * 24))
+          if (daysInFunnel > 14) {
+            opportunities.urgentActions.push({
+              type: 'FOLLOW_UP',
+              leadName: lead.name,
+              reason: `${daysInFunnel} dias sem contato`,
+              priority: 'ALTA'
+            })
+          }
+        })
+      }
+
+      // Sugestões de ações
+      opportunities.suggestedActions = [
+        'Ligar para os 3 leads mais quentes do dia',
+        'Enviar fotos de propriedades para leads com critérios específicos',
+        'Agendar visitas para propriedades premium',
+        'Fazer follow-up de propostas pendentes'
+      ]
+
+      return { success: true, data: opportunities }
+    } catch (error) {
+      return { success: false, error: `Erro ao gerar oportunidades: ${error}` }
+    }
+  }
+
+  // === MATCHING INTELIGENTE MELHORADO ===
   
   async findPropertyMatches(leadId: string): Promise<MCPResponse> {
     try {

@@ -42,6 +42,15 @@ async function executeMCPCommand(command: string, params: any, userId: string): 
       case 'get_market_analysis':
         return await crmMCP.getMarketAnalysis(params.location, params.propertyType)
       
+      case 'get_hot_leads':
+        return await crmMCP.getHotLeads(userId)
+      
+      case 'get_sales_arguments':
+        return await crmMCP.getSalesArguments(params.leadId, params.propertyId)
+      
+      case 'get_daily_sales_opportunities':
+        return await crmMCP.getDailySalesOpportunities(userId)
+      
       default:
         return { success: false, error: `Comando MCP não reconhecido: ${command}` }
     }
@@ -62,6 +71,9 @@ COMANDOS MCP DISPONÍVEIS:
 - get_leads: Buscar leads (filtros: status, budget, location)
 - find_property_matches: Encontrar propriedades para um lead (leadId)
 - get_market_analysis: Análise de mercado (location, propertyType)
+- get_hot_leads: Analisar leads quentes com score de urgência
+- get_sales_arguments: Gerar argumentos personalizados de venda (leadId, propertyId)
+- get_daily_sales_opportunities: Alertas e oportunidades diárias de vendas
 
 INSTRUÇÕES:
 1. Analise a pergunta do usuário e identifique quais dados são necessários
@@ -154,6 +166,14 @@ export async function POST(request: NextRequest) {
           month: now.getMonth() + 1, 
           year: now.getFullYear() 
         }, session.user.id)
+      } else if (messageLC.includes('leads quentes') || messageLC.includes('prioridade') || messageLC.includes('urgente')) {
+        mcpResult = await executeMCPCommand('get_hot_leads', {}, session.user.id)
+      } else if (messageLC.includes('oportunidade') || messageLC.includes('vendas hoje') || messageLC.includes('ações do dia')) {
+        mcpResult = await executeMCPCommand('get_daily_sales_opportunities', {}, session.user.id)
+      } else if (messageLC.includes('argumento') || messageLC.includes('como convencer') || messageLC.includes('pitch')) {
+        // Para argumentos de venda, precisaria de leadId e propertyId específicos
+        // Por enquanto, vamos buscar leads quentes como alternativa
+        mcpResult = await executeMCPCommand('get_hot_leads', {}, session.user.id)
       }
     }
 
