@@ -425,7 +425,7 @@ function AddOpportunityModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 rounded-t-xl">
+        <div className="bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-4 rounded-t-xl">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-semibold text-white flex items-center">
               <User className="h-6 w-6 mr-3" />
@@ -457,7 +457,7 @@ function AddOpportunityModal({
                     onClick={() => setSelectedLead(lead.id)}
                     className={`p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md ${
                       selectedLead === lead.id 
-                        ? 'border-blue-500 bg-blue-50' 
+                        ? 'border-purple-500 bg-purple-50' 
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
@@ -522,7 +522,7 @@ function AddOpportunityModal({
                       
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-3 ${
                         selectedLead === lead.id
-                          ? 'border-blue-500 bg-blue-500'
+                          ? 'border-purple-500 bg-purple-500'
                           : 'border-gray-300'
                       }`}>
                         {selectedLead === lead.id && (
@@ -545,7 +545,7 @@ function AddOpportunityModal({
                 <button
                   onClick={handleAddExisting}
                   disabled={!selectedLead}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+                  className="px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
                 >
                   Adicionar ao Pipeline
                 </button>
