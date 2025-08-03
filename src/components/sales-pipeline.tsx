@@ -51,7 +51,7 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
   const [selectedStageId, setSelectedStageId] = useState('')
   const [existingLeads, setExistingLeads] = useState<any[]>([])
 
-  // Função para obter probabilidade padrão do estágio
+  // Função para obter probabilidade padrão do estágio - v1.1
   const getStageProbability = (stageName: string) => {
     const stageProbabilities: { [key: string]: number } = {
       'Qualificação': 10,
