@@ -118,7 +118,7 @@ export default function AIAssistant() {
       {
         id: '1',
         type: 'assistant',
-        content: '🏠 Olá! Sou seu assistente inteligente do CRM Imobiliário. Posso ajudar você a:\n\n• 📊 **Analisar seu portfólio** de propriedades\n• 💰 **Acompanhar pagamentos** e inadimplência\n• 🎯 **Encontrar matches** para seus leads\n• 📈 **Análises de mercado** em tempo real\n• 📋 **Gerenciar contratos** e vencimentos\n\nO que você gostaria de saber hoje?',
+        content: '🤖 Olá! Sou a **SOFIA**, sua assistente inteligente de vendas! Posso ajudar você a:\n\n• 📊 **Analisar leads quentes** e prioridades\n• 💰 **Identificar oportunidades** de R$ 7,95M em vendas\n• 🎯 **Encontrar matches perfeitos** para compradores\n• 📈 **Gerar argumentos personalizados** de venda\n• 🚀 **Acelerar fechamentos** com insights inteligentes\n\n**Tenho 6 leads de compra esperando sua atenção!**\n\nO que você gostaria de saber hoje?',
         timestamp: new Date()
       }
     ])
@@ -154,8 +154,8 @@ export default function AIAssistant() {
             <span className="text-white font-bold text-sm">🤖</span>
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-gray-900">Assistente IA</h1>
-            <p className="text-xs text-gray-500">Powered by Claude + MCP</p>
+            <h1 className="text-lg font-semibold text-gray-900">SOFIA - Assistente IA</h1>
+            <p className="text-xs text-gray-500">SOFIA - Sistema Otimizado de Fechamento Imobiliário Avançado</p>
           </div>
         </div>
         <div className="flex items-center space-x-3">
@@ -241,7 +241,7 @@ export default function AIAssistant() {
                   <div className="bg-gray-50 rounded-2xl rounded-tl-md px-4 py-3">
                     <div className="flex items-center space-x-2">
                       <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                      <span className="text-gray-700">Analisando dados via MCP...</span>
+                      <span className="text-gray-700">SOFIA analisando suas oportunidades...</span>
                     </div>
                   </div>
                 </div>
@@ -278,7 +278,7 @@ export default function AIAssistant() {
             </button>
           </div>
           <p className="text-xs text-gray-500 mt-2 px-4">
-            Enter para enviar • Shift+Enter para nova linha • Powered by Claude + MCP
+            Enter para enviar • Shift+Enter para nova linha
           </p>
         </div>
       </div>
