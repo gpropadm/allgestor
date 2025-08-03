@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { redirect } from 'next/navigation'
+import { SofiaAvatar } from '@/components/sofia-avatar'
 
 interface Message {
   id: string
@@ -150,9 +151,7 @@ export default function AIAssistant() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">🤖</span>
-          </div>
+          <SofiaAvatar size="sm" />
           <div>
             <h1 className="text-lg font-semibold text-gray-900">SOFIA - Assistente IA</h1>
             <p className="text-xs text-gray-500">SOFIA - Sistema Otimizado de Fechamento Imobiliário Avançado</p>
@@ -182,9 +181,7 @@ export default function AIAssistant() {
             <div key={message.id} className="message-fade-in">
               {message.type === 'assistant' ? (
                 <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-sm font-medium">🤖</span>
-                  </div>
+                  <SofiaAvatar size="sm" className="flex-shrink-0" />
                   <div className="flex-1">
                     <div className="bg-gray-50 rounded-2xl rounded-tl-md px-4 py-3">
                       <div 
@@ -234,9 +231,7 @@ export default function AIAssistant() {
           {isLoading && (
             <div className="message-fade-in">
               <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-white text-sm font-medium">🤖</span>
-                </div>
+                <SofiaAvatar size="sm" className="flex-shrink-0" />
                 <div className="flex-1">
                   <div className="bg-gray-50 rounded-2xl rounded-tl-md px-4 py-3">
                     <div className="flex items-center space-x-2">
