@@ -615,10 +615,8 @@ function OpportunityCard({
   }
 
   const handleSave = () => {
-    if (onUpdate) {
-      onUpdate(opportunity.id, editForm)
-      setIsEditing(false)
-    }
+    // Não há mais campos para editar, apenas fechar o modal
+    setIsEditing(false)
   }
 
   const handleDelete = () => {
@@ -649,17 +647,12 @@ function OpportunityCard({
     return (
       <div className="space-y-3 bg-blue-50 p-3 rounded-lg border-2 border-blue-200">
         <div className="flex items-center justify-between mb-2">
-          <h4 className="font-medium text-blue-900">Editando Oportunidade</h4>
+          <h4 className="font-medium text-blue-900">Informações da Oportunidade</h4>
           <div className="flex space-x-1">
             <button 
               onClick={handleSave}
-              className="p-1 text-green-600 hover:bg-green-100 rounded"
-            >
-              <Save className="h-4 w-4" />
-            </button>
-            <button 
-              onClick={() => setIsEditing(false)}
-              className="p-1 text-gray-600 hover:bg-gray-100 rounded"
+              className="p-1 text-blue-600 hover:bg-blue-100 rounded"
+              title="Fechar"
             >
               <X className="h-4 w-4" />
             </button>
@@ -667,13 +660,13 @@ function OpportunityCard({
         </div>
 
         {/* Informações do Lead */}
-        {leadData && (
-          <div className="bg-white p-3 rounded border mb-3">
-            <h5 className="font-medium text-gray-900 mb-2">Informações do Lead</h5>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div>
-                <span className="text-gray-600">Interesse:</span>
-                <span className={`ml-2 px-2 py-1 rounded text-xs ${
+        {leadData ? (
+          <div className="bg-white p-4 rounded-lg border">
+            <h5 className="font-semibold text-gray-900 mb-4">Informações do Lead</h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <span className="text-gray-600 text-xs font-medium block mb-1">INTERESSE</span>
+                <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
                   leadData.interest === 'BUY' 
                     ? 'bg-green-100 text-green-800' 
                     : 'bg-blue-100 text-blue-800'
@@ -681,77 +674,44 @@ function OpportunityCard({
                   {leadData.interest === 'BUY' ? 'Comprar' : 'Alugar'}
                 </span>
               </div>
-              <div>
-                <span className="text-gray-600">Tipo:</span>
-                <span className="ml-2 font-medium">
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <span className="text-gray-600 text-xs font-medium block mb-1">TIPO IMÓVEL</span>
+                <span className="font-medium text-gray-900">
                   {leadData.propertyType === 'APARTMENT' ? 'Apartamento' : 
                    leadData.propertyType === 'HOUSE' ? 'Casa' : 
                    leadData.propertyType === 'COMMERCIAL' ? 'Comercial' : leadData.propertyType}
                 </span>
               </div>
-              <div>
-                <span className="text-gray-600">Orçamento:</span>
-                <span className="ml-2 font-medium">R$ {leadData.maxPrice?.toLocaleString()}</span>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <span className="text-gray-600 text-xs font-medium block mb-1">ORÇAMENTO</span>
+                <span className="font-semibold text-green-600">R$ {leadData.maxPrice?.toLocaleString()}</span>
               </div>
-              <div>
-                <span className="text-gray-600">Contato:</span>
-                <span className="ml-2">{leadData.phone}</span>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <span className="text-gray-600 text-xs font-medium block mb-1">TELEFONE</span>
+                <span className="font-medium text-gray-900">{leadData.phone}</span>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <span className="text-gray-600 text-xs font-medium block mb-1">EMAIL</span>
+                <span className="font-medium text-gray-900 text-xs">{leadData.email}</span>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <span className="text-gray-600 text-xs font-medium block mb-1">NOME</span>
+                <span className="font-medium text-gray-900">{leadData.name}</span>
               </div>
             </div>
             {leadData.notes && (
-              <div className="mt-2">
-                <span className="text-gray-600">Observações do Lead:</span>
-                <p className="mt-1 text-sm bg-gray-50 p-2 rounded">{leadData.notes}</p>
+              <div className="mt-4 bg-blue-50 p-3 rounded-lg">
+                <span className="text-blue-800 text-xs font-medium block mb-2">OBSERVAÇÕES DO LEAD</span>
+                <p className="text-sm text-blue-900 leading-relaxed">{leadData.notes}</p>
               </div>
             )}
           </div>
+        ) : (
+          <div className="bg-gray-100 p-4 rounded-lg text-center">
+            <span className="text-gray-500">Carregando informações do lead...</span>
+          </div>
         )}
 
-        <input
-          type="text"
-          value={editForm.leadName}
-          onChange={(e) => setEditForm({...editForm, leadName: e.target.value})}
-          onFocus={(e) => {
-            if (e.target.value === 'Nome do Lead') {
-              setEditForm({...editForm, leadName: ''})
-            }
-          }}
-          className="w-full p-2 border rounded text-sm"
-          placeholder="Nome do Lead"
-        />
-
-        <input
-          type="text"
-          value={editForm.propertyTitle}
-          onChange={(e) => setEditForm({...editForm, propertyTitle: e.target.value})}
-          className="w-full p-2 border rounded text-sm"
-          placeholder="Imóvel de Interesse"
-        />
-
-        <input
-          type="text"
-          value={editForm.value ? `R$ ${editForm.value.toLocaleString('pt-BR')}` : ''}
-          onChange={(e) => {
-            const value = e.target.value.replace(/[^\d]/g, '')
-            setEditForm({...editForm, value: value ? Number(value) : 0})
-          }}
-          className="w-full p-2 border rounded text-sm"
-          placeholder="R$ 0"
-        />
-        
-
-
-        <textarea
-          value={editForm.notes}
-          onChange={(e) => setEditForm({...editForm, notes: e.target.value})}
-          onFocus={(e) => {
-            if (e.target.value === 'À vista? Financiamento Aprovado? Urgente?') {
-              setEditForm({...editForm, notes: ''})
-            }
-          }}
-          className="w-full p-2 border rounded text-sm h-16 resize-none"
-          placeholder="À vista? Financiamento Aprovado? Urgente?"
-        />
       </div>
     )
   }
