@@ -627,7 +627,8 @@ function OpportunityCard({
   }
 
   const handleViewLead = () => {
-    window.open(`/leads/${opportunity.leadId}`, '_blank')
+    // Como não existe rota dinâmica para leads, usar busca pelo nome
+    window.open(`/leads?search=${encodeURIComponent(opportunity.leadName)}`, '_blank')
   }
 
   const handleContact = async () => {
