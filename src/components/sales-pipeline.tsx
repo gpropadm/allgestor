@@ -450,10 +450,12 @@ function AddOpportunityModal({
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-semibold text-gray-900">{lead.name}</h4>
-                        <div className="flex items-center space-x-4 mt-1 text-sm text-gray-600">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900 mb-2">{lead.name}</h4>
+                        
+                        {/* Contact Info */}
+                        <div className="flex items-center space-x-4 mb-3 text-sm text-gray-600">
                           {lead.phone && (
                             <span className="flex items-center">
                               <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
@@ -466,15 +468,48 @@ function AddOpportunityModal({
                               {lead.email}
                             </span>
                           )}
-                          {lead.maxPrice && (
-                            <span className="flex items-center">
-                              <DollarSign className="h-3 w-3 mr-1" />
-                              R$ {lead.maxPrice.toLocaleString()}
+                        </div>
+
+                        {/* Interest and Property Type */}
+                        <div className="flex items-center space-x-3 mb-2">
+                          {lead.interest && (
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              lead.interest === 'BUY' 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-blue-100 text-blue-800'
+                            }`}>
+                              {lead.interest === 'BUY' ? 'Comprar' : 'Alugar'}
+                            </span>
+                          )}
+                          {lead.propertyType && (
+                            <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+                              {lead.propertyType === 'APARTMENT' ? 'Apartamento' : 
+                               lead.propertyType === 'HOUSE' ? 'Casa' : 
+                               lead.propertyType === 'COMMERCIAL' ? 'Comercial' : lead.propertyType}
                             </span>
                           )}
                         </div>
+
+                        {/* Budget */}
+                        {lead.maxPrice && (
+                          <div className="flex items-center mb-2 text-sm">
+                            <DollarSign className="h-4 w-4 text-green-500 mr-1" />
+                            <span className="font-medium text-gray-900">
+                              Até R$ {lead.maxPrice.toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Notes */}
+                        {lead.notes && (
+                          <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded mt-2">
+                            <span className="font-medium">Observações: </span>
+                            {lead.notes.length > 100 ? `${lead.notes.substring(0, 100)}...` : lead.notes}
+                          </div>
+                        )}
                       </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-3 ${
                         selectedLead === lead.id
                           ? 'border-blue-500 bg-blue-500'
                           : 'border-gray-300'
