@@ -427,6 +427,11 @@ function OpportunityCard({
           type="text"
           value={editForm.leadName}
           onChange={(e) => setEditForm({...editForm, leadName: e.target.value})}
+          onFocus={(e) => {
+            if (e.target.value === 'Nome do Lead') {
+              setEditForm({...editForm, leadName: ''})
+            }
+          }}
           className="w-full p-2 border rounded text-sm"
           placeholder="Nome do Lead"
         />
@@ -455,8 +460,13 @@ function OpportunityCard({
         <textarea
           value={editForm.notes}
           onChange={(e) => setEditForm({...editForm, notes: e.target.value})}
+          onFocus={(e) => {
+            if (e.target.value === 'À vista? Financiamento Aprovado? Urgente?') {
+              setEditForm({...editForm, notes: ''})
+            }
+          }}
           className="w-full p-2 border rounded text-sm h-16 resize-none"
-          placeholder="Notas sobre a oportunidade..."
+          placeholder="À vista? Financiamento Aprovado? Urgente?"
         />
       </div>
     )
