@@ -11,7 +11,10 @@ import {
   MessageCircle,
   Eye,
   DollarSign,
-  Calendar
+  User,
+  Home,
+  Clock,
+  StickyNote
 } from 'lucide-react'
 
 interface SalesStage {
@@ -44,6 +47,19 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
   const [loading, setLoading] = useState(true)
   const [totalValue, setTotalValue] = useState(0)
   const [weightedValue, setWeightedValue] = useState(0)
+
+  // Função para obter probabilidade padrão do estágio
+  const getStageProbability = (stageName: string) => {
+    const stageProbabilities: { [key: string]: number } = {
+      'Qualificação': 10,
+      'Interesse Confirmado': 35,
+      'Visita Agendada': 55,
+      'Proposta Enviada': 75,
+      'Negociação': 90,
+      'Fechamento': 100
+    }
+    return stageProbabilities[stageName] || 0
+  }
 
   useEffect(() => {
     loadPipelineData()
@@ -139,10 +155,16 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
   }
 
   const addOpportunity = async (stageId: string) => {
+    // Data automática: 30 dias a partir de hoje
+    const futureDate = new Date()
+    futureDate.setDate(futureDate.getDate() + 30)
+    const expectedCloseDate = futureDate.toISOString().split('T')[0]
+
     const opportunity = {
       leadName: 'Novo Lead',
       value: 100000,
       probability: 10, // Sempre começa baixo na qualificação
+      expectedCloseDate,
       notes: 'Clique no ícone de edição para personalizar...'
     }
 
@@ -262,10 +284,16 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
                     style={{ backgroundColor: stage.color }}
                   >
                     <div className="flex items-center justify-between">
-                      <span>{stage.name}</span>
-                      <span className="bg-white bg-opacity-20 px-2 py-1 rounded text-sm">
-                        {stage.opportunities.length}
-                      </span>
+                      <span className="text-sm">{stage.name}</span>
+                      <div className="flex items-center space-x-2">
+                        <span className="bg-white bg-opacity-20 px-2 py-1 rounded text-xs">
+                          {stage.opportunities.length}
+                        </span>
+                        {/* Probabilidade padrão do estágio */}
+                        <span className="bg-white bg-opacity-30 px-2 py-1 rounded text-xs font-bold">
+                          {getStageProbability(stage.name)}%
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -344,10 +372,6 @@ function OpportunityCard({
     notes: opportunity.notes || ''
   })
   
-  const probabilityColor = 
-    opportunity.probability >= 70 ? 'text-green-600 bg-green-100' :
-    opportunity.probability >= 40 ? 'text-yellow-600 bg-yellow-100' :
-    'text-red-600 bg-red-100'
 
   const handleSave = () => {
     if (onUpdate) {
@@ -450,86 +474,96 @@ function OpportunityCard({
     <div className="space-y-3">
       {/* Header com ações */}
       <div className="flex items-center justify-between">
-        <h4 className="font-medium text-gray-900 truncate cursor-pointer"
-            onClick={() => setShowDetails(!showDetails)}>
-          {opportunity.leadName}
-        </h4>
+        <div className="flex items-center space-x-2 cursor-pointer" onClick={() => setShowDetails(!showDetails)}>
+          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+            <User className="h-4 w-4 text-blue-600" />
+          </div>
+          <h4 className="font-medium text-gray-900 truncate">
+            {opportunity.leadName}
+          </h4>
+        </div>
         <div className="flex space-x-1">
           <button 
             onClick={() => setIsEditing(true)}
-            className="p-1 text-blue-600 hover:bg-blue-100 rounded"
+            className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-full transition-colors"
             title="Editar"
           >
-            <Edit className="h-3 w-3" />
+            <Edit className="h-3.5 w-3.5" />
           </button>
           <button 
             onClick={handleDelete}
-            className="p-1 text-red-600 hover:bg-red-100 rounded"
+            className="p-1.5 text-red-600 hover:bg-red-100 rounded-full transition-colors"
             title="Deletar"
           >
-            <Trash2 className="h-3 w-3" />
+            <Trash2 className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>
 
-      {/* Propriedade */}
-      {opportunity.propertyTitle && (
-        <p className="text-sm text-gray-600 truncate">
-          🏠 {opportunity.propertyTitle}
-        </p>
-      )}
+      {/* Informações principais */}
+      <div className="space-y-2">
+        {/* Propriedade */}
+        {opportunity.propertyTitle && (
+          <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <Home className="h-4 w-4 text-gray-400" />
+            <span className="truncate">{opportunity.propertyTitle}</span>
+          </div>
+        )}
 
-      {/* Valor e Probabilidade */}
-      <div className="flex items-center justify-between">
-        <span className="font-semibold text-gray-900 flex items-center">
-          <DollarSign className="h-3 w-3 mr-1" />
-          {opportunity.value ? `R$ ${opportunity.value.toLocaleString()}` : 'Sem valor'}
-        </span>
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${probabilityColor}`}>
-          {opportunity.probability}%
-        </span>
-      </div>
-
-      {/* Data de Fechamento */}
-      {opportunity.expectedCloseDate && (
-        <div className="flex items-center text-sm text-gray-500">
-          <Calendar className="h-3 w-3 mr-1" />
-          {new Date(opportunity.expectedCloseDate).toLocaleDateString('pt-BR')}
+        {/* Valor */}
+        <div className="flex items-center space-x-2">
+          <DollarSign className="h-4 w-4 text-green-500" />
+          <span className="font-semibold text-gray-900">
+            {opportunity.value ? `R$ ${opportunity.value.toLocaleString()}` : 'Sem valor'}
+          </span>
         </div>
-      )}
+
+        {/* Data de Fechamento */}
+        {opportunity.expectedCloseDate && (
+          <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <Clock className="h-4 w-4 text-orange-500" />
+            <span>
+              {new Date(opportunity.expectedCloseDate).toLocaleDateString('pt-BR')}
+            </span>
+          </div>
+        )}
+      </div>
 
       {/* Notas (apenas se expandido) */}
       {showDetails && opportunity.notes && (
-        <p className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
-          {opportunity.notes}
-        </p>
+        <div className="flex items-start space-x-2 text-xs text-gray-500">
+          <StickyNote className="h-3 w-3 text-gray-400 mt-0.5 flex-shrink-0" />
+          <p className="bg-gray-50 p-2 rounded text-xs leading-relaxed">
+            {opportunity.notes}
+          </p>
+        </div>
       )}
 
       {/* Ações Funcionais */}
-      <div className="flex space-x-1 pt-2 border-t border-gray-100">
+      <div className="grid grid-cols-3 gap-1 pt-3 border-t border-gray-100">
         <button 
           onClick={handleViewLead}
-          className="flex items-center text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200 transition-colors"
+          className="flex items-center justify-center space-x-1 text-xs bg-blue-50 text-blue-700 py-2 rounded-md hover:bg-blue-100 transition-colors"
           title="Ver detalhes do lead"
         >
-          <Eye className="h-3 w-3 mr-1" />
-          Lead
+          <Eye className="h-3 w-3" />
+          <span>Lead</span>
         </button>
         <button 
           onClick={handleContact}
-          className="flex items-center text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200 transition-colors"
+          className="flex items-center justify-center space-x-1 text-xs bg-green-50 text-green-700 py-2 rounded-md hover:bg-green-100 transition-colors"
           title="Contatar via WhatsApp"
         >
-          <MessageCircle className="h-3 w-3 mr-1" />
-          WhatsApp
+          <MessageCircle className="h-3 w-3" />
+          <span>Chat</span>
         </button>
         <button 
           onClick={handleProposal}
-          className="flex items-center text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded hover:bg-purple-200 transition-colors"
+          className="flex items-center justify-center space-x-1 text-xs bg-purple-50 text-purple-700 py-2 rounded-md hover:bg-purple-100 transition-colors"
           title="Gerar proposta/simular financiamento"
         >
-          <FileText className="h-3 w-3 mr-1" />
-          Proposta
+          <FileText className="h-3 w-3" />
+          <span>Proposta</span>
         </button>
       </div>
     </div>
