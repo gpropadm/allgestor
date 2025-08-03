@@ -176,9 +176,11 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
 
   const addOpportunityFromExisting = async (leadId: string, leadName: string) => {
     const currentDate = new Date()
-    const expectedCloseDate = currentDate.toISOString().split('T')[0]
+    // Corrigir fuso horário - usar data local em vez de UTC
+    const localDate = new Date(currentDate.getTime() - (currentDate.getTimezoneOffset() * 60000))
+    const expectedCloseDate = localDate.toISOString().split('T')[0]
     
-    console.log('Generated current date:', expectedCloseDate)
+    console.log('Generated current date (local):', expectedCloseDate)
 
     // Encontrar os dados completos do lead
     const selectedLeadData = existingLeads.find(lead => lead.id === leadId)
@@ -583,6 +585,7 @@ function OpportunityCard({
 }) {
   const [isEditing, setIsEditing] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
+  const [leadData, setLeadData] = useState<any>(null)
   const [editForm, setEditForm] = useState({
     leadName: opportunity.leadName,
     propertyTitle: opportunity.propertyTitle || '',
@@ -590,6 +593,26 @@ function OpportunityCard({
     notes: opportunity.notes || ''
   })
   
+  const loadLeadData = async () => {
+    try {
+      const response = await fetch(`/api/leads`)
+      if (response.ok) {
+        const leads = await response.json()
+        const lead = leads.find((l: any) => l.id === opportunity.leadId)
+        if (lead) {
+          setLeadData(lead)
+          console.log('Lead data loaded for editing:', lead)
+        }
+      }
+    } catch (error) {
+      console.error('Error loading lead data:', error)
+    }
+  }
+
+  const handleEdit = () => {
+    setIsEditing(true)
+    loadLeadData()
+  }
 
   const handleSave = () => {
     if (onUpdate) {
@@ -642,6 +665,47 @@ function OpportunityCard({
             </button>
           </div>
         </div>
+
+        {/* Informações do Lead */}
+        {leadData && (
+          <div className="bg-white p-3 rounded border mb-3">
+            <h5 className="font-medium text-gray-900 mb-2">Informações do Lead</h5>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <span className="text-gray-600">Interesse:</span>
+                <span className={`ml-2 px-2 py-1 rounded text-xs ${
+                  leadData.interest === 'BUY' 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-blue-100 text-blue-800'
+                }`}>
+                  {leadData.interest === 'BUY' ? 'Comprar' : 'Alugar'}
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-600">Tipo:</span>
+                <span className="ml-2 font-medium">
+                  {leadData.propertyType === 'APARTMENT' ? 'Apartamento' : 
+                   leadData.propertyType === 'HOUSE' ? 'Casa' : 
+                   leadData.propertyType === 'COMMERCIAL' ? 'Comercial' : leadData.propertyType}
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-600">Orçamento:</span>
+                <span className="ml-2 font-medium">R$ {leadData.maxPrice?.toLocaleString()}</span>
+              </div>
+              <div>
+                <span className="text-gray-600">Contato:</span>
+                <span className="ml-2">{leadData.phone}</span>
+              </div>
+            </div>
+            {leadData.notes && (
+              <div className="mt-2">
+                <span className="text-gray-600">Observações do Lead:</span>
+                <p className="mt-1 text-sm bg-gray-50 p-2 rounded">{leadData.notes}</p>
+              </div>
+            )}
+          </div>
+        )}
 
         <input
           type="text"
@@ -706,7 +770,7 @@ function OpportunityCard({
         </div>
         <div className="flex space-x-1 flex-shrink-0 ml-2">
           <button 
-            onClick={() => setIsEditing(true)}
+            onClick={handleEdit}
             className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-full transition-colors"
             title="Editar"
           >
