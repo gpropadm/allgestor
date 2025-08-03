@@ -9,21 +9,21 @@ const openai = new OpenAI({
 })
 
 // Função para executar comandos MCP baseados na requisição do Claude
-async function executeMCPCommand(command: string, params: any, userId: string): Promise<any> {
+async function executeMCPCommand(command: string, params: any, userId: string, companyId: string): Promise<any> {
   try {
     switch (command) {
       case 'get_properties':
-        return await crmMCP.getProperties({ ...params, userId })
+        return await crmMCP.getProperties({ ...params, userId, companyId })
       
       case 'get_property_analytics':
-        return await crmMCP.getPropertyAnalytics(params.propertyId)
+        return await crmMCP.getPropertyAnalytics(params.propertyId, companyId)
       
       case 'get_contracts':
-        return await crmMCP.getContracts({ ...params, userId })
+        return await crmMCP.getContracts({ ...params, userId, companyId })
       
       case 'get_payments':
         // Converter status "overdue" para parâmetro overdue: true
-        const paymentParams = { ...params, userId }
+        const paymentParams = { ...params, userId, companyId }
         if (params.status === 'overdue') {
           paymentParams.overdue = true
           delete paymentParams.status
@@ -31,25 +31,25 @@ async function executeMCPCommand(command: string, params: any, userId: string): 
         return await crmMCP.getPayments(paymentParams)
       
       case 'get_financial_summary':
-        return await crmMCP.getFinancialSummary(userId, params.month, params.year)
+        return await crmMCP.getFinancialSummary(userId, companyId, params.month, params.year)
       
       case 'get_leads':
-        return await crmMCP.getLeads({ ...params, userId })
+        return await crmMCP.getLeads({ ...params, userId, companyId })
       
       case 'find_property_matches':
-        return await crmMCP.findPropertyMatches(params.leadId)
+        return await crmMCP.findPropertyMatches(params.leadId, companyId)
       
       case 'get_market_analysis':
-        return await crmMCP.getMarketAnalysis(params.location, params.propertyType)
+        return await crmMCP.getMarketAnalysis(params.location, params.propertyType, companyId)
       
       case 'get_hot_leads':
-        return await crmMCP.getHotLeads(userId)
+        return await crmMCP.getHotLeads(userId, companyId)
       
       case 'get_sales_arguments':
-        return await crmMCP.getSalesArguments(params.leadId, params.propertyId)
+        return await crmMCP.getSalesArguments(params.leadId, params.propertyId, companyId)
       
       case 'get_daily_sales_opportunities':
-        return await crmMCP.getDailySalesOpportunities(userId)
+        return await crmMCP.getDailySalesOpportunities(userId, companyId)
       
       default:
         return { success: false, error: `Comando MCP não reconhecido: ${command}` }
@@ -105,8 +105,8 @@ Caso contrário, responda normalmente analisando os dados fornecidos.`
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    if (!session?.user?.id || !session?.user?.companyId) {
+      return NextResponse.json({ error: 'Não autorizado ou sem empresa associada' }, { status: 401 })
     }
 
     const { message, context } = await request.json()
@@ -144,7 +144,8 @@ export async function POST(request: NextRequest) {
         mcpResult = await executeMCPCommand(
           mcpRequest.command, 
           mcpRequest.params, 
-          session.user.id
+          session.user.id,
+          session.user.companyId
         )
       }
     } catch (e) {
@@ -152,28 +153,28 @@ export async function POST(request: NextRequest) {
       const messageLC = message.toLowerCase()
       
       if (messageLC.includes('pagamento') && (messageLC.includes('atraso') || messageLC.includes('vencido') || messageLC.includes('pendente'))) {
-        mcpResult = await executeMCPCommand('get_payments', { overdue: true }, session.user.id)
+        mcpResult = await executeMCPCommand('get_payments', { overdue: true }, session.user.id, session.user.companyId)
       } else if (messageLC.includes('lead') && messageLC.includes('match')) {
-        mcpResult = await executeMCPCommand('get_leads', {}, session.user.id)
+        mcpResult = await executeMCPCommand('get_leads', {}, session.user.id, session.user.companyId)
         // Depois processar matches se houver leads
       } else if (messageLC.includes('propriedade') || messageLC.includes('portfólio') || messageLC.includes('imóv')) {
-        mcpResult = await executeMCPCommand('get_properties', {}, session.user.id)
+        mcpResult = await executeMCPCommand('get_properties', {}, session.user.id, session.user.companyId)
       } else if (messageLC.includes('contrato')) {
-        mcpResult = await executeMCPCommand('get_contracts', {}, session.user.id)
+        mcpResult = await executeMCPCommand('get_contracts', {}, session.user.id, session.user.companyId)
       } else if (messageLC.includes('financeiro') || messageLC.includes('receita') || messageLC.includes('faturamento')) {
         const now = new Date()
         mcpResult = await executeMCPCommand('get_financial_summary', { 
           month: now.getMonth() + 1, 
           year: now.getFullYear() 
-        }, session.user.id)
+        }, session.user.id, session.user.companyId)
       } else if (messageLC.includes('leads quentes') || messageLC.includes('prioridade') || messageLC.includes('urgente')) {
-        mcpResult = await executeMCPCommand('get_hot_leads', {}, session.user.id)
+        mcpResult = await executeMCPCommand('get_hot_leads', {}, session.user.id, session.user.companyId)
       } else if (messageLC.includes('oportunidade') || messageLC.includes('vendas hoje') || messageLC.includes('ações do dia')) {
-        mcpResult = await executeMCPCommand('get_daily_sales_opportunities', {}, session.user.id)
+        mcpResult = await executeMCPCommand('get_daily_sales_opportunities', {}, session.user.id, session.user.companyId)
       } else if (messageLC.includes('argumento') || messageLC.includes('como convencer') || messageLC.includes('pitch')) {
         // Para argumentos de venda, precisaria de leadId e propertyId específicos
         // Por enquanto, vamos buscar leads quentes como alternativa
-        mcpResult = await executeMCPCommand('get_hot_leads', {}, session.user.id)
+        mcpResult = await executeMCPCommand('get_hot_leads', {}, session.user.id, session.user.companyId)
       }
     }
 

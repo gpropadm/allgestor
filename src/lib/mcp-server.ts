@@ -20,9 +20,17 @@ export class CRMMCPServer {
     minPrice?: number
     maxPrice?: number
     userId?: string
+    companyId?: string
   }): Promise<MCPResponse> {
     try {
       const where: any = {}
+      
+      // SEGURANÇA: SEMPRE filtrar por companyId para isolamento de dados
+      if (filters?.companyId) {
+        where.companyId = filters.companyId
+      } else {
+        throw new Error('CompanyId é obrigatório para segurança dos dados')
+      }
       
       if (filters?.available !== undefined) {
         where.isAvailable = filters.available
@@ -132,9 +140,17 @@ export class CRMMCPServer {
     expiringSoon?: boolean
     userId?: string
     propertyId?: string
+    companyId?: string
   }): Promise<MCPResponse> {
     try {
       const where: any = {}
+      
+      // SEGURANÇA: SEMPRE filtrar por companyId
+      if (filters?.companyId) {
+        where.companyId = filters.companyId
+      } else {
+        throw new Error('CompanyId é obrigatório para segurança dos dados')
+      }
       
       if (filters?.userId) {
         where.userId = filters.userId
@@ -143,7 +159,7 @@ export class CRMMCPServer {
         where.propertyId = filters.propertyId
       }
       if (filters?.active) {
-        where.isActive = true
+        where.status = 'ACTIVE'
       }
       if (filters?.expiringSoon) {
         const thirtyDaysFromNow = new Date()
@@ -182,12 +198,19 @@ export class CRMMCPServer {
     contractId?: string
     fromDate?: Date
     toDate?: Date
+    companyId?: string
   }): Promise<MCPResponse> {
     try {
       const where: any = {}
       
-      if (filters?.userId) {
-        where.contract = { userId: filters.userId }
+      // SEGURANÇA: SEMPRE filtrar por companyId através do contrato
+      if (filters?.companyId) {
+        where.contract = { companyId: filters.companyId }
+        if (filters?.userId) {
+          where.contract.userId = filters.userId
+        }
+      } else {
+        throw new Error('CompanyId é obrigatório para segurança dos dados')
       }
       if (filters?.contractId) {
         where.contractId = filters.contractId
@@ -224,7 +247,7 @@ export class CRMMCPServer {
     }
   }
 
-  async getFinancialSummary(userId?: string, month?: number, year?: number): Promise<MCPResponse> {
+  async getFinancialSummary(userId?: string, companyId?: string, month?: number, year?: number): Promise<MCPResponse> {
     try {
       const currentDate = new Date()
       const targetMonth = month || currentDate.getMonth() + 1
