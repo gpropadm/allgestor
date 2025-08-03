@@ -175,11 +175,10 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
   }
 
   const addOpportunityFromExisting = async (leadId: string, leadName: string) => {
-    const futureDate = new Date()
-    futureDate.setDate(futureDate.getDate() + 30)
-    const expectedCloseDate = futureDate.toISOString().split('T')[0]
+    const currentDate = new Date()
+    const expectedCloseDate = currentDate.toISOString().split('T')[0]
     
-    console.log('Generated future date:', expectedCloseDate)
+    console.log('Generated current date:', expectedCloseDate)
 
     // Encontrar os dados completos do lead
     const selectedLeadData = existingLeads.find(lead => lead.id === leadId)
