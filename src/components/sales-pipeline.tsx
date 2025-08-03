@@ -2,6 +2,19 @@
 
 import React, { useState, useEffect } from 'react'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
+import { 
+  Edit, 
+  Trash2, 
+  User, 
+  Phone, 
+  FileText, 
+  X,
+  Save,
+  MessageCircle,
+  Eye,
+  DollarSign,
+  Calendar
+} from 'lucide-react'
 
 interface SalesStage {
   id: string
@@ -118,9 +131,9 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
   const addOpportunity = async (stageId: string) => {
     const opportunity = {
       leadName: 'Novo Lead',
-      value: 0,
+      value: 100000,
       probability: 50,
-      notes: 'Clique para editar...'
+      notes: 'Clique no ícone de edição para personalizar...'
     }
 
     try {
@@ -141,6 +154,45 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
       }
     } catch (error) {
       console.error('Erro ao criar oportunidade:', error)
+    }
+  }
+
+  const updateOpportunity = async (opportunityId: string, updates: Partial<SalesOpportunity>) => {
+    try {
+      const response = await fetch('/api/sales-pipeline', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update',
+          opportunityId,
+          updates
+        })
+      })
+      
+      if (response.ok) {
+        loadPipelineData()
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar oportunidade:', error)
+    }
+  }
+
+  const deleteOpportunity = async (opportunityId: string) => {
+    try {
+      const response = await fetch('/api/sales-pipeline', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          opportunityId
+        })
+      })
+      
+      if (response.ok) {
+        loadPipelineData()
+      }
+    } catch (error) {
+      console.error('Erro ao deletar oportunidade:', error)
     }
   }
 
@@ -232,7 +284,11 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
                                   snapshot.isDragging ? 'rotate-2 shadow-lg' : ''
                                 }`}
                               >
-                                <OpportunityCard opportunity={opportunity} />
+                                <OpportunityCard 
+                                  opportunity={opportunity} 
+                                  onUpdate={updateOpportunity}
+                                  onDelete={deleteOpportunity}
+                                />
                               </div>
                             )}
                           </Draggable>
@@ -259,27 +315,159 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
   )
 }
 
-function OpportunityCard({ opportunity }: { opportunity: SalesOpportunity }) {
+function OpportunityCard({ 
+  opportunity, 
+  onUpdate, 
+  onDelete 
+}: { 
+  opportunity: SalesOpportunity
+  onUpdate?: (id: string, updates: Partial<SalesOpportunity>) => void
+  onDelete?: (id: string) => void
+}) {
   const [isEditing, setIsEditing] = useState(false)
+  const [showDetails, setShowDetails] = useState(false)
+  const [editForm, setEditForm] = useState({
+    leadName: opportunity.leadName,
+    propertyTitle: opportunity.propertyTitle || '',
+    value: opportunity.value || 0,
+    probability: opportunity.probability,
+    expectedCloseDate: opportunity.expectedCloseDate || '',
+    notes: opportunity.notes || ''
+  })
   
   const probabilityColor = 
     opportunity.probability >= 70 ? 'text-green-600 bg-green-100' :
     opportunity.probability >= 40 ? 'text-yellow-600 bg-yellow-100' :
     'text-red-600 bg-red-100'
 
+  const handleSave = () => {
+    if (onUpdate) {
+      onUpdate(opportunity.id, editForm)
+      setIsEditing(false)
+    }
+  }
+
+  const handleDelete = () => {
+    if (confirm('Tem certeza que deseja deletar esta oportunidade?')) {
+      if (onDelete) {
+        onDelete(opportunity.id)
+      }
+    }
+  }
+
+  const handleViewLead = () => {
+    window.open(`/leads?search=${opportunity.leadName}`, '_blank')
+  }
+
+  const handleContact = () => {
+    // Simular abertura do WhatsApp
+    const phone = '5511999999999' // Buscar telefone real do lead
+    const message = `Olá ${opportunity.leadName}! Como está o interesse no imóvel?`
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank')
+  }
+
+  const handleProposal = () => {
+    // Abrir simulador financeiro com dados pré-preenchidos
+    window.open(`/simulador-financeiro?value=${opportunity.value}&leadId=${opportunity.leadId}`, '_blank')
+  }
+
+  if (isEditing) {
+    return (
+      <div className="space-y-3 bg-blue-50 p-3 rounded-lg border-2 border-blue-200">
+        <div className="flex items-center justify-between mb-2">
+          <h4 className="font-medium text-blue-900">Editando Oportunidade</h4>
+          <div className="flex space-x-1">
+            <button 
+              onClick={handleSave}
+              className="p-1 text-green-600 hover:bg-green-100 rounded"
+            >
+              <Save className="h-4 w-4" />
+            </button>
+            <button 
+              onClick={() => setIsEditing(false)}
+              className="p-1 text-gray-600 hover:bg-gray-100 rounded"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        <input
+          type="text"
+          value={editForm.leadName}
+          onChange={(e) => setEditForm({...editForm, leadName: e.target.value})}
+          className="w-full p-2 border rounded text-sm"
+          placeholder="Nome do Lead"
+        />
+
+        <input
+          type="text"
+          value={editForm.propertyTitle}
+          onChange={(e) => setEditForm({...editForm, propertyTitle: e.target.value})}
+          className="w-full p-2 border rounded text-sm"
+          placeholder="Título da Propriedade"
+        />
+
+        <div className="grid grid-cols-2 gap-2">
+          <input
+            type="number"
+            value={editForm.value}
+            onChange={(e) => setEditForm({...editForm, value: Number(e.target.value)})}
+            className="p-2 border rounded text-sm"
+            placeholder="Valor (R$)"
+          />
+          <input
+            type="number"
+            min="0"
+            max="100"
+            value={editForm.probability}
+            onChange={(e) => setEditForm({...editForm, probability: Number(e.target.value)})}
+            className="p-2 border rounded text-sm"
+            placeholder="Probabilidade (%)"
+          />
+        </div>
+
+        <input
+          type="date"
+          value={editForm.expectedCloseDate}
+          onChange={(e) => setEditForm({...editForm, expectedCloseDate: e.target.value})}
+          className="w-full p-2 border rounded text-sm"
+        />
+
+        <textarea
+          value={editForm.notes}
+          onChange={(e) => setEditForm({...editForm, notes: e.target.value})}
+          className="w-full p-2 border rounded text-sm h-16 resize-none"
+          placeholder="Notas sobre a oportunidade..."
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-3">
-      {/* Nome do Lead */}
+      {/* Header com ações */}
       <div className="flex items-center justify-between">
-        <h4 className="font-medium text-gray-900 truncate">
+        <h4 className="font-medium text-gray-900 truncate cursor-pointer"
+            onClick={() => setShowDetails(!showDetails)}>
           {opportunity.leadName}
         </h4>
-        <button 
-          onClick={() => setIsEditing(!isEditing)}
-          className="text-gray-400 hover:text-gray-600"
-        >
-          ✏️
-        </button>
+        <div className="flex space-x-1">
+          <button 
+            onClick={() => setIsEditing(true)}
+            className="p-1 text-blue-600 hover:bg-blue-100 rounded"
+            title="Editar"
+          >
+            <Edit className="h-3 w-3" />
+          </button>
+          <button 
+            onClick={handleDelete}
+            className="p-1 text-red-600 hover:bg-red-100 rounded"
+            title="Deletar"
+          >
+            <Trash2 className="h-3 w-3" />
+          </button>
+        </div>
       </div>
 
       {/* Propriedade */}
@@ -291,7 +479,8 @@ function OpportunityCard({ opportunity }: { opportunity: SalesOpportunity }) {
 
       {/* Valor e Probabilidade */}
       <div className="flex items-center justify-between">
-        <span className="font-semibold text-gray-900">
+        <span className="font-semibold text-gray-900 flex items-center">
+          <DollarSign className="h-3 w-3 mr-1" />
           {opportunity.value ? `R$ ${opportunity.value.toLocaleString()}` : 'Sem valor'}
         </span>
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${probabilityColor}`}>
@@ -302,26 +491,42 @@ function OpportunityCard({ opportunity }: { opportunity: SalesOpportunity }) {
       {/* Data de Fechamento */}
       {opportunity.expectedCloseDate && (
         <div className="flex items-center text-sm text-gray-500">
-          📅 {new Date(opportunity.expectedCloseDate).toLocaleDateString('pt-BR')}
+          <Calendar className="h-3 w-3 mr-1" />
+          {new Date(opportunity.expectedCloseDate).toLocaleDateString('pt-BR')}
         </div>
       )}
 
-      {/* Notas */}
-      {opportunity.notes && (
-        <p className="text-xs text-gray-500 truncate">
-          💬 {opportunity.notes}
+      {/* Notas (apenas se expandido) */}
+      {showDetails && opportunity.notes && (
+        <p className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
+          {opportunity.notes}
         </p>
       )}
 
-      {/* Ações Rápidas */}
-      <div className="flex space-x-2 pt-2 border-t border-gray-100">
-        <button className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200">
-          Ver Lead
+      {/* Ações Funcionais */}
+      <div className="flex space-x-1 pt-2 border-t border-gray-100">
+        <button 
+          onClick={handleViewLead}
+          className="flex items-center text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200 transition-colors"
+          title="Ver detalhes do lead"
+        >
+          <Eye className="h-3 w-3 mr-1" />
+          Lead
         </button>
-        <button className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200">
-          Contato
+        <button 
+          onClick={handleContact}
+          className="flex items-center text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200 transition-colors"
+          title="Contatar via WhatsApp"
+        >
+          <MessageCircle className="h-3 w-3 mr-1" />
+          WhatsApp
         </button>
-        <button className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded hover:bg-purple-200">
+        <button 
+          onClick={handleProposal}
+          className="flex items-center text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded hover:bg-purple-200 transition-colors"
+          title="Gerar proposta/simular financiamento"
+        >
+          <FileText className="h-3 w-3 mr-1" />
           Proposta
         </button>
       </div>
