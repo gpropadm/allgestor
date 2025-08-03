@@ -28,108 +28,128 @@ export function SofiaAvatar({ size = 'md', className = '' }: SofiaAvatarProps) {
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          {/* Background gradient roxo moderno */}
+          {/* Background neutro profissional */}
           <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#8B5CF6" />
-            <stop offset="50%" stopColor="#A855F7" />
-            <stop offset="100%" stopColor="#C084FC" />
+            <stop offset="0%" stopColor="#F8FAFC" />
+            <stop offset="50%" stopColor="#F1F5F9" />
+            <stop offset="100%" stopColor="#E2E8F0" />
           </linearGradient>
           
-          {/* Cabelo castanho natural */}
+          {/* Cabelo preto */}
           <linearGradient id="hairGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#92400E" />
-            <stop offset="100%" stopColor="#B45309" />
+            <stop offset="0%" stopColor="#1F2937" />
+            <stop offset="100%" stopColor="#374151" />
           </linearGradient>
           
-          {/* Pele clara e natural */}
+          {/* Pele natural realista */}
           <linearGradient id="skinGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#FEF3C7" />
-            <stop offset="100%" stopColor="#FDE68A" />
+            <stop offset="0%" stopColor="#FEF2E7" />
+            <stop offset="100%" stopColor="#FDE6D3" />
           </linearGradient>
           
-          {/* Camiseta roxa */}
+          {/* Blazer azul royal */}
+          <linearGradient id="blazerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#1E40AF" />
+            <stop offset="100%" stopColor="#2563EB" />
+          </linearGradient>
+          
+          {/* Camisa branca */}
           <linearGradient id="shirtGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#7C3AED" />
-            <stop offset="100%" stopColor="#8B5CF6" />
+            <stop offset="0%" stopColor="#FFFFFF" />
+            <stop offset="100%" stopColor="#F8FAFC" />
           </linearGradient>
         </defs>
         
-        {/* Background roxo elegante */}
+        {/* Background neutro profissional */}
         <circle cx="50" cy="50" r="48" fill="url(#bgGradient)" />
         
-        {/* Camiseta roxa */}
+        {/* Blazer azul royal */}
         <path 
-          d="M25 75 Q30 70 40 72 L60 72 Q70 70 75 75 L75 95 L25 95 Z" 
+          d="M22 75 Q25 68 35 70 L65 70 Q75 68 78 75 L78 95 L22 95 Z" 
+          fill="url(#blazerGradient)"
+        />
+        
+        {/* Gola do blazer */}
+        <path 
+          d="M35 70 Q40 66 45 68 L55 68 Q60 66 65 70 L60 72 L55 70 L45 70 L40 72 Z" 
+          fill="url(#blazerGradient)"
+        />
+        
+        {/* Botões pretos discretos */}
+        <circle cx="50" cy="76" r="1" fill="#1F2937" />
+        <circle cx="50" cy="82" r="1" fill="#1F2937" />
+        <circle cx="50" cy="88" r="1" fill="#1F2937" />
+        
+        {/* Camisa branca por baixo */}
+        <path 
+          d="M40 68 Q45 65 50 66 Q55 65 60 68 L58 70 L52 68 L48 68 L42 70 Z" 
           fill="url(#shirtGradient)"
         />
         
-        {/* Logo branco na camiseta */}
-        <circle cx="50" cy="80" r="3" fill="white" opacity="0.9" />
-        <path d="M48 78 L52 78 L50 82 Z" fill="url(#shirtGradient)" />
+        {/* Crachá azul claro no pescoço */}
+        <ellipse cx="50" cy="72" rx="4" ry="2" fill="#BAE6FD" />
+        <text x="50" y="73" textAnchor="middle" fontSize="3" fill="#1E40AF" fontWeight="bold">SOFIA</text>
+        
+        {/* Cordão do crachá */}
+        <path d="M50 65 Q50 68 50 70" stroke="#2563EB" strokeWidth="1" />
         
         {/* Pescoço */}
-        <ellipse cx="50" cy="65" rx="6" ry="8" fill="url(#skinGradient)" />
+        <ellipse cx="50" cy="60" rx="5" ry="6" fill="url(#skinGradient)" />
         
-        {/* Rosto jovem e amigável */}
-        <ellipse cx="50" cy="45" rx="16" ry="18" fill="url(#skinGradient)" />
+        {/* Rosto adulto profissional */}
+        <ellipse cx="50" cy="42" rx="15" ry="17" fill="url(#skinGradient)" />
         
-        {/* Cabelo castanho curto moderno */}
+        {/* Cabelo preto curto e alinhado */}
         <path 
-          d="M34 35 Q34 25 42 22 Q50 18 58 22 Q66 25 66 35 Q66 40 64 45 Q62 50 58 52 L42 52 Q38 50 36 45 Q34 40 34 35 Z" 
+          d="M35 32 Q35 22 42 18 Q50 15 58 18 Q65 22 65 32 Q65 38 62 42 Q60 45 56 46 L44 46 Q40 45 38 42 Q35 38 35 32 Z" 
           fill="url(#hairGradient)"
         />
         
-        {/* Franja lateral moderna */}
+        {/* Cabelo bem penteado lateral */}
         <path 
-          d="M36 32 Q40 28 44 30 Q48 27 52 29 Q56 28 60 30 Q58 33 55 34 Q52 32 48 33 Q44 32 40 34 Q38 33 36 32 Z" 
+          d="M37 30 Q42 25 46 27 Q50 24 54 27 Q58 25 63 30 Q60 32 56 31 Q52 29 48 30 Q44 29 40 31 Q37 32 37 30 Z" 
           fill="url(#hairGradient)"
         />
         
-        {/* Olhos claros e expressivos */}
-        <ellipse cx="45" cy="42" rx="2.5" ry="3" fill="white" />
-        <ellipse cx="55" cy="42" rx="2.5" ry="3" fill="white" />
-        <ellipse cx="45" cy="42" rx="1.8" ry="2.2" fill="#3B82F6" />
-        <ellipse cx="55" cy="42" rx="1.8" ry="2.2" fill="#3B82F6" />
+        {/* Olhos profissionais */}
+        <ellipse cx="45" cy="40" rx="2.2" ry="2.5" fill="white" />
+        <ellipse cx="55" cy="40" rx="2.2" ry="2.5" fill="white" />
+        <ellipse cx="45" cy="40" rx="1.5" ry="1.8" fill="#374151" />
+        <ellipse cx="55" cy="40" rx="1.5" ry="1.8" fill="#374151" />
         
         {/* Pupilas */}
-        <circle cx="45" cy="42" r="0.8" fill="#1E40AF" />
-        <circle cx="55" cy="42" r="0.8" fill="#1E40AF" />
+        <circle cx="45" cy="40" r="0.7" fill="black" />
+        <circle cx="55" cy="40" r="0.7" fill="black" />
         
         {/* Brilho nos olhos */}
-        <circle cx="45.3" cy="41.5" r="0.4" fill="white" />
-        <circle cx="55.3" cy="41.5" r="0.4" fill="white" />
+        <circle cx="45.2" cy="39.5" r="0.3" fill="white" />
+        <circle cx="55.2" cy="39.5" r="0.3" fill="white" />
         
         {/* Sobrancelhas bem definidas */}
-        <path d="M42 38 Q45 37 48 38" stroke="#92400E" strokeWidth="1.2" strokeLinecap="round" fill="none" />
-        <path d="M52 38 Q55 37 58 38" stroke="#92400E" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+        <path d="M42 37 Q45 36 48 37" stroke="#1F2937" strokeWidth="1" strokeLinecap="round" fill="none" />
+        <path d="M52 37 Q55 36 58 37" stroke="#1F2937" strokeWidth="1" strokeLinecap="round" fill="none" />
         
         {/* Nariz delicado */}
-        <ellipse cx="50" cy="46" rx="0.8" ry="1.2" fill="#FDE68A" opacity="0.8" />
+        <ellipse cx="50" cy="43" rx="0.7" ry="1" fill="#FDE6D3" opacity="0.7" />
         
-        {/* Sorriso gentil e confiante */}
-        <path d="M46 50 Q50 53 54 50" stroke="#DC2626" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+        {/* Sorriso profissional com dentes visíveis */}
+        <path d="M46 47 Q50 50 54 47" stroke="#EC4899" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+        <ellipse cx="50" cy="48.5" rx="3" ry="0.7" fill="white" opacity="0.95" />
         
-        {/* Dentes brancos */}
-        <ellipse cx="50" cy="51.5" rx="3" ry="0.8" fill="white" opacity="0.9" />
+        {/* Batom rosa claro */}
+        <ellipse cx="50" cy="48" rx="2" ry="0.6" fill="#F9A8D4" opacity="0.8" />
         
-        {/* Maquiagem leve - sombra */}
-        <ellipse cx="45" cy="40" rx="2" ry="1" fill="#C084FC" opacity="0.2" />
-        <ellipse cx="55" cy="40" rx="2" ry="1" fill="#C084FC" opacity="0.2" />
+        {/* Blush nas bochechas */}
+        <circle cx="41" cy="44" r="1.5" fill="#F9A8D4" opacity="0.3" />
+        <circle cx="59" cy="44" r="1.5" fill="#F9A8D4" opacity="0.3" />
         
-        {/* Batom discreto */}
-        <ellipse cx="50" cy="51" rx="2.5" ry="0.8" fill="#F87171" opacity="0.6" />
+        {/* Brincos discretos */}
+        <circle cx="37" cy="42" r="0.8" fill="#D1D5DB" />
+        <circle cx="63" cy="42" r="0.8" fill="#D1D5DB" />
         
-        {/* Badge AI moderno */}
-        <circle cx="75" cy="25" r="7" fill="white" opacity="0.95" />
-        <text x="75" y="28" textAnchor="middle" fontSize="7" fill="#8B5CF6" fontWeight="bold">AI</text>
-        
-        {/* Efeito profissional sutil */}
-        <circle cx="30" cy="30" r="1" fill="white" opacity="0.6">
-          <animate attributeName="opacity" values="0.3;0.8;0.3" dur="3s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="70" cy="70" r="0.8" fill="white" opacity="0.5">
-          <animate attributeName="opacity" values="0.5;1;0.5" dur="2.5s" repeatCount="indefinite" />
-        </circle>
+        {/* Badge SOFIA discreto */}
+        <circle cx="75" cy="25" r="6" fill="white" opacity="0.9" />
+        <text x="75" y="27" textAnchor="middle" fontSize="5" fill="#1E40AF" fontWeight="bold">S</text>
       </svg>
       
       {/* Badge de status online */}
