@@ -159,16 +159,33 @@ async function moveOpportunity(data: any, companyId: string) {
       return NextResponse.json({ error: 'Estágio não encontrado' }, { status: 404 })
     }
 
-    // Atualizar o estágio da oportunidade
+    // Calcular probabilidade baseada no estágio
+    const stageProbabilities = {
+      'Qualificação': 10,
+      'Interesse Confirmado': 35,
+      'Visita Agendada': 55,
+      'Proposta Enviada': 75,
+      'Negociação': 90,
+      'Fechamento': 100
+    }
+
+    const newProbability = stageProbabilities[stage.name as keyof typeof stageProbabilities] || opportunity.probability
+
+    // Atualizar o estágio da oportunidade com nova probabilidade
     await prisma.salesOpportunity.update({
       where: { id: opportunityId },
       data: {
         stageId: newStageId,
+        probability: newProbability,
         updatedAt: new Date()
       }
     })
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ 
+      success: true, 
+      newProbability,
+      message: `Probabilidade atualizada para ${newProbability}% (${stage.name})`
+    })
   } catch (error) {
     console.error('Erro ao mover oportunidade:', error)
     return NextResponse.json({ error: 'Erro ao mover oportunidade' }, { status: 500 })

@@ -5,8 +5,6 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 import { 
   Edit, 
   Trash2, 
-  User, 
-  Phone, 
   FileText, 
   X,
   Save,
@@ -111,7 +109,7 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
 
     // Atualizar no servidor
     try {
-      await fetch('/api/sales-pipeline', {
+      const response = await fetch('/api/sales-pipeline', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -121,6 +119,18 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
           newPosition: destination.index
         })
       })
+      
+      const result = await response.json()
+      
+      if (result.success && result.newProbability) {
+        // Mostrar notificação da mudança de probabilidade
+        console.log(`Probabilidade atualizada: ${result.message}`)
+        
+        // Recarregar dados para mostrar a nova probabilidade
+        setTimeout(() => {
+          loadPipelineData()
+        }, 500)
+      }
     } catch (error) {
       console.error('Erro ao mover oportunidade:', error)
       // Reverter mudança em caso de erro
@@ -132,7 +142,7 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
     const opportunity = {
       leadName: 'Novo Lead',
       value: 100000,
-      probability: 50,
+      probability: 10, // Sempre começa baixo na qualificação
       notes: 'Clique no ícone de edição para personalizar...'
     }
 
@@ -330,7 +340,6 @@ function OpportunityCard({
     leadName: opportunity.leadName,
     propertyTitle: opportunity.propertyTitle || '',
     value: opportunity.value || 0,
-    probability: opportunity.probability,
     expectedCloseDate: opportunity.expectedCloseDate || '',
     notes: opportunity.notes || ''
   })
@@ -408,23 +417,16 @@ function OpportunityCard({
           placeholder="Título da Propriedade"
         />
 
-        <div className="grid grid-cols-2 gap-2">
-          <input
-            type="number"
-            value={editForm.value}
-            onChange={(e) => setEditForm({...editForm, value: Number(e.target.value)})}
-            className="p-2 border rounded text-sm"
-            placeholder="Valor (R$)"
-          />
-          <input
-            type="number"
-            min="0"
-            max="100"
-            value={editForm.probability}
-            onChange={(e) => setEditForm({...editForm, probability: Number(e.target.value)})}
-            className="p-2 border rounded text-sm"
-            placeholder="Probabilidade (%)"
-          />
+        <input
+          type="number"
+          value={editForm.value}
+          onChange={(e) => setEditForm({...editForm, value: Number(e.target.value)})}
+          className="w-full p-2 border rounded text-sm"
+          placeholder="Valor (R$)"
+        />
+        
+        <div className="bg-blue-50 p-2 rounded text-sm text-blue-700">
+          💡 <strong>Probabilidade:</strong> {opportunity.probability}% (automática baseada no estágio)
         </div>
 
         <input
