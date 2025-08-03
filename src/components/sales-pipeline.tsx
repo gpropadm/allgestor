@@ -47,6 +47,9 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
   const [loading, setLoading] = useState(true)
   const [totalValue, setTotalValue] = useState(0)
   const [weightedValue, setWeightedValue] = useState(0)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [selectedStageId, setSelectedStageId] = useState('')
+  const [existingLeads, setExistingLeads] = useState<any[]>([])
 
   // Função para obter probabilidade padrão do estágio
   const getStageProbability = (stageName: string) => {
@@ -154,16 +157,28 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
     }
   }
 
-  const addOpportunity = async (stageId: string) => {
-    // Data automática: 30 dias a partir de hoje
+  const loadExistingLeads = async () => {
+    try {
+      const response = await fetch('/api/leads')
+      if (response.ok) {
+        const data = await response.json()
+        setExistingLeads(data.leads || [])
+      }
+    } catch (error) {
+      console.error('Erro ao carregar leads:', error)
+    }
+  }
+
+  const addOpportunityFromExisting = async (leadId: string, leadName: string) => {
     const futureDate = new Date()
     futureDate.setDate(futureDate.getDate() + 30)
     const expectedCloseDate = futureDate.toISOString().split('T')[0]
 
     const opportunity = {
-      leadName: 'Nome do Lead',
+      leadId,
+      leadName,
       value: 100000,
-      probability: 10, // Sempre começa baixo na qualificação
+      probability: 10,
       expectedCloseDate,
       notes: 'À vista? Financiamento Aprovado? Urgente?'
     }
@@ -174,7 +189,7 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'create',
-          stageId,
+          stageId: selectedStageId,
           opportunity,
           companyId,
           userId
@@ -182,6 +197,43 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
       })
       
       if (response.ok) {
+        setShowAddModal(false)
+        loadPipelineData()
+      }
+    } catch (error) {
+      console.error('Erro ao criar oportunidade:', error)
+    }
+  }
+
+  const addOpportunityNew = async (leadData: any) => {
+    const futureDate = new Date()
+    futureDate.setDate(futureDate.getDate() + 30)
+    const expectedCloseDate = futureDate.toISOString().split('T')[0]
+
+    const opportunity = {
+      leadName: leadData.name,
+      value: leadData.value || 100000,
+      probability: 10,
+      expectedCloseDate,
+      notes: leadData.notes || 'À vista? Financiamento Aprovado? Urgente?'
+    }
+
+    try {
+      const response = await fetch('/api/sales-pipeline', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-with-lead',
+          stageId: selectedStageId,
+          opportunity,
+          leadData,
+          companyId,
+          userId
+        })
+      })
+      
+      if (response.ok) {
+        setShowAddModal(false)
         loadPipelineData()
       }
     } catch (error) {
@@ -332,7 +384,11 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
                         
                         {/* Botão Adicionar */}
                         <button
-                          onClick={() => addOpportunity(stage.id)}
+                          onClick={() => {
+                            setSelectedStageId(stage.id)
+                            setShowAddModal(true)
+                            loadExistingLeads()
+                          }}
                           className="w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors"
                         >
                           + Adicionar Oportunidade
@@ -345,6 +401,178 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
             ))}
           </div>
         </DragDropContext>
+      </div>
+
+      {/* Modal de Adição */}
+      {showAddModal && (
+        <AddOpportunityModal
+          isOpen={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          stageId={selectedStageId}
+          existingLeads={existingLeads}
+          onAddFromExisting={addOpportunityFromExisting}
+          onAddNew={addOpportunityNew}
+        />
+      )}
+    </div>
+  )
+}
+
+function AddOpportunityModal({
+  isOpen,
+  onClose,
+  stageId,
+  existingLeads,
+  onAddFromExisting,
+  onAddNew
+}: {
+  isOpen: boolean
+  onClose: () => void
+  stageId: string
+  existingLeads: any[]
+  onAddFromExisting: (leadId: string, leadName: string) => void
+  onAddNew: (leadData: any) => void
+}) {
+  const [selectedLead, setSelectedLead] = useState('')
+  const [showNewLeadForm, setShowNewLeadForm] = useState(false)
+  const [newLeadForm, setNewLeadForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    value: 100000,
+    notes: ''
+  })
+
+  if (!isOpen) return null
+
+  const handleAddExisting = () => {
+    if (selectedLead) {
+      const lead = existingLeads.find(l => l.id === selectedLead)
+      onAddFromExisting(selectedLead, lead?.name || 'Lead')
+    }
+  }
+
+  const handleAddNew = () => {
+    if (newLeadForm.name.trim()) {
+      onAddNew(newLeadForm)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Adicionar Oportunidade</h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {!showNewLeadForm ? (
+          <div className="space-y-4">
+            {/* Opção 1: Lead Existente */}
+            <div className="border rounded-lg p-4">
+              <h4 className="font-medium mb-3 flex items-center">
+                <User className="h-4 w-4 mr-2" />
+                Selecionar Lead Existente
+              </h4>
+              <select
+                value={selectedLead}
+                onChange={(e) => setSelectedLead(e.target.value)}
+                className="w-full p-2 border rounded text-sm mb-3"
+              >
+                <option value="">Escolha um lead...</option>
+                {existingLeads.map(lead => (
+                  <option key={lead.id} value={lead.id}>
+                    {lead.name} - {lead.phone || 'Sem telefone'}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={handleAddExisting}
+                disabled={!selectedLead}
+                className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-gray-300"
+              >
+                Adicionar ao Pipeline
+              </button>
+            </div>
+
+            <div className="text-center text-gray-500 text-sm">ou</div>
+
+            {/* Opção 2: Novo Lead */}
+            <div className="border rounded-lg p-4">
+              <h4 className="font-medium mb-3 flex items-center">
+                <User className="h-4 w-4 mr-2" />
+                Criar Novo Lead
+              </h4>
+              <button
+                onClick={() => setShowNewLeadForm(true)}
+                className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+              >
+                + Criar Lead Completo
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <button
+              onClick={() => setShowNewLeadForm(false)}
+              className="text-blue-600 text-sm mb-4 flex items-center"
+            >
+              ← Voltar para opções
+            </button>
+            
+            <input
+              type="text"
+              placeholder="Nome do Lead"
+              value={newLeadForm.name}
+              onChange={(e) => setNewLeadForm({...newLeadForm, name: e.target.value})}
+              className="w-full p-2 border rounded text-sm"
+            />
+            
+            <input
+              type="email"
+              placeholder="Email"
+              value={newLeadForm.email}
+              onChange={(e) => setNewLeadForm({...newLeadForm, email: e.target.value})}
+              className="w-full p-2 border rounded text-sm"
+            />
+            
+            <input
+              type="tel"
+              placeholder="Telefone"
+              value={newLeadForm.phone}
+              onChange={(e) => setNewLeadForm({...newLeadForm, phone: e.target.value})}
+              className="w-full p-2 border rounded text-sm"
+            />
+            
+            <input
+              type="text"
+              placeholder="R$ 100.000"
+              value={newLeadForm.value ? `R$ ${newLeadForm.value.toLocaleString('pt-BR')}` : ''}
+              onChange={(e) => {
+                const value = e.target.value.replace(/[^\d]/g, '')
+                setNewLeadForm({...newLeadForm, value: value ? Number(value) : 0})
+              }}
+              className="w-full p-2 border rounded text-sm"
+            />
+            
+            <textarea
+              placeholder="Notas sobre o lead..."
+              value={newLeadForm.notes}
+              onChange={(e) => setNewLeadForm({...newLeadForm, notes: e.target.value})}
+              className="w-full p-2 border rounded text-sm h-16 resize-none"
+            />
+            
+            <button
+              onClick={handleAddNew}
+              disabled={!newLeadForm.name.trim()}
+              className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:bg-gray-300"
+            >
+              Criar Lead e Adicionar ao Pipeline
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
