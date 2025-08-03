@@ -165,7 +165,7 @@ export function SalesPipeline({ companyId, userId }: SalesPipelineProps) {
       value: 100000,
       probability: 10, // Sempre começa baixo na qualificação
       expectedCloseDate,
-      notes: 'Clique no ícone de edição para personalizar...'
+      notes: 'À vista? Financiamento Aprovado? Urgente?'
     }
 
     try {
