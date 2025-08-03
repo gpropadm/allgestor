@@ -15,6 +15,7 @@ interface Message {
 
 export default function AIAssistant() {
   const { data: session, status } = useSession()
+  const [companyName, setCompanyName] = useState('')
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -35,6 +36,26 @@ export default function AIAssistant() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  useEffect(() => {
+    if (session?.user?.companyId) {
+      fetchCompanyName()
+    }
+  }, [session])
+
+  const fetchCompanyName = async () => {
+    try {
+      const response = await fetch('/api/companies')
+      if (response.ok) {
+        const companies = await response.json()
+        if (companies.length > 0) {
+          setCompanyName(companies[0].name)
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao buscar nome da empresa:', error)
+    }
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputMessage(e.target.value)
@@ -153,7 +174,9 @@ export default function AIAssistant() {
         <div className="flex items-center space-x-3">
           <SofiaAvatar size="sm" />
           <div>
-            <h1 className="text-lg font-semibold text-gray-900">SOFIA - Assistente IA</h1>
+            <h1 className="text-lg font-semibold text-gray-900">
+              SOFIA - Assistente IA {companyName && `| ${companyName}`}
+            </h1>
             <p className="text-xs text-gray-500">SOFIA - Sistema Otimizado de Fechamento Imobiliário Avançado</p>
           </div>
         </div>
