@@ -627,14 +627,33 @@ function OpportunityCard({
   }
 
   const handleViewLead = () => {
-    window.open(`/leads?search=${opportunity.leadName}`, '_blank')
+    window.open(`/leads/${opportunity.leadId}`, '_blank')
   }
 
-  const handleContact = () => {
-    // Simular abertura do WhatsApp
-    const phone = '5511999999999' // Buscar telefone real do lead
-    const message = `Olá ${opportunity.leadName}! Como está o interesse no imóvel?`
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank')
+  const handleContact = async () => {
+    try {
+      // Buscar dados do lead para pegar o telefone real
+      const response = await fetch('/api/leads')
+      if (response.ok) {
+        const leads = await response.json()
+        const lead = leads.find((l: any) => l.id === opportunity.leadId)
+        
+        if (lead && lead.phone) {
+          // Limpar telefone para formato WhatsApp (apenas números)
+          const cleanPhone = lead.phone.replace(/\D/g, '')
+          // Adicionar código do país se não tiver
+          const phoneWithCountry = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`
+          
+          const message = `Olá ${opportunity.leadName}! Como está o interesse no imóvel?`
+          window.open(`https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(message)}`, '_blank')
+        } else {
+          alert('Telefone do lead não encontrado!')
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao buscar dados do lead:', error)
+      alert('Erro ao buscar telefone do lead!')
+    }
   }
 
   const handleProposal = () => {
