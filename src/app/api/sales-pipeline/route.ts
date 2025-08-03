@@ -250,12 +250,25 @@ async function updateOpportunity(data: any, companyId: string) {
       return NextResponse.json({ error: 'Oportunidade não encontrada' }, { status: 404 })
     }
 
-    // Atualizar a oportunidade
+    // Separar updates do lead e da oportunidade
+    const { leadName, propertyTitle, ...opportunityUpdates } = updates
+    
+    // Atualizar o lead se o nome foi modificado
+    if (leadName) {
+      await prisma.lead.update({
+        where: { id: opportunity.leadId },
+        data: { name: leadName }
+      })
+    }
+
+    // Atualizar a oportunidade (removendo campos que não existem na tabela)
     const updatedOpportunity = await prisma.salesOpportunity.update({
       where: { id: opportunityId },
       data: {
-        ...updates,
-        expectedCloseDate: updates.expectedCloseDate ? new Date(updates.expectedCloseDate) : undefined,
+        value: opportunityUpdates.value,
+        probability: opportunityUpdates.probability,
+        notes: opportunityUpdates.notes,
+        expectedCloseDate: opportunityUpdates.expectedCloseDate ? new Date(opportunityUpdates.expectedCloseDate) : undefined,
         updatedAt: new Date()
       }
     })
