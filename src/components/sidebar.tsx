@@ -17,7 +17,6 @@ import {
   Receipt,
   Calculator,
   Zap,
-  MessageSquare,
   UserPlus,
   Power,
   TrendingDown,
@@ -25,13 +24,20 @@ import {
   Shield,
   Wallet,
   TestTube,
-  Bot
+  Bot,
+  BarChart3,
+  TrendingUp,
+  MessageCircle
 } from 'lucide-react'
 
 // OPÇÃO 1: Ícones mais modernos
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
   { icon: Bot, label: '🤖 Assistente IA', href: '/ai-assistant', featured: true },
+  { icon: TrendingUp, label: '📊 Pipeline Vendas', href: '/sales-pipeline', featured: true },
+  { icon: Calculator, label: '💰 Simulador Financeiro', href: '/simulador-financeiro', featured: true },
+  { icon: BarChart3, label: '📈 Analytics', href: '/analytics', featured: true },
+  { icon: MessageCircle, label: '💬 WhatsApp', href: '/whatsapp', featured: true },
   { icon: Users, label: 'Proprietários', href: '/owners' },
   { icon: Building, label: 'Imóveis', href: '/properties' },
   { icon: User, label: 'Inquilinos', href: '/tenants' },
