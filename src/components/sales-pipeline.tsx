@@ -367,7 +367,6 @@ function OpportunityCard({
     leadName: opportunity.leadName,
     propertyTitle: opportunity.propertyTitle || '',
     value: opportunity.value || 0,
-    expectedCloseDate: opportunity.expectedCloseDate || '',
     notes: opportunity.notes || ''
   })
   
@@ -437,7 +436,7 @@ function OpportunityCard({
           value={editForm.propertyTitle}
           onChange={(e) => setEditForm({...editForm, propertyTitle: e.target.value})}
           className="w-full p-2 border rounded text-sm"
-          placeholder="Título da Propriedade"
+          placeholder="Imóvel de Interesse"
         />
 
         <input
@@ -452,12 +451,6 @@ function OpportunityCard({
           💡 <strong>Probabilidade:</strong> {opportunity.probability}% (automática baseada no estágio)
         </div>
 
-        <input
-          type="date"
-          value={editForm.expectedCloseDate}
-          onChange={(e) => setEditForm({...editForm, expectedCloseDate: e.target.value})}
-          className="w-full p-2 border rounded text-sm"
-        />
 
         <textarea
           value={editForm.notes}
