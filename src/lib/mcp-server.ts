@@ -170,18 +170,21 @@ export class CRMMCPServer {
         }
       }
 
+      console.log('🔍 MCP getContracts - where:', JSON.stringify(where, null, 2))
+      
       const contracts = await prisma.contract.findMany({
         where,
         include: {
           property: true,
           tenant: true,
-          owner: true,
           payments: {
             orderBy: { dueDate: 'desc' }
           }
         },
         orderBy: { createdAt: 'desc' }
       })
+      
+      console.log('📊 MCP getContracts - resultado:', contracts.length, 'contratos')
 
       return { success: true, data: contracts }
     } catch (error) {
