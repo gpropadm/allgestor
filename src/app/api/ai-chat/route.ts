@@ -265,6 +265,12 @@ ${message}
     // Resposta final do assistente
     let finalResponse = gptResponse
     if (mcpResult) {
+      // Verificar se houve erro no MCP
+      if (!mcpResult.success || mcpResult.error) {
+        console.error('Erro MCP:', mcpResult.error)
+        throw new Error(`Erro MCP: ${mcpResult.error}`)
+      }
+      
       const hasData = mcpResult.data && 
         ((Array.isArray(mcpResult.data) && mcpResult.data.length > 0) ||
          (typeof mcpResult.data === 'object' && Object.keys(mcpResult.data).length > 0))
