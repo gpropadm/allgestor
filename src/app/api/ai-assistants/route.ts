@@ -1,9 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import fs from 'fs/promises'
-import path from 'path'
 
 // Assistentes padrão do sistema
 const DEFAULT_ASSISTANTS = [
@@ -195,7 +193,7 @@ IMPORTANTE: Você é o "Sergeant Major" do sistema, coordenando toda a operaçã
 ]
 
 // Criar assistentes padrão para o usuário
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id || !session?.user?.companyId) {
@@ -217,41 +215,10 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Criar diretório de contexto para o usuário
-    const contextDir = path.join(process.cwd(), 'data', 'ai-contexts', session.user.companyId, session.user.id)
-    await fs.mkdir(contextDir, { recursive: true })
-
-    // Criar assistentes padrão
+    // Criar assistentes padrão (sem arquivos - apenas banco de dados)
     const createdAssistants = []
     for (const assistantData of DEFAULT_ASSISTANTS) {
-      // Criar arquivo de contexto .MD
-      const contextFileName = `${assistantData.name.toLowerCase()}-context.md`
-      const contextFilePath = path.join(contextDir, contextFileName)
-      
-      const contextContent = `# ${assistantData.name} - Contexto e Memória
-
-## Informações do Assistente
-- **Nome**: ${assistantData.name}
-- **Papel**: ${assistantData.role}
-- **Especialidade**: ${assistantData.speciality}
-- **Personalidade**: ${assistantData.personality}
-
-## Memória de Conversas
-<!-- Este arquivo mantém o contexto e memória das conversas -->
-
-## Preferências do Usuário
-<!-- Preferências específicas descobertas durante as conversas -->
-
-## Insights Importantes
-<!-- Insights e padrões identificados pelo assistente -->
-
-## Última Atualização
-${new Date().toISOString()}
-`
-
-      await fs.writeFile(contextFilePath, contextContent, 'utf8')
-
-      // Criar assistente no banco
+      // Criar assistente no banco sem dependência de arquivos
       const assistant = await prisma.aIAssistant.create({
         data: {
           userId: session.user.id,
@@ -261,7 +228,7 @@ ${new Date().toISOString()}
           personality: assistantData.personality,
           speciality: assistantData.speciality,
           systemPrompt: assistantData.systemPrompt,
-          contextFilePath: contextFilePath,
+          contextFilePath: null, // Não usar arquivos em produção
           isPrimary: assistantData.isPrimary,
           avatarUrl: assistantData.avatarUrl,
           isActive: true
