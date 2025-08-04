@@ -2,8 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { redirect } from 'next/navigation'
-import { SofiaAvatar } from '@/components/sofia-avatar'
+import { redirect, useSearchParams } from 'next/navigation'
 
 interface Message {
   id: string
@@ -13,19 +12,27 @@ interface Message {
   mcpData?: any
 }
 
+interface AIAssistant {
+  id: string
+  name: string
+  role: string
+  personality: string
+  speciality: string
+  isPrimary: boolean
+  avatarUrl?: string
+}
+
 export default function AIAssistant() {
   const { data: session, status } = useSession()
+  const searchParams = useSearchParams()
   const [companyName, setCompanyName] = useState('')
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      type: 'assistant',
-      content: '🏠 Olá! Sou seu assistente inteligente do CRM Imobiliário. Posso ajudar você a:\n\n• 📊 **Analisar seu portfólio** de propriedades\n• 💰 **Acompanhar pagamentos** e inadimplência\n• 🎯 **Encontrar matches** para seus leads\n• 📈 **Análises de mercado** em tempo real\n• 📋 **Gerenciar contratos** e vencimentos\n\nO que você gostaria de saber hoje?',
-      timestamp: new Date()
-    }
-  ])
+  const [currentAssistant, setCurrentAssistant] = useState<AIAssistant | null>(null)
+  const [availableAssistants, setAvailableAssistants] = useState<AIAssistant[]>([])
+  const [conversationId, setConversationId] = useState<string | null>(null)
+  const [messages, setMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [showAssistants, setShowAssistants] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -40,8 +47,19 @@ export default function AIAssistant() {
   useEffect(() => {
     if (session?.user?.companyId) {
       fetchCompanyName()
+      loadAssistants()
     }
   }, [session])
+
+  useEffect(() => {
+    const assistantId = searchParams.get('assistant')
+    if (assistantId && availableAssistants.length > 0) {
+      const assistant = availableAssistants.find(a => a.id === assistantId)
+      if (assistant) {
+        switchAssistant(assistant)
+      }
+    }
+  }, [searchParams, availableAssistants])
 
   const fetchCompanyName = async () => {
     try {
@@ -57,6 +75,127 @@ export default function AIAssistant() {
     }
   }
 
+  const loadAssistants = async () => {
+    try {
+      const response = await fetch('/api/ai-assistants')
+      if (response.ok) {
+        const data = await response.json()
+        const assistants = data.assistants || []
+        setAvailableAssistants(assistants)
+        
+        // Se não tem assistente selecionado, usar o primário
+        if (!currentAssistant && assistants.length > 0) {
+          const primary = assistants.find((a: AIAssistant) => a.isPrimary) || assistants[0]
+          switchAssistant(primary)
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao carregar assistentes:', error)
+    }
+  }
+
+  const switchAssistant = (assistant: AIAssistant) => {
+    setCurrentAssistant(assistant)
+    setConversationId(null) // Reset conversation
+    setMessages([
+      {
+        id: '1',
+        type: 'assistant',
+        content: getWelcomeMessage(assistant),
+        timestamp: new Date()
+      }
+    ])
+    setShowAssistants(false)
+  }
+
+  const getWelcomeMessage = (assistant: AIAssistant) => {
+    const welcomeMessages: Record<string, string> = {
+      'SOFIA': `💼 Olá! Sou **SOFIA**, sua especialista em vendas! Posso ajudar você a:
+
+• 🎯 **Analisar leads quentes** e prioridades
+• 💰 **Identificar oportunidades** de alto valor
+• 🔍 **Encontrar matches perfeitos** para compradores
+• 📈 **Gerar argumentos personalizados** de venda
+• 🚀 **Acelerar fechamentos** com insights inteligentes
+
+**Como ${assistant.role}, estou focada em converter leads em vendas!**
+
+O que você gostaria de saber sobre suas oportunidades hoje?`,
+
+      'CARLOS': `💰 Olá! Sou **CARLOS**, seu CFO Virtual! Posso ajudar você a:
+
+• 📊 **Analisar fluxo de caixa** e inadimplência
+• 💳 **Monitorar pagamentos** e vencimentos
+• 📈 **Gerar relatórios financeiros** precisos
+• ⚠️ **Identificar riscos** financeiros
+• 💡 **Otimizar cobrança** e recebimentos
+
+**Como ${assistant.role}, mantenho suas finanças sempre organizadas!**
+
+Que análise financeira você precisa hoje?`,
+
+      'MARIA': `📋 Olá! Sou **MARIA**, sua Gerente Jurídica! Posso ajudar você a:
+
+• ⏰ **Monitorar vencimentos** de contratos
+• 🔄 **Gerenciar renovações** e reajustes
+• ⚖️ **Verificar cláusulas** importantes
+• 🚨 **Alertar sobre prazos** críticos
+• 📝 **Garantir conformidade** legal
+
+**Como ${assistant.role}, nunca deixo prazos passarem!**
+
+Que contratos você precisa que eu analise hoje?`,
+
+      'PEDRO': `🏠 Olá! Sou **PEDRO**, seu Gerente de Portfólio! Posso ajudar você a:
+
+• 🔍 **Monitorar todas as propriedades**
+• 🔧 **Gerenciar manutenções** e melhorias
+• 📊 **Otimizar ocupação** e disponibilidade
+• 💡 **Identificar oportunidades** de valorização
+• ✨ **Manter qualidade** do portfólio
+
+**Como ${assistant.role}, conheço cada imóvel pessoalmente!**
+
+Que propriedades você quer que eu analise hoje?`,
+
+      'ALEX': `👑 Olá! Sou **ALEX**, seu CEO Virtual! Posso ajudar você a:
+
+• 🎯 **Coordenar todos os assistentes** (SOFIA, CARLOS, MARIA, PEDRO)
+• 📈 **Fornecer visão estratégica** do negócio
+• 💡 **Tomar decisões executivas** baseadas em dados
+• 🔍 **Identificar tendências** e oportunidades
+• 🚀 **Otimizar a operação** como um todo
+
+**Como ${assistant.role}, orquestro toda sua operação imobiliária!**
+
+Que análise estratégica você precisa hoje?`
+    }
+
+    return welcomeMessages[assistant.name] || `🤖 Olá! Sou **${assistant.name}**, ${assistant.role}. Como posso ajudar você hoje?`
+  }
+
+  const getAssistantIcon = (name: string) => {
+    const icons: Record<string, string> = {
+      'SOFIA': '💼',
+      'CARLOS': '💰',
+      'MARIA': '📋',
+      'PEDRO': '🏠',
+      'ALEX': '👑'
+    }
+    return icons[name] || '🤖'
+  }
+
+  const getAssistantColor = (name: string) => {
+    const colors: Record<string, string> = {
+      'SOFIA': 'from-pink-500 to-rose-500',
+      'CARLOS': 'from-green-500 to-emerald-500',
+      'MARIA': 'from-blue-500 to-indigo-500',
+      'PEDRO': 'from-orange-500 to-amber-500',
+      'ALEX': 'from-purple-500 to-violet-500'
+    }
+    return colors[name] || 'from-gray-500 to-gray-600'
+  }
+
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputMessage(e.target.value)
     
@@ -67,7 +206,7 @@ export default function AIAssistant() {
   }
 
   const sendMessage = async () => {
-    if (!inputMessage.trim() || isLoading) return
+    if (!inputMessage.trim() || isLoading || !currentAssistant) return
     
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -86,14 +225,15 @@ export default function AIAssistant() {
     }
 
     try {
-      const response = await fetch('/api/mcp/chat', {
+      const response = await fetch('/api/ai-chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
           message: userMessage.content,
-          context: messages.slice(-3).map(m => `${m.type}: ${m.content}`).join('\n')
+          assistantId: currentAssistant.id,
+          conversationId: conversationId
         })
       })
 
@@ -103,6 +243,10 @@ export default function AIAssistant() {
       }
 
       const data = await response.json()
+      
+      if (data.conversationId && !conversationId) {
+        setConversationId(data.conversationId)
+      }
       
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -119,7 +263,7 @@ export default function AIAssistant() {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: `❌ **Erro**: ${error instanceof Error ? error.message : 'Erro desconhecido'}\n\nTente uma pergunta mais simples ou verifique sua conexão.`,
+        content: `❌ **Erro**: ${error instanceof Error ? error.message : 'Erro desconhecido'}\\n\\nTente uma pergunta mais simples ou verifique sua conexão.`,
         timestamp: new Date()
       }
       setMessages(prev => [...prev, errorMessage])
@@ -136,23 +280,25 @@ export default function AIAssistant() {
   }
 
   const newConversation = () => {
-    setMessages([
-      {
-        id: '1',
-        type: 'assistant',
-        content: '🤖 Olá! Sou a **SOFIA**, sua assistente inteligente de vendas! Posso ajudar você a:\n\n• 📊 **Analisar leads quentes** e prioridades\n• 💰 **Identificar oportunidades** de R$ 7,95M em vendas\n• 🎯 **Encontrar matches perfeitos** para compradores\n• 📈 **Gerar argumentos personalizados** de venda\n• 🚀 **Acelerar fechamentos** com insights inteligentes\n\n**Tenho 6 leads de compra esperando sua atenção!**\n\nO que você gostaria de saber hoje?',
-        timestamp: new Date()
-      }
-    ])
+    if (currentAssistant) {
+      setConversationId(null)
+      setMessages([
+        {
+          id: '1',
+          type: 'assistant',
+          content: getWelcomeMessage(currentAssistant),
+          timestamp: new Date()
+        }
+      ])
+    }
   }
 
   const formatMessage = (content: string) => {
-    // Converter markdown básico para HTML
     return content
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>')
+      .replace(/\\*(.*?)\\*/g, '<em>$1</em>')
       .replace(/•/g, '•')
-      .replace(/\n/g, '<br>')
+      .replace(/\\n/g, '<br>')
   }
 
   if (status === 'loading') {
@@ -167,19 +313,70 @@ export default function AIAssistant() {
     redirect('/login')
   }
 
+  if (!currentAssistant) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando assistente...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="bg-white min-h-screen flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between relative">
         <div className="flex items-center space-x-3">
-          <SofiaAvatar size="sm" />
+          <div className={`w-10 h-10 bg-gradient-to-r ${getAssistantColor(currentAssistant.name)} rounded-full flex items-center justify-center text-white text-lg font-bold`}>
+            {getAssistantIcon(currentAssistant.name)}
+          </div>
           <div>
             <h1 className="text-lg font-semibold text-gray-900">
-              SOFIA - Assistente IA {companyName && `| ${companyName}`}
+              {currentAssistant.name} - {currentAssistant.role} {companyName && `| ${companyName}`}
             </h1>
-            <p className="text-xs text-gray-500">SOFIA - Sistema Otimizado de Fechamento Imobiliário Avançado</p>
+            <p className="text-xs text-gray-500">{currentAssistant.speciality}</p>
           </div>
+          <button
+            onClick={() => setShowAssistants(!showAssistants)}
+            className="ml-4 text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded transition-colors"
+          >
+            Trocar ↕️
+          </button>
         </div>
+        
+        {/* Dropdown de Assistentes */}
+        {showAssistants && (
+          <div className="absolute top-full left-6 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[300px]">
+            <div className="p-2">
+              <h3 className="text-sm font-medium text-gray-900 mb-2">Escolher Assistente:</h3>
+              {availableAssistants.map((assistant) => (
+                <button
+                  key={assistant.id}
+                  onClick={() => switchAssistant(assistant)}
+                  className={`w-full text-left p-3 rounded-lg hover:bg-gray-50 transition-colors ${
+                    currentAssistant.id === assistant.id ? 'bg-blue-50 border border-blue-200' : ''
+                  }`}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-8 h-8 bg-gradient-to-r ${getAssistantColor(assistant.name)} rounded-full flex items-center justify-center text-white text-sm font-bold`}>
+                      {getAssistantIcon(assistant.name)}
+                    </div>
+                    <div>
+                      <div className="font-medium text-sm">{assistant.name}</div>
+                      <div className="text-xs text-gray-600">{assistant.role}</div>
+                    </div>
+                    {assistant.isPrimary && (
+                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Principal</span>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center space-x-3">
           <button 
             onClick={() => window.history.back()}
@@ -204,7 +401,9 @@ export default function AIAssistant() {
             <div key={message.id} className="message-fade-in">
               {message.type === 'assistant' ? (
                 <div className="flex items-start space-x-3">
-                  <SofiaAvatar size="sm" className="flex-shrink-0" />
+                  <div className={`w-8 h-8 bg-gradient-to-r ${getAssistantColor(currentAssistant.name)} rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0`}>
+                    {getAssistantIcon(currentAssistant.name)}
+                  </div>
                   <div className="flex-1">
                     <div className="bg-gray-50 rounded-2xl rounded-tl-md px-4 py-3">
                       <div 
@@ -254,12 +453,14 @@ export default function AIAssistant() {
           {isLoading && (
             <div className="message-fade-in">
               <div className="flex items-start space-x-3">
-                <SofiaAvatar size="sm" className="flex-shrink-0" />
+                <div className={`w-8 h-8 bg-gradient-to-r ${getAssistantColor(currentAssistant.name)} rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0`}>
+                  {getAssistantIcon(currentAssistant.name)}
+                </div>
                 <div className="flex-1">
                   <div className="bg-gray-50 rounded-2xl rounded-tl-md px-4 py-3">
                     <div className="flex items-center space-x-2">
                       <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                      <span className="text-gray-700">SOFIA analisando suas oportunidades...</span>
+                      <span className="text-gray-700">{currentAssistant.name} analisando...</span>
                     </div>
                   </div>
                 </div>
@@ -279,7 +480,7 @@ export default function AIAssistant() {
                 value={inputMessage}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
-                placeholder="Pergunte sobre suas propriedades, pagamentos, leads..."
+                placeholder={`Pergunte para ${currentAssistant.name} sobre ${currentAssistant.speciality.toLowerCase()}...`}
                 className="w-full resize-none border border-gray-300 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent max-h-32"
                 rows={1}
                 disabled={isLoading}
