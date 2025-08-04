@@ -1,6 +1,6 @@
-FORCE DEPLOY - PAYMENTS VIEW OPTIMIZATION  
-Timestamp: 2025-08-02 13:15:00
-Commit: payments-monthly-view-with-expansion
+FORCE DEPLOY - ASSISTENTES AI CRÍTICO
+Timestamp: 2025-08-04 12:50:00
+Commit: correcao-mcp-assistentes-ai
 
 ✅ NOVA FEATURE: Visualização inteligente de pagamentos por mês!
 
