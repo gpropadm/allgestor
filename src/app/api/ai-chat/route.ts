@@ -3,12 +3,12 @@ import { crmMCP } from '@/lib/mcp-server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
-import OpenAI from 'openai'
+import Anthropic from '@anthropic-ai/sdk'
 import fs from 'fs/promises'
 import path from 'path'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
 // Função para executar comandos MCP (mantém a mesma lógica)
@@ -185,23 +185,19 @@ ${message}
 4. Seja prático e focado na sua especialidade`
 
     // Primeira análise com o assistente específico
-    const initialResponse = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+    const initialResponse = await anthropic.messages.create({
+      model: "claude-3-5-sonnet-20241022",
       max_tokens: 1000,
       temperature: 0.1,
       messages: [
         {
-          role: "system",
-          content: contextualPrompt
-        },
-        {
           role: "user",
-          content: message
+          content: `${contextualPrompt}\n\nUsuário: ${message}`
         }
       ]
     })
 
-    const gptResponse = initialResponse.choices[0]?.message?.content || ''
+    const gptResponse = initialResponse.content[0]?.type === 'text' ? initialResponse.content[0].text : ''
 
     // Verificar se precisa executar comando MCP
     let mcpResult = null
@@ -274,18 +270,16 @@ ${message}
 
 Após cadastrar essas informações, poderei ajudar com insights valiosos específicos da minha área! 📊`
       } else {
-        const analysisResponse = await openai.chat.completions.create({
-          model: "gpt-4o-mini",
+        const analysisResponse = await anthropic.messages.create({
+          model: "claude-3-5-sonnet-20241022",
           max_tokens: 2000,
           temperature: 0.3,
           messages: [
             {
-              role: "system",
-              content: contextualPrompt
-            },
-            {
               role: "user",
-              content: `Pergunta: "${message}"
+              content: `${contextualPrompt}
+
+Pergunta: "${message}"
 
 Dados obtidos:
 ${JSON.stringify(mcpResult.data, null, 2)}
@@ -295,7 +289,7 @@ Analise estes dados na sua área de especialidade e forneça insights valiosos.`
           ]
         })
 
-        finalResponse = analysisResponse.choices[0]?.message?.content || 'Erro ao processar resposta'
+        finalResponse = analysisResponse.content[0]?.type === 'text' ? analysisResponse.content[0].text : 'Erro ao processar resposta'
       }
     }
 
@@ -314,7 +308,7 @@ Analise estes dados na sua área de especialidade e forneça insights valiosos.`
         type: 'ASSISTANT',
         content: finalResponse,
         mcpData: mcpResult?.data ? JSON.stringify(mcpResult.data) : null,
-        tokensUsed: initialResponse.usage?.total_tokens || 0
+        tokensUsed: (initialResponse.usage?.input_tokens || 0) + (initialResponse.usage?.output_tokens || 0)
       }
     })
 
