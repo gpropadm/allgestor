@@ -14,6 +14,8 @@ const anthropic = new Anthropic({
 // Função para executar comandos MCP (mantém a mesma lógica)
 async function executeMCPCommand(command: string, params: any, userId: string, companyId: string): Promise<any> {
   try {
+    console.log(`Executando comando MCP: ${command} para userId: ${userId}, companyId: ${companyId}`)
+    
     switch (command) {
       case 'get_properties':
         return await crmMCP.getProperties({ ...params, userId, companyId })
@@ -57,7 +59,13 @@ async function executeMCPCommand(command: string, params: any, userId: string, c
         return { success: false, error: `Comando MCP não reconhecido: ${command}` }
     }
   } catch (error) {
-    return { success: false, error: `Erro ao executar comando MCP: ${error}` }
+    console.error(`Erro MCP no comando ${command}:`, error)
+    return { 
+      success: false, 
+      error: `Erro ao executar comando MCP: ${command}`,
+      details: error instanceof Error ? error.message : 'Erro desconhecido',
+      data: null
+    }
   }
 }
 
@@ -240,8 +248,10 @@ ${message}
       }
       // MARIA - Especialista em Contratos
       else if (assistant.name === 'MARIA') {
-        if (messageLC.includes('contrato')) {
+        if (messageLC.includes('contrato') || messageLC.includes('quantos')) {
+          console.log('MARIA executando get_contracts...')
           mcpResult = await executeMCPCommand('get_contracts', {}, session.user.id, session.user.companyId)
+          console.log('Resultado MCP para contratos:', mcpResult)
         }
       }
       // PEDRO - Especialista em Propriedades
@@ -340,9 +350,12 @@ Analise estes dados na sua área de especialidade e forneça insights valiosos.`
       }, { status: 402 })
     }
 
+    console.log('Erro detalhado:', error)
+    
     return NextResponse.json({ 
-      error: 'Erro ao processar mensagem. Tente novamente.',
-      details: error instanceof Error ? error.message : 'Erro desconhecido'
+      error: 'Erro ao processar mensagem. Tente novamente.\n\nTente uma pergunta mais simples ou verifique sua conexão.',
+      details: error instanceof Error ? error.message : 'Erro desconhecido',
+      debugInfo: process.env.NODE_ENV === 'development' ? String(error) : undefined
     }, { status: 500 })
   }
 }
