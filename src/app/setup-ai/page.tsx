@@ -1,8 +1,44 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 export default function SetupAI() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  
+  useEffect(() => {
+    if (status === 'loading') return // Ainda carregando
+    
+    if (!session) {
+      router.push('/login') // Redireciona para login se não autenticado
+      return
+    }
+    
+    // Só admins podem acessar
+    if (session.user?.role !== 'ADMIN') {
+      router.push('/dashboard') // Redireciona usuários normais
+      return
+    }
+  }, [session, status, router])
+  
+  // Mostra loading enquanto verifica autenticação
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Verificando permissões...</p>
+        </div>
+      </div>
+    )
+  }
+  
+  // Não renderiza nada se não autenticado (será redirecionado)
+  if (!session || session.user?.role !== 'ADMIN') {
+    return null
+  }
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState('')
 
