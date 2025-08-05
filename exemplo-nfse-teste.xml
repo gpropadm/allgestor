@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CompNfse xmlns="http://www.abrasf.org.br/nfse.xsd">
+  <Nfse>
+    <InfNfse>
+      <Numero>000001234</Numero>
+      <CodigoVerificacao>ABC123</CodigoVerificacao>
+      <DataEmissao>2024-01-15</DataEmissao>
+      <IdentificacaoRps>
+        <NumeroRps>RPS001</NumeroRps>
+        <SerieRps>A</SerieRps>
+      </IdentificacaoRps>
+      <DataEmissaoRps>2024-01-15</DataEmissaoRps>
+      <NaturezaOperacao>1</NaturezaOperacao>
+      <RegimeEspecialTributacao>6</RegimeEspecialTributacao>
+      <OptanteSimplesNacional>2</OptanteSimplesNacional>
+      <IncentivadorCultural>2</IncentivadorCultural>
+      <Competencia>2024-01-01</Competencia>
+      <Servico>
+        <Valores>
+          <ValorServicos>2500.00</ValorServicos>
+          <ValorDeducoes>0.00</ValorDeducoes>
+          <ValorPis>0.00</ValorPis>
+          <ValorCofins>0.00</ValorCofins>
+          <ValorInss>0.00</ValorInss>
+          <ValorIr>0.00</ValorIr>
+          <ValorCsll>0.00</ValorCsll>
+          <IssRetido>2</IssRetido>
+          <ValorIss>125.00</ValorIss>
+          <OutrasRetencoes>0.00</OutrasRetencoes>
+          <BaseCalculo>2500.00</BaseCalculo>
+          <Aliquota>0.05</Aliquota>
+          <ValorLiquidoNfse>2375.00</ValorLiquidoNfse>
+          <DescontoIncondicionado>0.00</DescontoIncondicionado>
+          <DescontoCondicionado>0.00</DescontoCondicionado>
+        </Valores>
+        <ItemListaServico>07.02</ItemListaServico>
+        <CodigoTributacaoMunicipio>070200001</CodigoTributacaoMunicipio>
+        <Discriminacao>SERVICOS DE ADMINISTRACAO PREDIAL - ALUGUEL IMOVEL RUA DAS FLORES 123 APT 45 - REFERENTE AO MES 01/2024</Discriminacao>
+        <CodigoMunicipio>3550308</CodigoMunicipio>
+      </Servico>
+      <PrestadorServico>
+        <IdentificacaoPrestador>
+          <Cnpj>12345678000199</Cnpj>
+          <InscricaoMunicipal>123456</InscricaoMunicipal>
+        </IdentificacaoPrestador>
+        <RazaoSocial>IMOBILIARIA TESTE LTDA</RazaoSocial>
+        <Endereco>
+          <Endereco>RUA DO COMERCIO 100</Endereco>
+          <Numero>100</Numero>
+          <Complemento>SALA 01</Complemento>
+          <Bairro>CENTRO</Bairro>
+          <CodigoMunicipio>3550308</CodigoMunicipio>
+          <Uf>SP</Uf>
+          <Cep>01234567</Cep>
+        </Endereco>
+        <Contato>
+          <Telefone>1133334444</Telefone>
+          <Email>contato@imobiliariateste.com.br</Email>
+        </Contato>
+      </PrestadorServico>
+      <TomadorServico>
+        <IdentificacaoTomador>
+          <CpfCnpj>
+            <Cpf>12345678901</Cpf>
+          </CpfCnpj>
+        </IdentificacaoTomador>
+        <RazaoSocial>JOSE DA SILVA PROPRIETARIO</RazaoSocial>
+        <Endereco>
+          <Endereco>RUA DAS FLORES 123</Endereco>
+          <Numero>123</Numero>
+          <Complemento>APT 45</Complemento>
+          <Bairro>JARDINS</Bairro>
+          <CodigoMunicipio>3550308</CodigoMunicipio>
+          <Uf>SP</Uf>
+          <Cep>01234567</Cep>
+        </Endereco>
+        <Contato>
+          <Telefone>11999887766</Telefone>
+          <Email>jose.silva@email.com</Email>
+        </Contato>
+      </TomadorServico>
+    </InfNfse>
+  </Nfse>
+</CompNfse>

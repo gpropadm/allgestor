@@ -34,6 +34,7 @@ model User {
   scrapingJobs         ScrapingJob[]
   aiAssistants         AIAssistant[]
   aiConversations      AIConversation[]
+  nfse                 NFSe[]
 
   @@map("users")
 }
@@ -1061,6 +1062,39 @@ model AIMessage {
 enum MessageType {
   USER
   ASSISTANT
+}
+
+model NFSe {
+  id                 String   @id @default(cuid())
+  userId             String
+  numeroNota         String
+  dataEmissao        DateTime
+  competencia        DateTime
+  valorServicos      Decimal  @db.Decimal(10,2)
+  valorLiquido       Decimal  @db.Decimal(10,2)
+  valorIss           Decimal  @db.Decimal(10,2) @default(0)
+  valorPis           Decimal  @db.Decimal(10,2) @default(0)
+  valorCofins        Decimal  @db.Decimal(10,2) @default(0)
+  valorInss          Decimal  @db.Decimal(10,2) @default(0)
+  valorIr            Decimal  @db.Decimal(10,2) @default(0)
+  codigoServico      String?
+  discriminacao      String?
+  tomadorCnpjCpf     String?
+  tomadorRazaoSocial String?
+  tomadorEndereco    String?
+  prestadorCnpjCpf   String?
+  prestadorRazaoSocial String?
+  fileName           String
+  processed          Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  
+  user               User     @relation(fields: [userId], references: [id])
+  
+  @@unique([numeroNota, userId])
+  @@index([userId])
+  @@index([competencia])
+  @@map("nfse")
 }
 
 
