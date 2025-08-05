@@ -146,10 +146,40 @@ export async function POST(request: NextRequest) {
     console.log(`  - Interest: ${updatedPayment.interest}`)
     console.log(`  - Status: ${updatedPayment.status}`)
 
+    // 🧾 GERAR RECIBO AUTOMATICAMENTE
+    console.log('🧾 Gerando recibo automaticamente...')
+    let recibo = null
+    
+    try {
+      // Chamar API de geração de recibo
+      const reciboResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/recibos`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': request.headers.get('Authorization') || ''
+        },
+        body: JSON.stringify({ paymentId: updatedPayment.id })
+      })
+
+      if (reciboResponse.ok) {
+        const reciboData = await reciboResponse.json()
+        recibo = reciboData.recibo
+        console.log('✅ Recibo gerado com sucesso:', recibo.numeroRecibo)
+      } else {
+        console.log('⚠️ Erro ao gerar recibo:', await reciboResponse.text())
+      }
+    } catch (error) {
+      console.log('⚠️ Erro ao gerar recibo:', error)
+      // Não falhar o pagamento por causa do recibo
+    }
+
     return NextResponse.json({
       success: true,
       payment: updatedPayment,
-      message: 'Pagamento marcado como pago com sucesso'
+      recibo: recibo,
+      message: recibo 
+        ? `Pagamento marcado como pago e recibo ${recibo.numeroRecibo} gerado com sucesso` 
+        : 'Pagamento marcado como pago com sucesso'
     })
 
   } catch (error) {

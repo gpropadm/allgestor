@@ -37,6 +37,7 @@ model User {
   nfseRecords          NFSe[]
   dimobCommissions     DimobCommission[]
   dimobDeductions      DimobDeduction[]
+  recibos              Recibo[]
 
   @@map("users")
 }
@@ -205,6 +206,7 @@ model Contract {
   notifications Notification[]
   maintenances  Maintenance[]
   monthlyReports MonthlyReport[]
+  recibos       Recibo[]      // Recibos gerados para este contrato
 
   @@map("contracts")
 }
@@ -237,6 +239,7 @@ model Payment {
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
   contract          Contract      @relation(fields: [contractId], references: [id])
+  recibo            Recibo?       // Um recibo por pagamento (opcional)
 
   @@map("payments")
 }
@@ -1142,6 +1145,39 @@ model DimobDeduction {
   @@index([userId])
   @@index([competencia])
   @@map("dimob_deductions")
+}
+
+model Recibo {
+  id                   String   @id @default(cuid())
+  userId               String
+  contractId           String
+  paymentId            String   @unique // Um recibo por pagamento
+  numeroRecibo         String   // Número sequencial do recibo
+  competencia          DateTime // Mês/ano do pagamento
+  dataPagamento        DateTime // Data do pagamento
+  valorTotal           Decimal  @db.Decimal(10,2) // Valor total pago pelo inquilino
+  taxaAdministracao    Decimal  @db.Decimal(10,2) // Taxa cobrada pela imobiliária
+  percentualTaxa       Decimal  @db.Decimal(5,2)  // Percentual da taxa
+  valorRepassado       Decimal  @db.Decimal(10,2) // Valor repassado ao proprietário
+  pdfUrl               String?  // URL do PDF do recibo
+  proprietarioNome     String   // Nome do proprietário
+  proprietarioDoc      String   // CPF/CNPJ do proprietário
+  inquilinoNome        String   // Nome do inquilino
+  inquilinoDoc         String   // CPF/CNPJ do inquilino
+  imovelEndereco       String   // Endereço do imóvel
+  observacoes          String?  // Observações adicionais
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  
+  user                 User     @relation(fields: [userId], references: [id])
+  contract             Contract @relation(fields: [contractId], references: [id])
+  payment              Payment  @relation(fields: [paymentId], references: [id])
+  
+  @@index([userId])
+  @@index([contractId])
+  @@index([competencia])
+  @@index([numeroRecibo])
+  @@map("recibos")
 }
 
 

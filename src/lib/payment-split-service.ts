@@ -347,6 +347,20 @@ export class PaymentSplitService {
         }
       })
 
+      // 🧾 GERAR RECIBO AUTOMATICAMENTE SE PAGAMENTO FOI CONFIRMADO
+      if (webhookResult.status === 'PAID') {
+        console.log('🧾 Gerando recibo automaticamente para pagamento ASAAS:', updatedPayment.id)
+        
+        try {
+          // Chamar API de geração de recibo
+          await this.gerarReciboAutomatico(updatedPayment.id)
+          console.log('✅ Recibo gerado automaticamente via webhook ASAAS')
+        } catch (error) {
+          console.error('⚠️ Erro ao gerar recibo via webhook:', error)
+          // Não falhar o webhook por causa do recibo
+        }
+      }
+
       console.log('Webhook processado:', {
         paymentId: payment.id,
         status: webhookResult.status,
@@ -503,6 +517,98 @@ export class PaymentSplitService {
         success: false,
         message: `Erro ao testar configuração: ${error.message}`
       }
+    }
+  }
+
+  /**
+   * Gera recibo automaticamente para um pagamento
+   */
+  private async gerarReciboAutomatico(paymentId: string): Promise<void> {
+    try {
+      const { ReciboGenerator } = await import('./recibo-generator')
+      
+      // Buscar o pagamento com todas as informações necessárias
+      const payment = await prisma.payment.findUnique({
+        where: { id: paymentId },
+        include: {
+          contract: {
+            include: {
+              property: {
+                include: {
+                  owner: true
+                }
+              },
+              tenant: true,
+              company: true
+            }
+          },
+          recibo: true // Verificar se já existe recibo
+        }
+      })
+
+      if (!payment) {
+        throw new Error('Pagamento não encontrado')
+      }
+
+      if (payment.recibo) {
+        console.log('Recibo já existe para este pagamento:', payment.recibo.numeroRecibo)
+        return
+      }
+
+      if (payment.status !== 'PAID') {
+        throw new Error('Pagamento ainda não foi marcado como pago')
+      }
+
+      // Gerar número do recibo
+      const competencia = new Date(payment.paidDate || payment.dueDate)
+      const ano = competencia.getFullYear()
+      const mes = competencia.getMonth() + 1
+
+      // Contar recibos existentes para gerar sequencial
+      const recibosExistentes = await prisma.recibo.count({
+        where: {
+          userId: payment.contract.userId,
+          competencia: {
+            gte: new Date(ano, mes - 1, 1),
+            lt: new Date(ano, mes, 1)
+          }
+        }
+      })
+
+      const numeroRecibo = ReciboGenerator.gerarNumeroRecibo(payment.contract.userId, ano, mes, recibosExistentes + 1)
+
+      // Calcular valores
+      const valorTotal = payment.amount
+      const percentualTaxa = payment.contract.administrationFeePercentage
+      const { taxaAdministracao, valorRepassado } = ReciboGenerator.calcularValores(valorTotal, percentualTaxa)
+
+      // Criar registro do recibo no banco
+      await prisma.recibo.create({
+        data: {
+          userId: payment.contract.userId,
+          contractId: payment.contractId,
+          paymentId: payment.id,
+          numeroRecibo,
+          competencia,
+          dataPagamento: payment.paidDate || new Date(),
+          valorTotal,
+          taxaAdministracao,
+          percentualTaxa,
+          valorRepassado,
+          pdfUrl: `/api/recibos/${numeroRecibo}/pdf`,
+          proprietarioNome: payment.contract.property.owner.name,
+          proprietarioDoc: payment.contract.property.owner.document,
+          inquilinoNome: payment.contract.tenant.name,
+          inquilinoDoc: payment.contract.tenant.document,
+          imovelEndereco: `${payment.contract.property.address}, ${payment.contract.property.city} - ${payment.contract.property.state}`,
+        }
+      })
+
+      console.log(`✅ Recibo ${numeroRecibo} criado automaticamente via webhook`)
+
+    } catch (error) {
+      console.error('Erro ao gerar recibo automaticamente:', error)
+      throw error
     }
   }
 }
