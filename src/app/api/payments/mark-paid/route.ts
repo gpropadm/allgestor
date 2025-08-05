@@ -2,6 +2,79 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { requireAuth } from '@/lib/auth-middleware'
 
+// Função helper para gerar recibo
+async function gerarReciboParaPagamento(paymentId: string, userId: string) {
+  // Buscar o pagamento com todas as informações necessárias
+  const payment = await prisma.payment.findUnique({
+    where: { id: paymentId },
+    include: {
+      contract: {
+        include: {
+          property: {
+            include: {
+              owner: true
+            }
+          },
+          tenant: true,
+          company: true
+        }
+      }
+    }
+  })
+
+  if (!payment || payment.status !== 'PAID') {
+    return null
+  }
+
+  // Gerar número do recibo
+  const competencia = new Date(payment.paidDate || payment.dueDate)
+  const ano = competencia.getFullYear()
+  const mes = competencia.getMonth() + 1
+
+  // Contar recibos existentes para gerar sequencial
+  const recibosExistentes = await prisma.recibo.count({
+    where: {
+      userId: userId,
+      competencia: {
+        gte: new Date(ano, mes - 1, 1),
+        lt: new Date(ano, mes, 1)
+      }
+    }
+  })
+
+  const { ReciboGenerator } = await import('@/lib/recibo-generator')
+  const numeroRecibo = ReciboGenerator.gerarNumeroRecibo(userId, ano, mes, recibosExistentes + 1)
+
+  // Calcular valores
+  const valorTotal = payment.amount
+  const percentualTaxa = payment.contract.administrationFeePercentage
+  const { taxaAdministracao, valorRepassado } = ReciboGenerator.calcularValores(valorTotal, percentualTaxa)
+
+  // Criar registro do recibo no banco
+  const recibo = await prisma.recibo.create({
+    data: {
+      userId: userId,
+      contractId: payment.contractId,
+      paymentId: payment.id,
+      numeroRecibo,
+      competencia,
+      dataPagamento: payment.paidDate || new Date(),
+      valorTotal,
+      taxaAdministracao,
+      percentualTaxa,
+      valorRepassado,
+      pdfUrl: `/api/recibos/${numeroRecibo}/pdf`,
+      proprietarioNome: payment.contract.property.owner.name,
+      proprietarioDoc: payment.contract.property.owner.document,
+      inquilinoNome: payment.contract.tenant.name,
+      inquilinoDoc: payment.contract.tenant.document,
+      imovelEndereco: `${payment.contract.property.address}, ${payment.contract.property.city} - ${payment.contract.property.state}`,
+    }
+  })
+
+  return recibo
+}
+
 export async function POST(request: NextRequest) {
   try {
     console.log('=== MARK-PAID API CALLED ===')
@@ -151,23 +224,9 @@ export async function POST(request: NextRequest) {
     let recibo = null
     
     try {
-      // Chamar API de geração de recibo
-      const reciboResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/recibos`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': request.headers.get('Authorization') || ''
-        },
-        body: JSON.stringify({ paymentId: updatedPayment.id })
-      })
-
-      if (reciboResponse.ok) {
-        const reciboData = await reciboResponse.json()
-        recibo = reciboData.recibo
-        console.log('✅ Recibo gerado com sucesso:', recibo.numeroRecibo)
-      } else {
-        console.log('⚠️ Erro ao gerar recibo:', await reciboResponse.text())
-      }
+      // Gerar recibo diretamente (sem fetch interno)
+      recibo = await gerarReciboParaPagamento(updatedPayment.id, user.id)
+      console.log('✅ Recibo gerado com sucesso:', recibo?.numeroRecibo)
     } catch (error) {
       console.log('⚠️ Erro ao gerar recibo:', error)
       // Não falhar o pagamento por causa do recibo
