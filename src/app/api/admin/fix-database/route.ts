@@ -57,9 +57,30 @@ export async function GET(request: NextRequest) {
 
     await prisma.$disconnect()
 
+    // Testar se Prisma Client reconhece o modelo
+    let prismaTest = null
+    let prismaError = null
+    
+    try {
+      const { prisma: testPrisma } = await import('@/lib/db')
+      const testQuery = await testPrisma.recibo.findMany({ take: 1 })
+      prismaTest = {
+        success: true,
+        message: 'Prisma client reconhece modelo Recibo',
+        count: testQuery.length
+      }
+    } catch (error: any) {
+      prismaError = {
+        success: false,
+        message: 'Prisma client não reconhece modelo Recibo',
+        error: error.message
+      }
+    }
+
     return NextResponse.json({
       success: true,
       message: '🎉 BANCO CORRIGIDO! Tabela recibos criada com sucesso!',
+      prismaClientTest: prismaTest || prismaError,
       instructions: [
         '1. Volte para /dashboard/recibos',
         '2. Clique em "Atualizar Lista"',
