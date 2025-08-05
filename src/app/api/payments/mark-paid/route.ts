@@ -31,16 +31,16 @@ async function gerarReciboParaPagamento(paymentId: string, userId: string) {
   const ano = competencia.getFullYear()
   const mes = competencia.getMonth() + 1
 
-  // Contar recibos existentes para gerar sequencial
-  const recibosExistentes = await prisma.recibo.count({
-    where: {
-      userId: userId,
-      competencia: {
-        gte: new Date(ano, mes - 1, 1),
-        lt: new Date(ano, mes, 1)
-      }
-    }
-  })
+  // Contar recibos existentes para gerar sequencial usando SQL direto
+  const countResult = await prisma.$queryRawUnsafe(`
+    SELECT COUNT(*) as count 
+    FROM recibos 
+    WHERE "userId" = $1 
+    AND competencia >= $2 
+    AND competencia < $3
+  `, userId, new Date(ano, mes - 1, 1), new Date(ano, mes, 1))
+  
+  const recibosExistentes = Array.isArray(countResult) && countResult[0] ? Number(countResult[0].count) : 0
 
   const { ReciboGenerator } = await import('@/lib/recibo-generator')
   const numeroRecibo = ReciboGenerator.gerarNumeroRecibo(userId, ano, mes, recibosExistentes + 1)
@@ -50,27 +50,40 @@ async function gerarReciboParaPagamento(paymentId: string, userId: string) {
   const percentualTaxa = payment.contract.administrationFeePercentage
   const { taxaAdministracao, valorRepassado } = ReciboGenerator.calcularValores(valorTotal, percentualTaxa)
 
-  // Criar registro do recibo no banco
-  const recibo = await prisma.recibo.create({
-    data: {
-      userId: userId,
-      contractId: payment.contractId,
-      paymentId: payment.id,
-      numeroRecibo,
-      competencia,
-      dataPagamento: payment.paidDate || new Date(),
-      valorTotal,
-      taxaAdministracao,
-      percentualTaxa,
-      valorRepassado,
-      pdfUrl: `/api/recibos/${numeroRecibo}/pdf`,
-      proprietarioNome: payment.contract.property.owner.name,
-      proprietarioDoc: payment.contract.property.owner.document,
-      inquilinoNome: payment.contract.tenant.name,
-      inquilinoDoc: payment.contract.tenant.document,
-      imovelEndereco: `${payment.contract.property.address}, ${payment.contract.property.city} - ${payment.contract.property.state}`,
-    }
-  })
+  // Criar registro do recibo no banco usando SQL direto
+  const dataPagamento = payment.paidDate || new Date()
+  const pdfUrl = `/api/recibos/${numeroRecibo}/pdf`
+  const imovelEndereco = `${payment.contract.property.address}, ${payment.contract.property.city} - ${payment.contract.property.state}`
+  
+  const reciboId = `recibo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  
+  await prisma.$executeRawUnsafe(`
+    INSERT INTO recibos (
+      id, "userId", "contractId", "paymentId", "numeroRecibo", 
+      competencia, "dataPagamento", "valorTotal", "taxaAdministracao", 
+      "percentualTaxa", "valorRepassado", "pdfUrl", "proprietarioNome", 
+      "proprietarioDoc", "inquilinoNome", "inquilinoDoc", "imovelEndereco",
+      "createdAt", "updatedAt"
+    ) VALUES (
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19
+    )
+  `, 
+    reciboId, userId, payment.contractId, payment.id, numeroRecibo,
+    competencia, dataPagamento, valorTotal, taxaAdministracao,
+    percentualTaxa, valorRepassado, pdfUrl, payment.contract.property.owner.name,
+    payment.contract.property.owner.document, payment.contract.tenant.name, 
+    payment.contract.tenant.document, imovelEndereco, new Date(), new Date()
+  )
+  
+  // Criar objeto recibo para retorno
+  const recibo = {
+    id: reciboId,
+    numeroRecibo,
+    valorTotal,
+    taxaAdministracao,
+    proprietarioNome: payment.contract.property.owner.name,
+    inquilinoNome: payment.contract.tenant.name
+  }
 
   return recibo
 }

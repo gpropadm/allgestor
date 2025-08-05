@@ -12,44 +12,77 @@ export async function GET(request: NextRequest) {
     const ano = searchParams.get('ano')
     const mes = searchParams.get('mes')
 
-    const where: any = {
-      userId: user.id
-    }
+    console.log('🔍 Buscando recibos para usuário:', user.id)
+
+    // Usar SQL direto para contornar problema do Prisma client
+    let sqlQuery = `
+      SELECT 
+        r.*,
+        c.id as contract_id,
+        p.title as property_title,
+        p.address as property_address,
+        t.name as tenant_name,
+        pay.amount as payment_amount
+      FROM recibos r
+      LEFT JOIN contracts c ON r."contractId" = c.id
+      LEFT JOIN properties p ON c."propertyId" = p.id  
+      LEFT JOIN tenants t ON c."tenantId" = t.id
+      LEFT JOIN payments pay ON r."paymentId" = pay.id
+      WHERE r."userId" = $1
+    `
+    let params: any[] = [user.id]
+    let paramIndex = 2
 
     if (contractId) {
-      where.contractId = contractId
+      sqlQuery += ` AND r."contractId" = $${paramIndex}`
+      params.push(contractId)
+      paramIndex++
     }
 
     if (ano && mes) {
       const competencia = new Date(parseInt(ano), parseInt(mes) - 1, 1)
       const proximaCompetencia = new Date(parseInt(ano), parseInt(mes), 1)
       
-      where.competencia = {
-        gte: competencia,
-        lt: proximaCompetencia
-      }
+      sqlQuery += ` AND r.competencia >= $${paramIndex} AND r.competencia < $${paramIndex + 1}`
+      params.push(competencia)
+      params.push(proximaCompetencia)
     }
 
-    const recibos = await prisma.recibo.findMany({
-      where,
-      include: {
-        contract: {
-          include: {
-            property: true,
-            tenant: true,
-          }
-        },
-        payment: true
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
+    sqlQuery += ` ORDER BY r."createdAt" DESC`
+
+    console.log('🔍 SQL Query:', sqlQuery)
+    console.log('🔍 Params:', params)
+
+    const rawRecibos = await prisma.$queryRawUnsafe(sqlQuery, ...params)
+    
+    console.log('✅ Recibos encontrados:', Array.isArray(rawRecibos) ? rawRecibos.length : 0)
+
+    // Transformar resultado para o formato esperado pelo frontend
+    const recibos = Array.isArray(rawRecibos) ? rawRecibos.map((r: any) => ({
+      id: r.id,
+      numeroRecibo: r.numeroRecibo,
+      competencia: r.competencia,
+      dataPagamento: r.dataPagamento,
+      valorTotal: Number(r.valorTotal),
+      taxaAdministracao: Number(r.taxaAdministracao),
+      valorRepassado: Number(r.valorRepassado),
+      proprietarioNome: r.proprietarioNome,
+      inquilinoNome: r.inquilinoNome,
+      imovelEndereco: r.imovelEndereco,
+      pdfUrl: r.pdfUrl
+    })) : []
 
     return NextResponse.json(recibos)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching recibos:', error)
-    return NextResponse.json({ error: 'Erro ao buscar recibos' }, { status: 500 })
+    console.error('Error details:', error.message)
+    console.error('Error stack:', error.stack)
+    
+    return NextResponse.json({ 
+      error: 'Erro ao buscar recibos',
+      details: error.message,
+      suggestion: 'Tabela recibos pode não existir ou Prisma client precisa ser regenerado'
+    }, { status: 500 })
   }
 }
 
