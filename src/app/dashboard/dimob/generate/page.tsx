@@ -81,16 +81,12 @@ export default function DimobGeneratePage() {
     
     setLoading(true)
     try {
-      const response = await fetch('/api/dimob', {
+      // Usar uma nova rota específica para gerar DIMOB com dados já carregados
+      const response = await fetch(`/api/dimob/generate?year=${selectedYear}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          xmlFiles: [], // Sem XMLs, usar apenas dados dos contratos
-          year: selectedYear.toString(),
-          generateFile: true
-        })
+        }
       })
 
       const result = await response.json()
