@@ -14,20 +14,21 @@ export async function GET(request: NextRequest) {
 
     console.log('🔍 Buscando recibos para usuário:', user.id)
 
-    // Usar SQL direto para contornar problema do Prisma client
+    // Usar SQL direto mais simples para evitar problemas de BigInt
     let sqlQuery = `
       SELECT 
-        r.*,
-        c.id as contract_id,
-        p.title as property_title,
-        p.address as property_address,
-        t.name as tenant_name,
-        pay.amount as payment_amount
+        r.id,
+        r."numeroRecibo",
+        r.competencia,
+        r."dataPagamento",
+        CAST(r."valorTotal" AS DECIMAL) as "valorTotal",
+        CAST(r."taxaAdministracao" AS DECIMAL) as "taxaAdministracao", 
+        CAST(r."valorRepassado" AS DECIMAL) as "valorRepassado",
+        r."proprietarioNome",
+        r."inquilinoNome", 
+        r."imovelEndereco",
+        r."pdfUrl"
       FROM recibos r
-      LEFT JOIN contracts c ON r."contractId" = c.id
-      LEFT JOIN properties p ON c."propertyId" = p.id  
-      LEFT JOIN tenants t ON c."tenantId" = t.id
-      LEFT JOIN payments pay ON r."paymentId" = pay.id
       WHERE r."userId" = $1
     `
     let params: any[] = [user.id]
@@ -50,27 +51,30 @@ export async function GET(request: NextRequest) {
 
     sqlQuery += ` ORDER BY r."createdAt" DESC`
 
+    console.log('🔍 Buscando recibos para userId:', user.id)
     console.log('🔍 SQL Query:', sqlQuery)
-    console.log('🔍 Params:', params)
 
     const rawRecibos = await prisma.$queryRawUnsafe(sqlQuery, ...params)
     
+    console.log('✅ Raw result:', rawRecibos)
     console.log('✅ Recibos encontrados:', Array.isArray(rawRecibos) ? rawRecibos.length : 0)
 
     // Transformar resultado para o formato esperado pelo frontend
     const recibos = Array.isArray(rawRecibos) ? rawRecibos.map((r: any) => ({
-      id: r.id,
-      numeroRecibo: r.numeroRecibo,
+      id: String(r.id),
+      numeroRecibo: String(r.numeroRecibo),
       competencia: r.competencia,
       dataPagamento: r.dataPagamento,
-      valorTotal: Number(r.valorTotal),
-      taxaAdministracao: Number(r.taxaAdministracao),
-      valorRepassado: Number(r.valorRepassado),
-      proprietarioNome: r.proprietarioNome,
-      inquilinoNome: r.inquilinoNome,
-      imovelEndereco: r.imovelEndereco,
+      valorTotal: parseFloat(r.valorTotal) || 0,
+      taxaAdministracao: parseFloat(r.taxaAdministracao) || 0,
+      valorRepassado: parseFloat(r.valorRepassado) || 0,
+      proprietarioNome: String(r.proprietarioNome),
+      inquilinoNome: String(r.inquilinoNome),
+      imovelEndereco: String(r.imovelEndereco),
       pdfUrl: r.pdfUrl
     })) : []
+
+    console.log('📋 Recibos formatados:', recibos)
 
     return NextResponse.json(recibos)
   } catch (error: any) {
