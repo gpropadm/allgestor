@@ -86,7 +86,7 @@ async function gerarReciboParaPagamento(paymentId: string, userId: string) {
         competencia, "dataPagamento", "valorTotal", "taxaAdministracao", 
         "percentualTaxa", "valorRepassado", "pdfUrl", "proprietarioNome", 
         "proprietarioDoc", "inquilinoNome", "inquilinoDoc", "imovelEndereco",
-        "createdAt", "updatedAt"
+        "observacoes", "createdAt", "updatedAt"
       ) VALUES (
         '${reciboId}', '${userId}', '${payment.contractId}', '${payment.id}', '${numeroRecibo}',
         '${competencia.toISOString()}', '${dataPagamento.toISOString()}', 
@@ -94,7 +94,7 @@ async function gerarReciboParaPagamento(paymentId: string, userId: string) {
         '${pdfUrl}', '${payment.contract.property.owner.name.replace("'", "''")}', 
         '${payment.contract.property.owner.document}', '${payment.contract.tenant.name.replace("'", "''")}', 
         '${payment.contract.tenant.document}', '${imovelEndereco.replace("'", "''")}',
-        '${now.toISOString()}', '${now.toISOString()}'
+        'Recibo gerado automaticamente', '${now.toISOString()}', '${now.toISOString()}'
       )
     `)
   } catch (insertError: any) {

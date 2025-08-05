@@ -8,19 +8,20 @@ export async function GET(request: NextRequest) {
     const testId = `test_${Date.now()}`
     const now = new Date()
     
-    // Tentar inserção mais simples possível
+    // Tentar inserção com TODOS os campos obrigatórios
     await prisma.$executeRawUnsafe(`
       INSERT INTO recibos (
         id, "userId", "contractId", "paymentId", "numeroRecibo", 
         competencia, "dataPagamento", "valorTotal", "taxaAdministracao", 
-        "percentualTaxa", "valorRepassado", "proprietarioNome", 
-        "inquilinoNome", "imovelEndereco", "createdAt", "updatedAt"
+        "percentualTaxa", "valorRepassado", "pdfUrl", "proprietarioNome", 
+        "proprietarioDoc", "inquilinoNome", "inquilinoDoc", "imovelEndereco",
+        "observacoes", "createdAt", "updatedAt"
       ) VALUES (
         '${testId}', 'test-user', 'test-contract', 'test-payment', 'TEST-001',
         '${now.toISOString()}', '${now.toISOString()}', 
-        2800, 280, 10, 2520,
-        'Proprietario Teste', 'Inquilino Teste', 'Endereco Teste',
-        '${now.toISOString()}', '${now.toISOString()}'
+        2800, 280, 10, 2520, '/api/test.pdf',
+        'Proprietario Teste', '12345678901', 'Inquilino Teste', '98765432101', 'Endereco Teste',
+        'Teste de inserção', '${now.toISOString()}', '${now.toISOString()}'
       )
     `)
 
