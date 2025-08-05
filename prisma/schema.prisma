@@ -34,7 +34,7 @@ model User {
   scrapingJobs         ScrapingJob[]
   aiAssistants         AIAssistant[]
   aiConversations      AIConversation[]
-  nfse                 NFSe[]
+  nfseRecords          NFSe[]
 
   @@map("users")
 }
