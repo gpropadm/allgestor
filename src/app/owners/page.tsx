@@ -83,11 +83,13 @@ export default function Owners() {
         showSuccess('Proprietário criado!', 'O proprietário foi cadastrado com sucesso.')
       } else {
         const errorData = await response.json()
-        showError('Erro ao criar proprietário', errorData.error || 'Tente novamente.')
+        // Lançar erro para o formulário tratar (manter dados preenchidos)
+        throw new Error(errorData.error || 'Erro ao criar proprietário. Tente novamente.')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating owner:', error)
-      showError('Erro ao criar proprietário', 'Verifique sua conexão e tente novamente.')
+      // Re-lançar erro para o formulário tratar
+      throw new Error(error.message || 'Verifique sua conexão e tente novamente.')
     }
   }
 
@@ -110,11 +112,13 @@ export default function Owners() {
         showSuccess('Proprietário atualizado!', 'As informações foram atualizadas com sucesso.')
       } else {
         const errorData = await response.json()
-        showError('Erro ao atualizar proprietário', errorData.error || 'Tente novamente.')
+        // Lançar erro para o formulário tratar (manter dados preenchidos)
+        throw new Error(errorData.error || 'Erro ao atualizar proprietário. Tente novamente.')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating owner:', error)
-      showError('Erro ao atualizar proprietário', 'Verifique sua conexão e tente novamente.')
+      // Re-lançar erro para o formulário tratar
+      throw new Error(error.message || 'Verifique sua conexão e tente novamente.')
     }
   }
 

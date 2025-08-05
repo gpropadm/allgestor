@@ -33,6 +33,7 @@ export function OwnerForm({ isOpen, onClose, onSubmit, owner }: OwnerFormProps) 
 
   const [loading, setLoading] = useState(false)
   const [includeBankAccount, setIncludeBankAccount] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     if (isOpen) {
@@ -66,6 +67,7 @@ export function OwnerForm({ isOpen, onClose, onSubmit, owner }: OwnerFormProps) 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError('') // Limpar erro anterior
 
     try {
       const submitData = {
@@ -73,11 +75,16 @@ export function OwnerForm({ isOpen, onClose, onSubmit, owner }: OwnerFormProps) 
         bankAccount: includeBankAccount ? formData.bankAccount : null
       }
 
-      await onSubmit(submitData)
+      const result = await onSubmit(submitData)
+      if (result?.error) {
+        throw new Error(result.error)
+      }
       onClose()
       resetForm()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting form:', error)
+      // Manter dados preenchidos e mostrar erro
+      setError(error.message || 'Erro ao salvar. Verifique os dados e tente novamente.')
     } finally {
       setLoading(false)
     }
@@ -104,6 +111,7 @@ export function OwnerForm({ isOpen, onClose, onSubmit, owner }: OwnerFormProps) 
       }
     })
     setIncludeBankAccount(false)
+    setError('')
   }
 
   const formatPhone = (value: string) => {
@@ -157,10 +165,7 @@ export function OwnerForm({ isOpen, onClose, onSubmit, owner }: OwnerFormProps) 
     return value.replace(/[^\d-]/g, '').slice(0, 6)
   }
 
-  const formatAccount = (value: string) => {
-    // Permite números e hífen
-    return value.replace(/[^\d-]/g, '').slice(0, 10)
-  }
+  // Função removida pois não estava sendo usada
 
   if (!isOpen) return null
 
@@ -180,6 +185,32 @@ export function OwnerForm({ isOpen, onClose, onSubmit, owner }: OwnerFormProps) 
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Alert de Erro */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-start">
+                <div className="text-red-400 mr-3 mt-0.5">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium text-red-800 mb-1">Erro ao cadastrar</h3>
+                  <p className="text-sm text-red-700">{error}</p>
+                  {error.includes('já está em uso') && (
+                    <div className="mt-2 text-xs text-red-600">
+                      <p><strong>Sugestões:</strong></p>
+                      <ul className="list-disc list-inside mt-1">
+                        <li>Use um email diferente (ex: {formData.name.toLowerCase().replace(/\s+/g, '.')}.2024@email.com)</li>
+                        <li>Verifique se o CPF/CNPJ está correto</li>
+                        <li>O proprietário pode já estar cadastrado no sistema</li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
           {/* Informações Pessoais */}
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-4">Informações Pessoais</h3>
@@ -206,10 +237,15 @@ export function OwnerForm({ isOpen, onClose, onSubmit, owner }: OwnerFormProps) 
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    error.includes('Email') ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
                   placeholder="maria@email.com"
                   required
                 />
+                {error.includes('Email') && (
+                  <p className="text-xs text-red-600 mt-1">Este email já está cadastrado. Tente: {formData.name.toLowerCase().replace(/\s+/g, '.')}.2024@email.com</p>
+                )}
               </div>
 
               <div>
@@ -235,11 +271,16 @@ export function OwnerForm({ isOpen, onClose, onSubmit, owner }: OwnerFormProps) 
                   type="text"
                   value={formData.document}
                   onChange={(e) => setFormData(prev => ({ ...prev, document: formatDocument(e.target.value) }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    error.includes('documento') ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
                   placeholder="123.456.789-00 ou 12.345.678/0001-90"
                   maxLength={18}
                   required
                 />
+                {error.includes('documento') && (
+                  <p className="text-xs text-red-600 mt-1">Este CPF/CNPJ já está cadastrado. Verifique os dados.</p>
+                )}
               </div>
             </div>
           </div>
