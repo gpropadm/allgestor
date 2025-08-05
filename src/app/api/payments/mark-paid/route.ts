@@ -4,6 +4,8 @@ import { requireAuth } from '@/lib/auth-middleware'
 
 // Função helper para gerar recibo
 async function gerarReciboParaPagamento(paymentId: string, userId: string) {
+  console.log('🧾 [RECIBO] Iniciando geração para payment:', paymentId, 'user:', userId)
+  
   // Buscar o pagamento com todas as informações necessárias
   const payment = await prisma.payment.findUnique({
     where: { id: paymentId },
@@ -22,7 +24,11 @@ async function gerarReciboParaPagamento(paymentId: string, userId: string) {
     }
   })
 
+  console.log('🧾 [RECIBO] Payment encontrado:', !!payment)
+  console.log('🧾 [RECIBO] Payment status:', payment?.status)
+
   if (!payment || payment.status !== 'PAID') {
+    console.log('🧾 [RECIBO] ERRO: Payment não encontrado ou não está PAID')
     return null
   }
 
@@ -32,6 +38,8 @@ async function gerarReciboParaPagamento(paymentId: string, userId: string) {
   const mes = competencia.getMonth() + 1
 
   // Contar recibos existentes para gerar sequencial usando SQL direto
+  console.log('🧾 [RECIBO] Competência:', { ano, mes, competencia })
+  
   const countResult = await prisma.$queryRawUnsafe(`
     SELECT COUNT(*) as count 
     FROM recibos 
@@ -41,14 +49,17 @@ async function gerarReciboParaPagamento(paymentId: string, userId: string) {
   `, userId, new Date(ano, mes - 1, 1), new Date(ano, mes, 1))
   
   const recibosExistentes = Array.isArray(countResult) && countResult[0] ? Number(countResult[0].count) : 0
+  console.log('🧾 [RECIBO] Recibos existentes na competência:', recibosExistentes)
 
   const { ReciboGenerator } = await import('@/lib/recibo-generator')
   const numeroRecibo = ReciboGenerator.gerarNumeroRecibo(userId, ano, mes, recibosExistentes + 1)
+  console.log('🧾 [RECIBO] Número gerado:', numeroRecibo)
 
   // Calcular valores
   const valorTotal = payment.amount
   const percentualTaxa = payment.contract.administrationFeePercentage
   const { taxaAdministracao, valorRepassado } = ReciboGenerator.calcularValores(valorTotal, percentualTaxa)
+  console.log('🧾 [RECIBO] Valores calculados:', { valorTotal, taxaAdministracao, valorRepassado })
 
   // Criar registro do recibo no banco usando SQL direto
   const dataPagamento = payment.paidDate || new Date()
@@ -57,6 +68,14 @@ async function gerarReciboParaPagamento(paymentId: string, userId: string) {
   
   const reciboId = `recibo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   
+  console.log('🧾 [RECIBO] Inserindo no banco:', {
+    reciboId,
+    userId,
+    contractId: payment.contractId,
+    paymentId: payment.id,
+    numeroRecibo
+  })
+
   await prisma.$executeRawUnsafe(`
     INSERT INTO recibos (
       id, "userId", "contractId", "paymentId", "numeroRecibo", 
@@ -74,6 +93,8 @@ async function gerarReciboParaPagamento(paymentId: string, userId: string) {
     payment.contract.property.owner.document, payment.contract.tenant.name, 
     payment.contract.tenant.document, imovelEndereco, new Date(), new Date()
   )
+  
+  console.log('🧾 [RECIBO] ✅ Recibo inserido com sucesso no banco!')
   
   // Criar objeto recibo para retorno
   const recibo = {
@@ -240,8 +261,10 @@ export async function POST(request: NextRequest) {
       // Gerar recibo diretamente (sem fetch interno)
       recibo = await gerarReciboParaPagamento(updatedPayment.id, user.id)
       console.log('✅ Recibo gerado com sucesso:', recibo?.numeroRecibo)
-    } catch (error) {
-      console.log('⚠️ Erro ao gerar recibo:', error)
+    } catch (error: any) {
+      console.error('❌ ERRO DETALHADO AO GERAR RECIBO:', error)
+      console.error('❌ Error message:', error.message)
+      console.error('❌ Error stack:', error.stack)
       // Não falhar o pagamento por causa do recibo
     }
 
