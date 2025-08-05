@@ -79,11 +79,11 @@ export default function DimobPage() {
             <p className="text-gray-600">Gerencie suas obrigações fiscais imobiliárias</p>
           </div>
           <div className="flex gap-3">
-            <Link href="/dimob/upload" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors">
+            <Link href="/dashboard/dimob/upload" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors">
               <Upload size={16} />
               Upload XMLs
             </Link>
-            <Link href="/dimob/generate" className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 transition-colors">
+            <Link href="/dashboard/dimob/generate" className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 transition-colors">
               <Download size={16} />
               Gerar DIMOB
             </Link>
@@ -168,7 +168,7 @@ export default function DimobPage() {
             <p className="text-gray-600 mb-4">
               Importe os arquivos XML das suas notas fiscais de serviço emitidas.
             </p>
-            <Link href="/dimob/upload">
+            <Link href="/dashboard/dimob/upload">
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 hover:bg-blue-50 transition-all cursor-pointer">
                 <FileX className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                 <p className="text-gray-600 mb-2">Arraste arquivos XML aqui ou clique para selecionar</p>
@@ -203,7 +203,7 @@ export default function DimobPage() {
                 </select>
               </div>
 
-              <Link href="/dimob/generate" className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center gap-2 transition-colors">
+              <Link href="/dashboard/dimob/generate" className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center gap-2 transition-colors">
                 <Download size={16} />
                 Gerar Arquivo DIMOB {selectedYear}
               </Link>

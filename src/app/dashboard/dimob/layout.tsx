@@ -1,9 +1,6 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 import { usePathname } from 'next/navigation'
-import { useEffect } from 'react'
 import Link from 'next/link'
 import { 
   LayoutDashboard,
@@ -13,10 +10,10 @@ import {
 } from 'lucide-react'
 
 const dimobMenuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/dimob' },
-  { icon: Upload, label: 'Upload XMLs', href: '/dimob/upload' },
-  { icon: FileText, label: 'Gerar DIMOB', href: '/dimob/generate' },
-  { icon: BarChart3, label: 'Relatórios', href: '/dimob/reports' }
+  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard/dimob' },
+  { icon: Upload, label: 'Upload XMLs', href: '/dashboard/dimob/upload' },
+  { icon: FileText, label: 'Gerar DIMOB', href: '/dashboard/dimob/generate' },
+  { icon: BarChart3, label: 'Relatórios', href: '/dashboard/dimob/reports' }
 ]
 
 export default function DimobLayout({
@@ -24,31 +21,7 @@ export default function DimobLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { data: session, status } = useSession()
-  const router = useRouter()
   const pathname = usePathname()
-
-  useEffect(() => {
-    if (status === 'loading') return // Still loading
-    if (!session) {
-      router.push('/login')
-      return
-    }
-  }, [session, status, router])
-
-  // Show loading while checking authentication
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    )
-  }
-
-  // Don't render if not authenticated
-  if (!session) {
-    return null
-  }
 
   return (
     <div className="min-h-screen">
