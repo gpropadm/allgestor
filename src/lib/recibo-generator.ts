@@ -36,229 +36,439 @@ export class ReciboGenerator {
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
     
     const { width, height } = page.getSize()
-    const margin = 50
+    const marginLeft = 43  // 15mm
+    const marginRight = 43 // 15mm
+    const marginTop = 57   // 20mm
+    const marginBottom = 57 // 20mm
     
-    // Cores
-    const primaryColor = rgb(0.96, 0.24, 0.42) // #f63c6a
+    // Cores padrão NFS-e
+    const headerColor = rgb(0.1, 0.1, 0.1)
     const textColor = rgb(0.2, 0.2, 0.2)
-    const grayColor = rgb(0.5, 0.5, 0.5)
+    const grayColor = rgb(0.6, 0.6, 0.6)
+    const borderColor = rgb(0.8, 0.8, 0.8)
     
-    let yPosition = height - margin
+    // Função helper para desenhar linha horizontal
+    const drawHorizontalLine = (x: number, y: number, width: number, thickness = 1) => {
+      page.drawLine({
+        start: { x, y },
+        end: { x: x + width, y },
+        thickness,
+        color: borderColor,
+      })
+    }
     
-    // CABEÇALHO - Dados da Imobiliária
-    page.drawRectangle({
-      x: margin,
-      y: yPosition - 80,
-      width: width - 2 * margin,
-      height: 80,
-      color: rgb(0.98, 0.98, 0.98),
-      borderColor: primaryColor,
-      borderWidth: 2,
+    // Função helper para desenhar caixa com borda
+    const drawBox = (x: number, y: number, width: number, height: number, fillColor = rgb(1, 1, 1)) => {
+      page.drawRectangle({
+        x,
+        y: y - height,
+        width,
+        height,
+        color: fillColor,
+        borderColor: borderColor,
+        borderWidth: 1,
+      })
+    }
+    
+    const contentWidth = width - marginLeft - marginRight
+    let currentY = height - marginTop
+    
+    // =============================================================
+    // 1. CABEÇALHO INSTITUCIONAL (estilo NFS-e)
+    // =============================================================
+    
+    // Caixa do cabeçalho
+    drawBox(marginLeft, currentY, contentWidth, 60, rgb(0.95, 0.95, 0.95))
+    
+    // Título principal centralizado
+    page.drawText('RECIBO DE SERVIÇO ELETRÔNICO', {
+      x: marginLeft + contentWidth/2 - 120,
+      y: currentY - 20,
+      size: 14,
+      font: fontBold,
+      color: headerColor,
     })
     
-    // Logo placeholder (área para logo)
-    page.drawRectangle({
-      x: margin + 10,
-      y: yPosition - 70,
-      width: 60,
-      height: 60,
-      color: rgb(0.95, 0.95, 0.95),
-      borderColor: grayColor,
-      borderWidth: 1,
-    })
-    
-    page.drawText('LOGO', {
-      x: margin + 25,
-      y: yPosition - 45,
+    // Subtítulo
+    page.drawText('Sistema de Administração Predial', {
+      x: marginLeft + contentWidth/2 - 90,
+      y: currentY - 35,
       size: 10,
+      font: font,
+      color: textColor,
+    })
+    
+    // Dados de contato
+    page.drawText(`${data.imobiliariaTelefone} - ${data.imobiliariaEmail}`, {
+      x: marginLeft + contentWidth/2 - 80,
+      y: currentY - 50,
+      size: 9,
       font: font,
       color: grayColor,
     })
     
-    // Dados da imobiliária
-    page.drawText(data.imobiliariaRazaoSocial, {
-      x: margin + 85,
-      y: yPosition - 25,
-      size: 16,
+    currentY -= 80
+    
+    // =============================================================
+    // 2. IDENTIFICAÇÃO DO DOCUMENTO
+    // =============================================================
+    
+    drawBox(marginLeft, currentY, contentWidth, 50)
+    
+    // Linha 1: Tipo e número
+    page.drawText('Recibo de Administração Predial', {
+      x: marginLeft + 10,
+      y: currentY - 15,
+      size: 12,
       font: fontBold,
-      color: primaryColor,
+      color: headerColor,
     })
     
-    page.drawText(`CNPJ: ${data.imobiliariaCnpj}`, {
-      x: margin + 85,
-      y: yPosition - 45,
+    page.drawText(`Número: ${data.numeroRecibo}`, {
+      x: marginLeft + contentWidth - 150,
+      y: currentY - 15,
+      size: 11,
+      font: fontBold,
+      color: headerColor,
+    })
+    
+    // Linha 2: Datas
+    const dataFormatada = data.dataPagamento.toLocaleDateString('pt-BR')
+    const competenciaFormatada = data.competencia.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+    
+    page.drawText(`Data de Geração: ${dataFormatada}`, {
+      x: marginLeft + 10,
+      y: currentY - 35,
+      size: 10,
+      font: font,
+      color: textColor,
+    })
+    
+    page.drawText(`Competência: ${competenciaFormatada}`, {
+      x: marginLeft + contentWidth - 200,
+      y: currentY - 35,
+      size: 10,
+      font: font,
+      color: textColor,
+    })
+    
+    currentY -= 70
+    
+    // =============================================================
+    // 3. DADOS DO PRESTADOR (IMOBILIÁRIA)
+    // =============================================================
+    
+    page.drawText('DADOS DO PRESTADOR', {
+      x: marginLeft,
+      y: currentY,
+      size: 11,
+      font: fontBold,
+      color: headerColor,
+    })
+    
+    currentY -= 5
+    drawHorizontalLine(marginLeft, currentY, contentWidth)
+    currentY -= 15
+    
+    drawBox(marginLeft, currentY, contentWidth, 80)
+    
+    // Razão Social
+    page.drawText('Razão Social:', {
+      x: marginLeft + 10,
+      y: currentY - 15,
+      size: 9,
+      font: fontBold,
+      color: textColor,
+    })
+    
+    page.drawText(data.imobiliariaRazaoSocial, {
+      x: marginLeft + 85,
+      y: currentY - 15,
+      size: 10,
+      font: font,
+      color: textColor,
+    })
+    
+    // CNPJ e Inscrição Municipal
+    page.drawText('CNPJ:', {
+      x: marginLeft + 10,
+      y: currentY - 35,
+      size: 9,
+      font: fontBold,
+      color: textColor,
+    })
+    
+    page.drawText(data.imobiliariaCnpj, {
+      x: marginLeft + 50,
+      y: currentY - 35,
       size: 10,
       font: font,
       color: textColor,
     })
     
     if (data.imobiliariaInscricaoMunicipal) {
-      page.drawText(`Inscrição Municipal: ${data.imobiliariaInscricaoMunicipal}`, {
-        x: margin + 85,
-        y: yPosition - 58,
+      page.drawText('Inscrição Municipal:', {
+        x: marginLeft + 250,
+        y: currentY - 35,
         size: 9,
+        font: fontBold,
+        color: textColor,
+      })
+      
+      page.drawText(data.imobiliariaInscricaoMunicipal, {
+        x: marginLeft + 370,
+        y: currentY - 35,
+        size: 10,
         font: font,
         color: textColor,
       })
     }
     
-    page.drawText(`${data.imobiliariaTelefone} | ${data.imobiliariaEmail}`, {
-      x: margin + 85,
-      y: data.imobiliariaInscricaoMunicipal ? yPosition - 72 : yPosition - 60,
+    // Endereço
+    page.drawText('Endereço:', {
+      x: marginLeft + 10,
+      y: currentY - 55,
+      size: 9,
+      font: fontBold,
+      color: textColor,
+    })
+    
+    page.drawText(data.imobiliariaEndereco, {
+      x: marginLeft + 70,
+      y: currentY - 55,
       size: 10,
       font: font,
       color: textColor,
     })
     
-    yPosition -= 120
+    currentY -= 100
     
-    // TÍTULO DO RECIBO
-    page.drawText('RECIBO DE ADMINISTRAÇÃO PREDIAL', {
-      x: width / 2 - 150,
-      y: yPosition,
-      size: 18,
+    // =============================================================
+    // 4. DADOS DO TOMADOR (INQUILINO)
+    // =============================================================
+    
+    page.drawText('DADOS DO TOMADOR DE SERVIÇOS', {
+      x: marginLeft,
+      y: currentY,
+      size: 11,
       font: fontBold,
-      color: primaryColor,
+      color: headerColor,
     })
     
-    page.drawText(`Recibo Nº: ${data.numeroRecibo}`, {
-      x: width - margin - 120,
-      y: yPosition,
-      size: 12,
+    currentY -= 5
+    drawHorizontalLine(marginLeft, currentY, contentWidth)
+    currentY -= 15
+    
+    drawBox(marginLeft, currentY, contentWidth, 60)
+    
+    // Nome do inquilino
+    page.drawText('Nome/Razão Social:', {
+      x: marginLeft + 10,
+      y: currentY - 15,
+      size: 9,
       font: fontBold,
       color: textColor,
     })
     
-    yPosition -= 40
-    
-    // Data do recibo
-    const dataFormatada = data.dataPagamento.toLocaleDateString('pt-BR')
-    const competenciaFormatada = data.competencia.toLocaleDateString('pt-BR', { 
-      month: 'long', 
-      year: 'numeric' 
-    })
-    
-    page.drawText(`São Paulo, ${dataFormatada}`, {
-      x: width - margin - 100,
-      y: yPosition,
+    page.drawText(data.inquilinoNome, {
+      x: marginLeft + 120,
+      y: currentY - 15,
       size: 10,
       font: font,
       color: textColor,
     })
     
-    yPosition -= 50
+    // CPF
+    page.drawText('CPF/CNPJ:', {
+      x: marginLeft + 10,
+      y: currentY - 35,
+      size: 9,
+      font: fontBold,
+      color: textColor,
+    })
     
-    // CORPO DO RECIBO
-    const textoRecibo = [
-      `Recebemos do inquilino ${data.inquilinoNome}, CPF ${data.inquilinoDoc},`,
-      `o valor de R$ ${data.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} referente ao aluguel do imóvel localizado`,
-      `na ${data.imovelEndereco}, relativo à competência ${competenciaFormatada}.`,
-      '',
-      'DISCRIMINAÇÃO DOS VALORES:',
-      '',
-      `• Valor total recebido: R$ ${data.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-      `• Taxa de administração (${data.percentualTaxa}%): R$ ${data.taxaAdministracao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-      `• Valor repassado ao proprietário: R$ ${data.valorRepassado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-      '',
-      'DADOS DO CONTRATO:',
-      '',
-      `Proprietário: ${data.proprietarioNome}`,
-      `CPF/CNPJ: ${data.proprietarioDoc}`,
-      `Inquilino: ${data.inquilinoNome}`,
-      `CPF/CNPJ: ${data.inquilinoDoc}`,
-      `Imóvel: ${data.imovelEndereco}`,
+    page.drawText(data.inquilinoDoc, {
+      x: marginLeft + 80,
+      y: currentY - 35,
+      size: 10,
+      font: font,
+      color: textColor,
+    })
+    
+    // Endereço do imóvel
+    page.drawText('Endereço do Imóvel:', {
+      x: marginLeft + 250,
+      y: currentY - 35,
+      size: 9,
+      font: fontBold,
+      color: textColor,
+    })
+    
+    page.drawText(data.imovelEndereco.substring(0, 40), {
+      x: marginLeft + 250,
+      y: currentY - 50,
+      size: 9,
+      font: font,
+      color: textColor,
+    })
+    
+    currentY -= 80
+    
+    // =============================================================
+    // 5. DESCRIÇÃO DOS SERVIÇOS
+    // =============================================================
+    
+    page.drawText('DESCRIÇÃO DOS SERVIÇOS', {
+      x: marginLeft,
+      y: currentY,
+      size: 11,
+      font: fontBold,
+      color: headerColor,
+    })
+    
+    currentY -= 5
+    drawHorizontalLine(marginLeft, currentY, contentWidth)
+    currentY -= 15
+    
+    drawBox(marginLeft, currentY, contentWidth, 40)
+    
+    page.drawText(`Administração de aluguel referente a ${competenciaFormatada}.`, {
+      x: marginLeft + 10,
+      y: currentY - 15,
+      size: 11,
+      font: font,
+      color: textColor,
+    })
+    
+    page.drawText(`Proprietário: ${data.proprietarioNome} (${data.proprietarioDoc})`, {
+      x: marginLeft + 10,
+      y: currentY - 30,
+      size: 10,
+      font: font,
+      color: textColor,
+    })
+    
+    currentY -= 60
+    
+    // =============================================================
+    // 6. DETALHAMENTO DOS VALORES
+    // =============================================================
+    
+    page.drawText('DETALHAMENTO DOS VALORES', {
+      x: marginLeft,
+      y: currentY,
+      size: 11,
+      font: fontBold,
+      color: headerColor,
+    })
+    
+    currentY -= 5
+    drawHorizontalLine(marginLeft, currentY, contentWidth)
+    currentY -= 15
+    
+    drawBox(marginLeft, currentY, contentWidth, 120)
+    
+    // Tabela de valores
+    const tableY = currentY - 15
+    const col1 = marginLeft + 20
+    const col2 = marginLeft + contentWidth - 120
+    
+    // Cabeçalho da tabela
+    page.drawText('Discriminação', {
+      x: col1,
+      y: tableY,
+      size: 10,
+      font: fontBold,
+      color: textColor,
+    })
+    
+    page.drawText('Valor (R$)', {
+      x: col2,
+      y: tableY,
+      size: 10,
+      font: fontBold,
+      color: textColor,
+    })
+    
+    // Linha separadora
+    drawHorizontalLine(col1 - 10, tableY - 5, contentWidth - 20)
+    
+    // Linhas da tabela
+    const rows = [
+      ['Valor total dos serviços:', data.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })],
+      [`Taxa de administração (${data.percentualTaxa}%):`, data.taxaAdministracao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })],
+      ['Valor repassado ao proprietário:', data.valorRepassado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })],
     ]
     
-    textoRecibo.forEach((linha, index) => {
-      const fontSize = linha.startsWith('•') ? 11 : 
-                      linha.startsWith('DISCRIMINAÇÃO') || linha.startsWith('DADOS DO CONTRATO') ? 12 : 11
-      const fontType = linha.startsWith('DISCRIMINAÇÃO') || linha.startsWith('DADOS DO CONTRATO') ? fontBold : font
-      const cor = linha.startsWith('•') ? textColor : 
-                  linha.startsWith('DISCRIMINAÇÃO') || linha.startsWith('DADOS DO CONTRATO') ? primaryColor : textColor
-      
-      page.drawText(linha, {
-        x: margin,
-        y: yPosition - (index * 20),
-        size: fontSize,
-        font: fontType,
-        color: cor,
-      })
-    })
-    
-    yPosition -= (textoRecibo.length * 20) + 30
-    
-    // Observações (se houver)
-    if (data.observacoes) {
-      page.drawText('OBSERVAÇÕES:', {
-        x: margin,
-        y: yPosition,
-        size: 12,
-        font: fontBold,
-        color: primaryColor,
-      })
-      
-      page.drawText(data.observacoes, {
-        x: margin,
-        y: yPosition - 20,
+    let rowY = tableY - 25
+    rows.forEach((row, index) => {
+      page.drawText(row[0], {
+        x: col1,
+        y: rowY - (index * 20),
         size: 10,
         font: font,
         color: textColor,
       })
       
-      yPosition -= 60
-    }
-    
-    // ASSINATURA
-    yPosition -= 30
-    
-    page.drawLine({
-      start: { x: margin, y: yPosition },
-      end: { x: margin + 200, y: yPosition },
-      thickness: 1,
-      color: grayColor,
+      page.drawText(row[1], {
+        x: col2,
+        y: rowY - (index * 20),
+        size: 10,
+        font: font,
+        color: textColor,
+      })
     })
     
-    page.drawText(data.imobiliariaRazaoSocial, {
-      x: margin,
-      y: yPosition - 15,
-      size: 10,
+    // Valor líquido (destaque)
+    const liquidoY = rowY - 80
+    drawHorizontalLine(col1 - 10, liquidoY + 10, contentWidth - 20)
+    
+    page.drawText('VALOR LÍQUIDO DO RECIBO:', {
+      x: col1,
+      y: liquidoY,
+      size: 11,
       font: fontBold,
-      color: textColor,
+      color: headerColor,
     })
     
-    page.drawText('Administração Predial', {
-      x: margin,
-      y: yPosition - 30,
-      size: 9,
-      font: font,
-      color: grayColor,
+    page.drawText(`R$ ${data.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, {
+      x: col2,
+      y: liquidoY,
+      size: 12,
+      font: fontBold,
+      color: headerColor,
     })
     
-    // RODAPÉ
-    const rodapeY = 50
+    currentY -= 150
     
-    page.drawLine({
-      start: { x: margin, y: rodapeY + 30 },
-      end: { x: width - margin, y: rodapeY + 30 },
-      thickness: 1,
-      color: primaryColor,
-    })
+    // =============================================================
+    // 7. RODAPÉ INFORMATIVO
+    // =============================================================
     
-    page.drawText(data.imobiliariaEndereco, {
-      x: width / 2 - 100,
-      y: rodapeY + 10,
-      size: 9,
-      font: font,
-      color: grayColor,
-    })
-    
-    page.drawText(`${data.imobiliariaTelefone} | ${data.imobiliariaEmail}`, {
-      x: width / 2 - 80,
-      y: rodapeY - 5,
-      size: 9,
-      font: font,
-      color: grayColor,
-    })
+    if (currentY > marginBottom + 60) {
+      // Linha separadora
+      drawHorizontalLine(marginLeft, currentY, contentWidth)
+      currentY -= 20
+      
+      // Informações legais
+      page.drawText('DOCUMENTO GERADO ELETRONICAMENTE', {
+        x: marginLeft + contentWidth/2 - 90,
+        y: currentY,
+        size: 9,
+        font: fontBold,
+        color: grayColor,
+      })
+      
+      currentY -= 15
+      
+      page.drawText(`Autenticidade: ${data.numeroRecibo} | ${dataFormatada}`, {
+        x: marginLeft + contentWidth/2 - 70,
+        y: currentY,
+        size: 8,
+        font: font,
+        color: grayColor,
+      })
+    }
     
     return await pdfDoc.save()
   }
