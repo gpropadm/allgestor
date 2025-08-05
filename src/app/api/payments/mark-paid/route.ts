@@ -76,6 +76,9 @@ async function gerarReciboParaPagamento(paymentId: string, userId: string) {
     numeroRecibo
   })
 
+  // Usar inserção mais simples e robusta
+  const now = new Date()
+  
   try {
     await prisma.$executeRawUnsafe(`
       INSERT INTO recibos (
@@ -85,23 +88,18 @@ async function gerarReciboParaPagamento(paymentId: string, userId: string) {
         "proprietarioDoc", "inquilinoNome", "inquilinoDoc", "imovelEndereco",
         "createdAt", "updatedAt"
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, CAST($8 AS DECIMAL), CAST($9 AS DECIMAL), 
-        CAST($10 AS DECIMAL), CAST($11 AS DECIMAL), $12, $13, $14, $15, $16, $17, $18, $19
+        '${reciboId}', '${userId}', '${payment.contractId}', '${payment.id}', '${numeroRecibo}',
+        '${competencia.toISOString()}', '${dataPagamento.toISOString()}', 
+        ${valorTotal}, ${taxaAdministracao}, ${percentualTaxa}, ${valorRepassado},
+        '${pdfUrl}', '${payment.contract.property.owner.name.replace("'", "''")}', 
+        '${payment.contract.property.owner.document}', '${payment.contract.tenant.name.replace("'", "''")}', 
+        '${payment.contract.tenant.document}', '${imovelEndereco.replace("'", "''")}',
+        '${now.toISOString()}', '${now.toISOString()}'
       )
-    `, 
-      reciboId, userId, payment.contractId, payment.id, numeroRecibo,
-      competencia, dataPagamento, valorTotal.toString(), taxaAdministracao.toString(),
-      percentualTaxa.toString(), valorRepassado.toString(), pdfUrl, payment.contract.property.owner.name,
-      payment.contract.property.owner.document, payment.contract.tenant.name, 
-      payment.contract.tenant.document, imovelEndereco, new Date(), new Date()
-    )
+    `)
   } catch (insertError: any) {
     console.error('🧾 [RECIBO] ❌ ERRO NA INSERÇÃO SQL:', insertError)
     console.error('🧾 [RECIBO] ❌ Erro detalhado:', insertError.message)
-    console.error('🧾 [RECIBO] ❌ Valores sendo inseridos:', {
-      reciboId, userId, contractId: payment.contractId, paymentId: payment.id,
-      numeroRecibo, valorTotal, taxaAdministracao, percentualTaxa, valorRepassado
-    })
     throw insertError
   }
   
