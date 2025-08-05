@@ -129,6 +129,7 @@ export async function POST(request: NextRequest) {
       // Dados da imobiliária
       imobiliariaRazaoSocial: company.name,
       imobiliariaCnpj: company.document,
+      imobiliariaInscricaoMunicipal: company.inscricaoMunicipal,
       imobiliariaEndereco: `${company.address}, ${company.city} - ${company.state}, CEP: ${company.zipCode}`,
       imobiliariaTelefone: company.phone,
       imobiliariaEmail: company.email,

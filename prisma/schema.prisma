@@ -47,6 +47,7 @@ model Company {
   name          String
   tradeName     String?
   document      String    @unique  // CNPJ
+  inscricaoMunicipal String?       // Inscrição Municipal
   email         String
   phone         String
   address       String

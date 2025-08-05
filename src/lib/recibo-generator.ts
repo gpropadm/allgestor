@@ -12,6 +12,7 @@ interface ReciboData {
   // Dados da imobiliária
   imobiliariaRazaoSocial: string
   imobiliariaCnpj: string
+  imobiliariaInscricaoMunicipal?: string
   imobiliariaEndereco: string
   imobiliariaTelefone: string
   imobiliariaEmail: string
@@ -91,9 +92,19 @@ export class ReciboGenerator {
       color: textColor,
     })
     
+    if (data.imobiliariaInscricaoMunicipal) {
+      page.drawText(`Inscrição Municipal: ${data.imobiliariaInscricaoMunicipal}`, {
+        x: margin + 85,
+        y: yPosition - 58,
+        size: 9,
+        font: font,
+        color: textColor,
+      })
+    }
+    
     page.drawText(`${data.imobiliariaTelefone} | ${data.imobiliariaEmail}`, {
       x: margin + 85,
-      y: yPosition - 60,
+      y: data.imobiliariaInscricaoMunicipal ? yPosition - 72 : yPosition - 60,
       size: 10,
       font: font,
       color: textColor,
