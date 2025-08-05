@@ -90,13 +90,28 @@ export default function RecibosPage() {
               Recibos gerados automaticamente quando pagamentos são marcados como pagos
             </p>
           </div>
-          <button 
-            onClick={fetchRecibos}
-            className="mt-4 sm:mt-0 px-4 py-2 text-white rounded-lg transition-colors"
-            style={{backgroundColor: '#f63c6a'}}
-          >
-            Atualizar Lista
-          </button>
+          <div className="flex gap-2">
+            <button 
+              onClick={(e) => {
+                e.preventDefault()
+                console.log('Botão clicado!')
+                fetchRecibos()
+              }}
+              className="px-4 py-2 text-white rounded-lg transition-colors hover:opacity-80 cursor-pointer"
+              style={{backgroundColor: '#f63c6a'}}
+              type="button"
+            >
+              {loading ? 'Carregando...' : 'Atualizar Lista'}
+            </button>
+            
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-gray-600 text-white rounded-lg transition-colors hover:bg-gray-700 cursor-pointer"
+              type="button"
+            >
+              Recarregar Página
+            </button>
+          </div>
         </div>
 
         {/* Erro */}
