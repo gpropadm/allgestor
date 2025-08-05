@@ -24,6 +24,10 @@ interface DimobSummary {
   totalNetValue: number
   monthsCount: number
   recordsCount: number
+  totalCommissions: number
+  totalDeductions: number
+  commissionsCount: number
+  deductionsCount: number
 }
 
 interface DimobRecord {
@@ -41,12 +45,35 @@ interface DimobRecord {
   netValue: number
 }
 
+interface DimobCommission {
+  cpfCnpj: string
+  nome: string
+  valorComissao: number
+  competencia: string
+  valorPis?: number
+  valorCofins?: number
+  valorInss?: number
+  valorIr?: number
+  descricao?: string
+}
+
+interface DimobDeduction {
+  tipoDeducao: '01' | '02' | '03' | '04'
+  valorDeducao: number
+  competencia: string
+  descricao: string
+  proprietarioDoc?: string
+  inquilinoDoc?: string
+}
+
 export default function DimobGeneratePage() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [loading, setLoading] = useState(false)
   const [dimobData, setDimobData] = useState<{
     summary: DimobSummary
     records: DimobRecord[]
+    commissions: DimobCommission[]
+    deductions: DimobDeduction[]
     company: { cnpj: string; name: string }
   } | null>(null)
   const [generatedFile, setGeneratedFile] = useState<{
@@ -164,7 +191,7 @@ export default function DimobGeneratePage() {
         {/* Summary Cards */}
         {dimobData && !loading && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
               <div className="bg-white rounded-lg shadow-sm border p-6">
                 <div className="flex items-center">
                   <div className="p-3 rounded-full bg-blue-100">
@@ -209,8 +236,34 @@ export default function DimobGeneratePage() {
                     <FileText className="w-6 h-6 text-orange-600" />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">Registros</p>
+                    <p className="text-sm font-medium text-gray-500">Registros VEN</p>
                     <p className="text-2xl font-bold text-gray-900">{dimobData.summary.recordsCount}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <div className="flex items-center">
+                  <div className="p-3 rounded-full bg-yellow-100">
+                    <DollarSign className="w-6 h-6 text-yellow-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-500">Comissões COM</p>
+                    <p className="text-2xl font-bold text-gray-900">{dimobData.summary.commissionsCount}</p>
+                    <p className="text-sm text-gray-500">{formatCurrency(dimobData.summary.totalCommissions)}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <div className="flex items-center">
+                  <div className="p-3 rounded-full bg-red-100">
+                    <AlertCircle className="w-6 h-6 text-red-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-500">Deduções DED</p>
+                    <p className="text-2xl font-bold text-gray-900">{dimobData.summary.deductionsCount}</p>
+                    <p className="text-sm text-gray-500">{formatCurrency(dimobData.summary.totalDeductions)}</p>
                   </div>
                 </div>
               </div>

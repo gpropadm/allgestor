@@ -50,6 +50,27 @@ export interface DimobRecord {
   nfseDate?: string
 }
 
+export interface DimobCommission {
+  cpfCnpj: string
+  nome: string
+  valorComissao: number
+  competencia: string // YYYYMM
+  valorPis?: number
+  valorCofins?: number
+  valorInss?: number
+  valorIr?: number
+  descricao?: string
+}
+
+export interface DimobDeduction {
+  tipoDeducao: '01' | '02' | '03' | '04' // 01=Desconto, 02=Reparo, 03=Inadimplência, 04=Outros
+  valorDeducao: number
+  competencia: string // YYYYMM
+  descricao: string
+  proprietarioDoc?: string
+  inquilinoDoc?: string
+}
+
 export class DimobGenerator {
   
   /**
@@ -61,7 +82,9 @@ export class DimobGenerator {
       name: string
       year: number
     },
-    records: DimobRecord[]
+    records: DimobRecord[],
+    commissions: DimobCommission[] = [],
+    deductions: DimobDeduction[] = []
   ): string {
     try {
       const lines: string[] = []
@@ -82,6 +105,25 @@ export class DimobGenerator {
         for (const record of ownerRecords) {
           const venLine = this.generateVENRecord(record)
           lines.push(venLine)
+        }
+
+        // Linhas COM - Comissões pagas para este proprietário
+        const ownerCommissions = commissions.filter(c => 
+          records.some(r => r.ownerDocument === ownerDocument)
+        )
+        for (const commission of ownerCommissions) {
+          const comLine = this.generateCOMRecord(commission)
+          lines.push(comLine)
+        }
+
+        // Linhas DED - Deduções para este proprietário
+        const ownerDeductions = deductions.filter(d => 
+          d.proprietarioDoc === ownerDocument || 
+          records.some(r => r.ownerDocument === ownerDocument)
+        )
+        for (const deduction of ownerDeductions) {
+          const dedLine = this.generateDEDRecord(deduction)
+          lines.push(dedLine)
         }
       }
 
@@ -133,6 +175,37 @@ export class DimobGenerator {
     const valorIr = '0.00'
 
     return `VEN|${cleanTenantDoc}|${tenantName}|${grossValue}|${competencia}|${valorPis}|${valorCofins}|${valorInss}|${valorIr}|${adminFee}|${netValue}`
+  }
+
+  /**
+   * Gera registro COM - Comissões pagas
+   */
+  private static generateCOMRecord(commission: DimobCommission): string {
+    const cleanCpfCnpj = commission.cpfCnpj.replace(/\D/g, '')
+    const nome = this.sanitizeText(commission.nome, 60)
+    const valorComissao = this.formatValue(commission.valorComissao)
+    const competencia = commission.competencia
+    const valorPis = this.formatValue(commission.valorPis || 0)
+    const valorCofins = this.formatValue(commission.valorCofins || 0)
+    const valorInss = this.formatValue(commission.valorInss || 0)
+    const valorIr = this.formatValue(commission.valorIr || 0)
+    const descricao = this.sanitizeText(commission.descricao || '', 200)
+
+    return `COM|${cleanCpfCnpj}|${nome}|${valorComissao}|${competencia}|${valorPis}|${valorCofins}|${valorInss}|${valorIr}|${descricao}`
+  }
+
+  /**
+   * Gera registro DED - Deduções
+   */
+  private static generateDEDRecord(deduction: DimobDeduction): string {
+    const tipoDeducao = deduction.tipoDeducao
+    const valorDeducao = this.formatValue(deduction.valorDeducao)
+    const competencia = deduction.competencia
+    const descricao = this.sanitizeText(deduction.descricao, 200)
+    const proprietarioDoc = deduction.proprietarioDoc ? deduction.proprietarioDoc.replace(/\D/g, '') : ''
+    const inquilinoDoc = deduction.inquilinoDoc ? deduction.inquilinoDoc.replace(/\D/g, '') : ''
+
+    return `DED|${tipoDeducao}|${valorDeducao}|${competencia}|${descricao}|${proprietarioDoc}|${inquilinoDoc}`
   }
 
   /**
@@ -280,7 +353,9 @@ export class DimobGenerator {
    */
   static validateData(
     companyData: { cnpj: string; name: string; year: number },
-    records: DimobRecord[]
+    records: DimobRecord[],
+    commissions: DimobCommission[] = [],
+    deductions: DimobDeduction[] = []
   ): { valid: boolean; errors: string[] } {
     const errors: string[] = []
 
@@ -297,7 +372,7 @@ export class DimobGenerator {
       errors.push('Ano base inválido')
     }
 
-    // Validação dos registros
+    // Validação dos registros VEN
     if (records.length === 0) {
       errors.push('Nenhum registro de locação encontrado')
     }
@@ -320,6 +395,44 @@ export class DimobGenerator {
       }
     }
 
+    // Validação das comissões COM
+    for (const [index, commission] of commissions.entries()) {
+      if (!commission.cpfCnpj || commission.cpfCnpj.replace(/\D/g, '').length < 11) {
+        errors.push(`Comissão ${index + 1}: CPF/CNPJ inválido`)
+      }
+
+      if (!commission.nome || commission.nome.trim().length === 0) {
+        errors.push(`Comissão ${index + 1}: Nome é obrigatório`)
+      }
+
+      if (commission.valorComissao <= 0) {
+        errors.push(`Comissão ${index + 1}: Valor da comissão inválido`)
+      }
+
+      if (!commission.competencia || !/^\d{6}$/.test(commission.competencia)) {
+        errors.push(`Comissão ${index + 1}: Competência deve estar no formato YYYYMM`)
+      }
+    }
+
+    // Validação das deduções DED
+    for (const [index, deduction] of deductions.entries()) {
+      if (!['01', '02', '03', '04'].includes(deduction.tipoDeducao)) {
+        errors.push(`Dedução ${index + 1}: Tipo de dedução inválido (deve ser 01, 02, 03 ou 04)`)
+      }
+
+      if (deduction.valorDeducao <= 0) {
+        errors.push(`Dedução ${index + 1}: Valor da dedução inválido`)
+      }
+
+      if (!deduction.competencia || !/^\d{6}$/.test(deduction.competencia)) {
+        errors.push(`Dedução ${index + 1}: Competência deve estar no formato YYYYMM`)
+      }
+
+      if (!deduction.descricao || deduction.descricao.trim().length === 0) {
+        errors.push(`Dedução ${index + 1}: Descrição é obrigatória`)
+      }
+    }
+
     return {
       valid: errors.length === 0,
       errors
@@ -329,7 +442,11 @@ export class DimobGenerator {
   /**
    * Gera relatório de resumo dos dados
    */
-  static generateSummary(records: DimobRecord[]): {
+  static generateSummary(
+    records: DimobRecord[],
+    commissions: DimobCommission[] = [],
+    deductions: DimobDeduction[] = []
+  ): {
     totalProperties: number
     totalTenants: number
     totalOwners: number
@@ -338,6 +455,10 @@ export class DimobGenerator {
     totalNetValue: number
     monthsCount: number
     recordsCount: number
+    totalCommissions: number
+    totalDeductions: number
+    commissionsCount: number
+    deductionsCount: number
   } {
     const uniqueProperties = new Set(records.map(r => r.propertyAddress))
     const uniqueTenants = new Set(records.map(r => r.tenantDocument))
@@ -350,6 +471,9 @@ export class DimobGenerator {
       netValue: acc.netValue + record.netValue
     }), { grossValue: 0, adminFee: 0, netValue: 0 })
 
+    const totalCommissions = commissions.reduce((sum, c) => sum + c.valorComissao, 0)
+    const totalDeductions = deductions.reduce((sum, d) => sum + d.valorDeducao, 0)
+
     return {
       totalProperties: uniqueProperties.size,
       totalTenants: uniqueTenants.size,
@@ -358,7 +482,11 @@ export class DimobGenerator {
       totalAdminFee: totals.adminFee,
       totalNetValue: totals.netValue,
       monthsCount: uniqueMonths.size,
-      recordsCount: records.length
+      recordsCount: records.length,
+      totalCommissions,
+      totalDeductions,
+      commissionsCount: commissions.length,
+      deductionsCount: deductions.length
     }
   }
 }

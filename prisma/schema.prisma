@@ -35,6 +35,8 @@ model User {
   aiAssistants         AIAssistant[]
   aiConversations      AIConversation[]
   nfseRecords          NFSe[]
+  dimobCommissions     DimobCommission[]
+  dimobDeductions      DimobDeduction[]
 
   @@map("users")
 }
@@ -1095,6 +1097,51 @@ model NFSe {
   @@index([userId])
   @@index([competencia])
   @@map("nfse")
+}
+
+model DimobCommission {
+  id               String   @id @default(cuid())
+  userId           String
+  cpfCnpj          String   // CPF/CNPJ de quem recebeu a comissão
+  nome             String   // Nome de quem recebeu
+  valorComissao    Decimal  @db.Decimal(10,2)
+  competencia      DateTime // Mês/ano da competência
+  valorPis         Decimal  @db.Decimal(10,2) @default(0)
+  valorCofins      Decimal  @db.Decimal(10,2) @default(0)
+  valorInss        Decimal  @db.Decimal(10,2) @default(0)
+  valorIr          Decimal  @db.Decimal(10,2) @default(0)
+  descricao        String?  // Descrição da comissão
+  contratoId       String?  // Relacionado a qual contrato (opcional)
+  ativo            Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  user             User     @relation(fields: [userId], references: [id])
+  
+  @@index([userId])
+  @@index([competencia])
+  @@map("dimob_commissions")
+}
+
+model DimobDeduction {
+  id               String   @id @default(cuid())
+  userId           String
+  tipoDeducao      String   // 01=Desconto, 02=Reparo, 03=Inadimplência, 04=Outros
+  valorDeducao     Decimal  @db.Decimal(10,2)
+  competencia      DateTime // Mês/ano da competência
+  descricao        String   // Descrição da dedução
+  contratoId       String?  // Relacionado a qual contrato (opcional)
+  proprietarioDoc  String?  // CPF/CNPJ do proprietário afetado
+  inquilinoDoc     String?  // CPF/CNPJ do inquilino afetado
+  ativo            Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  user             User     @relation(fields: [userId], references: [id])
+  
+  @@index([userId])
+  @@index([competencia])
+  @@map("dimob_deductions")
 }
 
 

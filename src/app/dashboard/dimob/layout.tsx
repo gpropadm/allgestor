@@ -6,12 +6,16 @@ import {
   LayoutDashboard,
   Upload,
   FileText,
-  BarChart3
+  BarChart3,
+  DollarSign,
+  AlertTriangle
 } from 'lucide-react'
 
 const dimobMenuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard/dimob' },
   { icon: Upload, label: 'Upload XMLs', href: '/dashboard/dimob/upload' },
+  { icon: DollarSign, label: 'Comissões', href: '/dashboard/dimob/comissoes' },
+  { icon: AlertTriangle, label: 'Deduções', href: '/dashboard/dimob/deducoes' },
   { icon: FileText, label: 'Gerar DIMOB', href: '/dashboard/dimob/generate' },
   { icon: BarChart3, label: 'Relatórios', href: '/dashboard/dimob/reports' }
 ]

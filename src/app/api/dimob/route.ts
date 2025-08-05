@@ -18,6 +18,8 @@ export async function GET(request: NextRequest) {
     
     // Primeiro, tentar buscar dados reais dos XMLs processados
     let nfseRecords: any[] = []
+    let commissionRecords: any[] = []
+    let deductionRecords: any[] = []
     let usingRealData = false
     
     try {
@@ -33,11 +35,47 @@ export async function GET(request: NextRequest) {
           competencia: 'asc'
         }
       })
+
+      // Buscar comissões
+      const realCommissionRecords = await prisma.dimobCommission.findMany({
+        where: {
+          userId: user.id,
+          competencia: {
+            gte: new Date(`${year}-01-01`),
+            lte: new Date(`${year}-12-31`)
+          },
+          ativo: true
+        },
+        orderBy: {
+          competencia: 'asc'
+        }
+      })
+
+      // Buscar deduções
+      const realDeductionRecords = await prisma.dimobDeduction.findMany({
+        where: {
+          userId: user.id,
+          competencia: {
+            gte: new Date(`${year}-01-01`),
+            lte: new Date(`${year}-12-31`)
+          },
+          ativo: true
+        },
+        orderBy: {
+          competencia: 'asc'
+        }
+      })
       
       if (realNfseRecords.length > 0) {
         nfseRecords = realNfseRecords
+        commissionRecords = realCommissionRecords
+        deductionRecords = realDeductionRecords
         usingRealData = true
-        console.log('Usando dados reais do banco:', nfseRecords.length, 'NFS-e encontradas')
+        console.log('Usando dados reais do banco:', {
+          nfse: nfseRecords.length,
+          commissions: commissionRecords.length,
+          deductions: deductionRecords.length
+        })
       }
     } catch (dbError) {
       console.log('Tabela NFSe não existe ainda, usando dados de exemplo')
@@ -46,6 +84,36 @@ export async function GET(request: NextRequest) {
     // Se não há dados reais, usar dados de exemplo baseados nos XMLs de teste
     if (nfseRecords.length === 0) {
       console.log('Usando dados de exemplo para demonstração')
+      
+      // Dados de exemplo COM (comissões)
+      commissionRecords = [
+        {
+          id: 'commission-1',
+          cpfCnpj: '12345678901',
+          nome: 'CORRETOR PARCEIRO LTDA',
+          valorComissao: 2500.00,
+          competencia: new Date('2024-01-15'),
+          valorPis: 0,
+          valorCofins: 0,
+          valorInss: 0,
+          valorIr: 0,
+          descricao: 'Comissão por indicação de cliente'
+        }
+      ]
+
+      // Dados de exemplo DED (deduções)
+      deductionRecords = [
+        {
+          id: 'deduction-1',
+          tipoDeducao: '01', // Desconto
+          valorDeducao: 500.00,
+          competencia: new Date('2024-01-15'),
+          descricao: 'Desconto concedido no primeiro aluguel',
+          proprietarioDoc: '12345678901',
+          inquilinoDoc: '11122233344'
+        }
+      ]
+
       nfseRecords = [
         {
           id: 'example-1',
@@ -184,10 +252,36 @@ export async function GET(request: NextRequest) {
       record.month.startsWith(year.toString())
     )
 
-    // Gerar resumo
-    const summary = DimobGenerator.generateSummary(filteredRecords)
+    // Converter comissões e deduções para formato DIMOB (se houver)
+    const dimobCommissions = commissionRecords.map(commission => ({
+      cpfCnpj: commission.cpfCnpj,
+      nome: commission.nome,
+      valorComissao: Number(commission.valorComissao),
+      competencia: commission.competencia.toISOString().substring(0, 7).replace('-', ''),
+      valorPis: Number(commission.valorPis || 0),
+      valorCofins: Number(commission.valorCofins || 0),
+      valorInss: Number(commission.valorInss || 0),
+      valorIr: Number(commission.valorIr || 0),
+      descricao: commission.descricao || ''
+    }))
 
-    console.log('Registros DIMOB gerados:', filteredRecords.length)
+    const dimobDeductions = deductionRecords.map(deduction => ({
+      tipoDeducao: deduction.tipoDeducao as '01' | '02' | '03' | '04',
+      valorDeducao: Number(deduction.valorDeducao),
+      competencia: deduction.competencia.toISOString().substring(0, 7).replace('-', ''),
+      descricao: deduction.descricao,
+      proprietarioDoc: deduction.proprietarioDoc || '',
+      inquilinoDoc: deduction.inquilinoDoc || ''
+    }))
+
+    // Gerar resumo
+    const summary = DimobGenerator.generateSummary(filteredRecords, dimobCommissions, dimobDeductions)
+
+    console.log('Registros DIMOB gerados:', {
+      ven: filteredRecords.length,
+      com: dimobCommissions.length,
+      ded: dimobDeductions.length
+    })
     console.log('Resumo:', summary)
 
     return NextResponse.json({
@@ -196,13 +290,17 @@ export async function GET(request: NextRequest) {
         year,
         contracts: contractData,
         records: filteredRecords,
+        commissions: dimobCommissions,
+        deductions: dimobDeductions,
         summary,
         company: {
           cnpj: company.document,
           name: company.name
         },
         dataSource: usingRealData ? 'database' : 'example',
-        nfseCount: nfseRecords.length
+        nfseCount: nfseRecords.length,
+        commissionsCount: dimobCommissions.length,
+        deductionsCount: dimobDeductions.length
       }
     })
 
