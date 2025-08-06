@@ -279,7 +279,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             text-align: left;
         }
         
@@ -290,7 +290,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             text-align: left;
         }
         
@@ -302,7 +302,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             text-align: left;
         }
         
