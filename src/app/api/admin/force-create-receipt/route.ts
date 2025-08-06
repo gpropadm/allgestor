@@ -43,11 +43,11 @@ export async function GET(request: NextRequest) {
     const reciboId = `recibo_${Date.now()}_manual`
     const numeroRecibo = `MANUAL-${Date.now()}`
     
-    // Valores simples
-    const valorTotal = 2800
-    const taxaAdministracao = 280
+    // Valores corretos baseados no payment
+    const valorTotal = Number(payment.amount)
     const percentualTaxa = 10
-    const valorRepassado = 2520
+    const taxaAdministracao = valorTotal * 0.1
+    const valorRepassado = valorTotal - taxaAdministracao
 
     console.log('🧾 Inserindo recibo manual...')
 
