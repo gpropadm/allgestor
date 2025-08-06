@@ -222,14 +222,22 @@ export async function POST(request: NextRequest) {
     console.log(`  - Interest: ${updatedPayment.interest}`)
     console.log(`  - Status: ${updatedPayment.status}`)
 
-    // 🧾 GERAR RECIBO AUTOMATICAMENTE - VERSÃO SIMPLES
+    // 🧾 GERAR RECIBO AUTOMATICAMENTE - LOGS INTENSIVOS
     console.log('🧾 ===== INICIANDO GERAÇÃO DE RECIBO =====')
     console.log('🧾 Payment ID:', updatedPayment.id)
     console.log('🧾 User ID:', user.id)
+    console.log('🧾 Contract ID:', updatedPayment.contractId)
+    console.log('🧾 Payment Amount:', updatedPayment.amount)
+    
     let recibo = null
     
     try {
-      // MÉTODO DIRETO - SEM FUNÇÃO SEPARADA
+      // TESTE DE CONEXÃO COM BANCO PRIMEIRO
+      console.log('🔍 TESTANDO CONEXÃO COM BANCO...')
+      const testQuery = await prisma.$queryRaw`SELECT COUNT(*) as count FROM recibos`
+      console.log('✅ CONEXÃO OK - Recibos atuais no banco:', testQuery)
+
+      // DADOS DO RECIBO
       const now = new Date()
       const reciboId = `recibo_${Date.now()}_auto`
       const numeroRecibo = `AUTO-${Date.now()}`
@@ -239,10 +247,21 @@ export async function POST(request: NextRequest) {
       const taxaAdministracao = valorTotal * 0.1
       const valorRepassado = valorTotal - taxaAdministracao
 
-      console.log('🧾 Dados do recibo:', { reciboId, numeroRecibo, valorTotal })
+      console.log('🧾 DADOS CALCULADOS:', {
+        reciboId,
+        numeroRecibo, 
+        valorTotal,
+        taxaAdministracao,
+        valorRepassado,
+        userId: user.id,
+        contractId: updatedPayment.contractId,
+        paymentId: updatedPayment.id
+      })
 
-      // Inserir recibo direto no banco
-      await prisma.$executeRaw`
+      // EXECUTAR INSERÇÃO
+      console.log('⚡ EXECUTANDO INSERÇÃO NA TABELA RECIBOS...')
+      
+      const insertResult = await prisma.$executeRaw`
         INSERT INTO recibos (
           id, "userId", "contractId", "paymentId", "numeroRecibo", 
           competencia, "dataPagamento", "valorTotal", "taxaAdministracao", 
@@ -259,9 +278,15 @@ export async function POST(request: NextRequest) {
           ${'Recibo gerado automaticamente'}, ${now}, ${now}
         )
       `
+      
+      console.log('✅ INSERÇÃO EXECUTADA! Resultado:', insertResult)
+
+      // VERIFICAR SE REALMENTE INSERIU
+      const verification = await prisma.$queryRaw`SELECT COUNT(*) as count FROM recibos WHERE "paymentId" = ${updatedPayment.id}`
+      console.log('🔍 VERIFICAÇÃO PÓS-INSERÇÃO:', verification)
 
       recibo = { id: reciboId, numeroRecibo, valorTotal, taxaAdministracao }
-      console.log('✅ RECIBO CRIADO COM SUCESSO:', numeroRecibo)
+      console.log('🎉 RECIBO CRIADO E VERIFICADO COM SUCESSO:', numeroRecibo)
       
     } catch (error: any) {
       console.error('❌ ERRO CRÍTICO AO GERAR RECIBO:', error)
