@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import DashboardLayout from '@/components/dashboard-layout'
+import { DashboardLayout } from '@/components/dashboard-layout'
 import { FileText, Download, Calendar, User, Building, CheckCircle, AlertTriangle } from 'lucide-react'
 
 interface Proprietario {
