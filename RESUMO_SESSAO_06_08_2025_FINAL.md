@@ -41,32 +41,40 @@
 
 ---
 
-## 🚨 **PROBLEMA RESTANTE**
+## 🚨 **PROBLEMA RESTANTE - ATUALIZAÇÃO 06/08 04:15**
 
 ### **GERAÇÃO AUTOMÁTICA DE RECIBOS**
 - ❌ **Sintoma:** Marcar pagamento como pago NÃO gera recibo automaticamente
 - 🔍 **Teste realizado:** Marcado pagamento → continua apenas 1 recibo
 - ⚡ **Correção aplicada:** Simplificação da função `gerarReciboParaPagamento()`
 
-### **ÚLTIMA CORREÇÃO (Commit 88bd6c0):**
-- Removida função complexa externa
-- Código direto na API `/api/payments/mark-paid`
-- Logs intensivos para debug
-- Deploy realizado às 02:45
+### **DESCOBERTA CRÍTICA COM BANCO LIMPO:**
+- ✅ **Usuário atual:** `bs@gmail.com` (ID: `cmdzepte20002ky04w7y1ja4e`)
+- ✅ **Banco limpo:** Todas tabelas corretas exceto `recibos` vazia
+- ❌ **API mark-paid:** Ficava `Promise{<pending>}` infinitamente (TRAVANDO!)
+- 🧾 **Nenhum log:** Função de gerar recibo nem chegava a executar
+
+### **ÚLTIMA CORREÇÃO (Commit 18b1a6f - 04:15):**
+- ❌ Removido SQL raw complexo que causava travamento
+- ✅ Usado `prisma.recibo.create()` simples e direto  
+- ⚡ Dados mínimos para evitar erros
+- 🔥 URGENTE: Resolver travamento da API mark-paid
 
 ---
 
 ## 📋 **TESTE PARA AMANHÃ**
 
-### **TESTE DEFINITIVO:**
-1. ✅ **Login:** Como `dc@gmail.com`
+### **TESTE DEFINITIVO PARA AMANHÃ:**
+1. ✅ **Login:** Como `bs@gmail.com` (usuário com banco limpo)
 2. 🔄 **Marcar:** Qualquer pagamento como pago
-3. 📊 **Verificar:** Se aparece 2º recibo em `/recibos`
-4. 🎯 **Resultado esperado:** Total de 2 recibos, R$ 2.000,00
+3. ⏱️ **Verificar:** Se não fica mais `Promise{<pending>}` (deve ser rápido)
+4. 🗄️ **Banco:** Verificar se apareceu 1 registro na tabela `recibos`
+5. 📊 **Interface:** Verificar se aparece na página `/recibos`
 
-### **CENÁRIOS:**
-- **✅ SE FUNCIONAR:** Sistema 100% operacional para clientes
-- **❌ SE NÃO FUNCIONAR:** Debug final via logs da API mark-paid
+### **CENÁRIOS PARA AMANHÃ:**
+- **✅ SE FUNCIONAR:** Sistema 100% operacional - PROBLEMA RESOLVIDO!
+- **❌ SE CONTINUAR PENDING:** Há problema mais grave no Prisma/banco
+- **⚠️ SE RÁPIDO MAS SEM INSERIR:** Erro no model/schema do Prisma
 
 ---
 
@@ -79,6 +87,8 @@
 - `baac1dc` - Logs intensivos para debug
 - `d9235b5` - API debug específica
 - **`88bd6c0`** - **CORREÇÃO CRÍTICA** da geração automática
+- `1a41901` - Debug intensivo com logs completos (CAUSOU TRAVAMENTO)
+- **`18b1a6f`** - **CORREÇÃO URGENTE** remove SQL complexo, usa prisma.create
 
 ---
 
@@ -91,12 +101,20 @@
 - ✅ APIs de consulta
 - ✅ Download PDF (estrutura)
 
-### **A TESTAR:**
-- ⏳ Geração automática via mark-paid
+### **PROBLEMA ATUAL:**
+- ⏳ API mark-paid travava com `Promise{<pending>}`  
+- 🧾 Função de gerar recibos nem chegava a executar
+- 📋 Nenhum log aparecia no console
 
-### **EXPECTATIVA:**
-- 🎉 **1 teste simples amanhã** = sistema completamente funcional
-- 📈 **Deploy para clientes** após confirmação
+### **CORREÇÃO APLICADA:**
+- ✅ Substituído SQL raw complexo por `prisma.recibo.create()`
+- ⚡ Dados mínimos para evitar erros de validação
+- 🔥 Deploy realizado às 04:15
+
+### **EXPECTATIVA PARA AMANHÃ:**
+- 🎯 **1 teste simples** = marcar pagamento deve ser rápido (não pending)
+- 🗄️ **Verificar banco** = deve aparecer registro na tabela recibos
+- 🎉 **Se funcionar** = sistema 100% operacional para clientes
 
 ---
 
