@@ -37,10 +37,20 @@ async function gerarReciboParaPagamento(paymentId: string, userId: string) {
   const taxaAdministracao = valorTotal * 0.1
   const valorRepassado = valorTotal - taxaAdministracao
 
-  console.log('🧾 [RECIBO] Inserindo diretamente...')
+  console.log('🧾 [RECIBO] Inserindo com parâmetros seguros...')
 
-  // Inserção direta igual ao endpoint que funcionou
-  await prisma.$executeRawUnsafe(`
+  // Verificar se já existe recibo para este pagamento
+  const existingRecibo = await prisma.$queryRaw`
+    SELECT COUNT(*) as count FROM recibos WHERE "paymentId" = ${payment.id}
+  `
+  
+  if (Array.isArray(existingRecibo) && existingRecibo[0] && Number(existingRecibo[0].count) > 0) {
+    console.log('🧾 [RECIBO] Já existe recibo para este pagamento')
+    return null
+  }
+
+  // Inserção com parâmetros seguros
+  await prisma.$executeRaw`
     INSERT INTO recibos (
       id, "userId", "contractId", "paymentId", "numeroRecibo", 
       competencia, "dataPagamento", "valorTotal", "taxaAdministracao", 
@@ -48,15 +58,15 @@ async function gerarReciboParaPagamento(paymentId: string, userId: string) {
       "proprietarioDoc", "inquilinoNome", "inquilinoDoc", "imovelEndereco",
       "observacoes", "createdAt", "updatedAt"
     ) VALUES (
-      '${reciboId}', '${userId}', '${payment.contractId}', '${payment.id}', '${numeroRecibo}',
-      '${now.toISOString()}', '${now.toISOString()}', 
+      ${reciboId}, ${userId}, ${payment.contractId}, ${payment.id}, ${numeroRecibo},
+      ${now}, ${now}, 
       ${valorTotal}, ${taxaAdministracao}, ${percentualTaxa}, ${valorRepassado},
-      '/api/auto.pdf', '${payment.contract.property.owner.name}', 
-      '${payment.contract.property.owner.document}', '${payment.contract.tenant.name}', 
-      '${payment.contract.tenant.document}', 'Endereco Auto',
-      'Recibo gerado automaticamente', '${now.toISOString()}', '${now.toISOString()}'
+      ${'/api/auto.pdf'}, ${payment.contract.property.owner.name}, 
+      ${payment.contract.property.owner.document}, ${payment.contract.tenant.name}, 
+      ${payment.contract.tenant.document}, ${'Endereço do imóvel'},
+      ${'Recibo gerado automaticamente'}, ${now}, ${now}
     )
-  `)
+  `
 
   console.log('🧾 [RECIBO] ✅ Recibo auto criado!')
 
