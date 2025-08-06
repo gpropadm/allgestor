@@ -31,6 +31,16 @@ export function middleware(request: NextRequest) {
   const protectedPaths = ['/recibos']
   
   if (protectedPaths.includes(pathname)) {
+    // Verificar se tem token de sessão
+    const sessionToken = request.cookies.get('next-auth.session-token')?.value || 
+                         request.cookies.get('__Secure-next-auth.session-token')?.value
+    
+    if (!sessionToken) {
+      // Não autenticado - redirecionar para login
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+    
+    // Autenticado - permitir acesso
     return NextResponse.next()
   }
 
