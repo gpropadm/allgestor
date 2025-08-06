@@ -450,7 +450,7 @@ export default function Payments() {
       matchesStatus = payment.status?.toUpperCase() === filterStatus.toUpperCase()
     }
 
-    // Filtro por mês atual (exceto se inquilino estiver expandido)
+    // ✅ CORRIGIDO: Mostrar mês atual OU pagamentos overdue OU inquilino expandido
     const currentMonth = new Date().getMonth()
     const currentYear = new Date().getFullYear()
     const paymentMonth = dueDate.getMonth()
@@ -458,8 +458,10 @@ export default function Payments() {
     
     const isCurrentMonth = paymentMonth === currentMonth && paymentYear === currentYear
     const isTenantExpanded = expandedTenants.has(tenantName)
+    const isOverdue = payment.status === 'OVERDUE'
     
-    const matchesMonth = isTenantExpanded || isCurrentMonth
+    // Mostrar se: inquilino expandido OU mês atual OU pagamento em atraso
+    const matchesMonth = isTenantExpanded || isCurrentMonth || isOverdue
 
     return matchesSearch && matchesStatus && matchesMonth
   })
