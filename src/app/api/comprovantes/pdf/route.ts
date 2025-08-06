@@ -139,18 +139,27 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
             border: 1px solid #333;
         }
         
+        .section-title-no-border { 
+            font-weight: bold; 
+            font-size: 11pt;
+            padding: 8px 0;
+            margin-bottom: 10px;
+            border: none;
+            background: none;
+        }
+        
         .beneficiary-section {
             display: flex;
             border: 2px solid #333;
             margin-bottom: 20px;
             box-sizing: border-box;
-            min-height: 60px;
+            min-height: 45px;
         }
         
         .beneficiary-left {
             flex: 0 0 70%;
             width: 70%;
-            padding: 12px 15px;
+            padding: 8px 15px;
             border-right: 2px solid #333;
             box-sizing: border-box;
             display: flex;
@@ -161,7 +170,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
         .beneficiary-right {
             flex: 0 0 30%;
             width: 30%;
-            padding: 12px 15px;
+            padding: 8px 15px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
@@ -269,7 +278,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
     </div>
 
     <div class="section">
-        <div class="section-title">1. BENEFICIÁRIO DO RENDIMENTO (LOCADOR)</div>
+        <div class="section-title-no-border">1. BENEFICIÁRIO DO RENDIMENTO (LOCADOR)</div>
         <div class="beneficiary-section">
             <div class="beneficiary-left">
                 <div class="field-label-small">Nome/Nome Empresarial:</div>
