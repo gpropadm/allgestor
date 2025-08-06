@@ -390,10 +390,21 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
     </div>
 
     <div class="section">
-        <div class="section-title">5. INFORMAÇÕES COMPLEMENTARES</div>
-        <div class="field"><span class="field-label">CNPJ da administradora (Imobiliária):</span> ${data.imobiliaria.cnpj}</div>
-        <div class="field"><span class="field-label">Nome da imobiliária:</span> ${data.imobiliaria.nome}</div>
-        <div class="field"><span class="field-label">Endereço:</span> ${data.imobiliaria.endereco}</div>
+        <div class="section-title-no-border">5. INFORMAÇÕES COMPLEMENTARES</div>
+        <div class="property-section">
+            <div class="property-col-25">
+                <div class="field-label-small">CNPJ da administradora (Imobiliária):</div>
+                <div class="field-value">${data.imobiliaria.cnpj}</div>
+            </div>
+            <div class="property-col-25">
+                <div class="field-label-small">Nome da imobiliária:</div>
+                <div class="field-value">${data.imobiliaria.nome}</div>
+            </div>
+            <div class="property-col-50">
+                <div class="field-label-small">Endereço:</div>
+                <div class="field-value">${data.imobiliaria.endereco}</div>
+            </div>
+        </div>
     </div>
 
     <div class="section">
