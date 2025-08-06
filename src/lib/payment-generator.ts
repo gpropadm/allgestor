@@ -36,21 +36,24 @@ export async function generatePaymentsForContract(contractId: string, forceGener
     const endDate = new Date(contract.endDate)
     const dayOfMonth = startDate.getDate()
     
-    console.log(`📝 ${contract.tenant.name}: Gerando pagamentos dia ${dayOfMonth}`)
+    console.log(`📝 ${contract.tenant.name}: Gerando pagamentos dia ${dayOfMonth} do mês`)
+    console.log(`📅 Período do contrato: ${startDate.toLocaleDateString('pt-BR')} até ${endDate.toLocaleDateString('pt-BR')}`)
     
     // Gerar pagamentos para todo o período do contrato
     const currentDate = new Date()
     const currentMonth = currentDate.getMonth()
     const currentYear = currentDate.getFullYear()
     
-    // Primeiro pagamento: usar o dia do mês de início, mas no mês de início ou no próximo
-    let paymentDate = new Date(startDate)
-    paymentDate.setDate(dayOfMonth)
+    // ✅ CORRIGIDO: Gerar pagamentos desde o primeiro mês do contrato
+    // Primeiro pagamento sempre no mês de início, no dia especificado
+    let paymentDate = new Date(startDate.getFullYear(), startDate.getMonth(), dayOfMonth)
     
-    // Se o dia do pagamento já passou no mês de início, usar o próximo mês
+    // Se o dia do pagamento for antes da data de início no mesmo mês, mover para o próximo mês
     if (paymentDate < startDate) {
       paymentDate = addOneMonth(paymentDate)
     }
+    
+    console.log(`📅 Gerando pagamentos de ${paymentDate.toLocaleDateString('pt-BR')} até ${endDate.toLocaleDateString('pt-BR')}`)
     
     const payments = []
     
@@ -67,11 +70,11 @@ export async function generatePaymentsForContract(contractId: string, forceGener
       if (paymentYear < currentYear || (paymentYear === currentYear && paymentMonth < currentMonth)) {
         // Meses anteriores ao atual = EM ABERTO (OVERDUE)
         status = 'OVERDUE'
-        console.log(`  🔴 ${paymentDate.toLocaleDateString('pt-BR')} - EM ABERTO (mês anterior ao atual)`)
+        console.log(`  🔴 ${paymentDate.toLocaleDateString('pt-BR')} - EM ABERTO (${paymentYear < currentYear ? 'ano passado' : 'mês passado'})`)
       } else {
-        // Mês atual e futuros = A VENCER (PENDING)
+        // Mês atual e futuros = A VENCER (PENDING)  
         status = 'PENDING'
-        console.log(`  🟡 ${paymentDate.toLocaleDateString('pt-BR')} - A VENCER (mês atual ou futuro)`)
+        console.log(`  🟡 ${paymentDate.toLocaleDateString('pt-BR')} - A VENCER (${paymentYear === currentYear && paymentMonth === currentMonth ? 'mês atual' : 'futuro'})`)
       }
       
       // Create payment without gateway field (temporarily removed from schema)
