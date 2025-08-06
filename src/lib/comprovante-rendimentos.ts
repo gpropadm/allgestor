@@ -76,18 +76,31 @@ export async function gerarComprovanteRendimentos(
     const startDate = new Date(ano, 0, 1) // 1º de janeiro
     const endDate = new Date(ano, 11, 31, 23, 59, 59) // 31 de dezembro
     
+    // ✅ CORRIGIDO: Buscar pagamentos PAID usando dueDate se paidDate for null
     const paymentsYear = await prisma.payment.findMany({
       where: {
         contractId: contractId,
         status: 'PAID',
-        paidDate: {
-          gte: startDate,
-          lte: endDate
-        }
+        OR: [
+          {
+            paidDate: {
+              gte: startDate,
+              lte: endDate
+            }
+          },
+          {
+            paidDate: null,
+            dueDate: {
+              gte: startDate,
+              lte: endDate
+            }
+          }
+        ]
       },
-      orderBy: {
-        paidDate: 'asc'
-      }
+      orderBy: [
+        { paidDate: 'asc' },
+        { dueDate: 'asc' }
+      ]
     })
     
     console.log(`💰 Encontrados ${paymentsYear.length} pagamentos pagos em ${ano}`)
@@ -105,7 +118,9 @@ export async function gerarComprovanteRendimentos(
     
     const rendimentosPorMes = meses.map((nomeDoMes, index) => {
       const pagamentosDoMes = paymentsYear.filter(payment => {
-        const mesPagamento = payment.paidDate!.getMonth()
+        // Usar paidDate se existir, senão usar dueDate
+        const dataReferencia = payment.paidDate || payment.dueDate
+        const mesPagamento = dataReferencia.getMonth()
         return mesPagamento === index
       })
       
