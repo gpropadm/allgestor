@@ -458,10 +458,10 @@ export default function Payments() {
     
     const isCurrentMonth = paymentMonth === currentMonth && paymentYear === currentYear
     const isTenantExpanded = expandedTenants.has(tenantName)
-    const isOverdue = payment.status === 'OVERDUE'
+    const isPaymentOverdue = payment.status === 'OVERDUE'
     
     // Mostrar se: inquilino expandido OU mês atual OU pagamento em atraso
-    const matchesMonth = isTenantExpanded || isCurrentMonth || isOverdue
+    const matchesMonth = isTenantExpanded || isCurrentMonth || isPaymentOverdue
 
     return matchesSearch && matchesStatus && matchesMonth
   })
