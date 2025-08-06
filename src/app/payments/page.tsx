@@ -236,6 +236,45 @@ export default function Payments() {
     }
   }
 
+  // Função para calcular juros e multa (mesma lógica do backend)
+  const calculateInterestAndPenalty = (payment: Payment) => {
+    const paymentSettings = {
+      penaltyRate: 2.0,          // 2% padrão
+      dailyInterestRate: 0.033,  // 0.033% ao dia padrão
+      gracePeriodDays: 0,        // sem carência padrão
+      maxInterestDays: 365       // máximo 1 ano padrão
+    }
+
+    const dueDate = new Date(payment.dueDate)
+    const currentDate = new Date()
+    const daysPastDue = Math.max(0, Math.floor((currentDate.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24)))
+    
+    let finalAmount = payment.amount
+    let penalty = 0
+    let interest = 0
+    
+    if (daysPastDue > 0) {
+      // Aplicar período de carência
+      const effectiveDays = Math.max(0, daysPastDue - paymentSettings.gracePeriodDays)
+      
+      if (effectiveDays > 0) {
+        // Calcular multa e juros
+        penalty = payment.amount * (paymentSettings.penaltyRate / 100)
+        const daysForInterest = Math.min(effectiveDays, paymentSettings.maxInterestDays)
+        interest = payment.amount * (paymentSettings.dailyInterestRate / 100) * daysForInterest
+        finalAmount = payment.amount + penalty + interest
+      }
+    }
+
+    return {
+      originalAmount: payment.amount,
+      penalty: Math.round(penalty * 100) / 100,
+      interest: Math.round(interest * 100) / 100,
+      finalAmount: Math.round(finalAmount * 100) / 100,
+      daysPastDue
+    }
+  }
+
   // Função para marcar como pago
   const markAsPaid = async () => {
     if (!selectedPaymentForUpdate) return
@@ -792,7 +831,31 @@ export default function Payments() {
                     <p><strong>Inquilino:</strong> {selectedPaymentForUpdate.tenant?.name || selectedPaymentForUpdate.contract?.tenant?.name}</p>
                     <p><strong>Propriedade:</strong> {selectedPaymentForUpdate.property?.title || selectedPaymentForUpdate.contract?.property?.title}</p>
                     <p><strong>Vencimento:</strong> {formatDate(selectedPaymentForUpdate.dueDate)}</p>
-                    <p><strong>Valor:</strong> R$ {selectedPaymentForUpdate.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                    {(() => {
+                      const calculation = calculateInterestAndPenalty(selectedPaymentForUpdate)
+                      return (
+                        <div className="space-y-1">
+                          <p><strong>Valor Original:</strong> R$ {calculation.originalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                          {calculation.daysPastDue > 0 && (
+                            <>
+                              <p className="text-orange-600"><strong>Atraso:</strong> {calculation.daysPastDue} dias</p>
+                              {calculation.penalty > 0 && (
+                                <p className="text-red-600"><strong>Multa (2%):</strong> R$ {calculation.penalty.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                              )}
+                              {calculation.interest > 0 && (
+                                <p className="text-red-600"><strong>Juros:</strong> R$ {calculation.interest.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                              )}
+                              <div className="pt-2 border-t border-gray-200">
+                                <p className="font-semibold text-gray-900"><strong>Valor Total a Pagar:</strong> R$ {calculation.finalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                              </div>
+                            </>
+                          )}
+                          {calculation.daysPastDue === 0 && (
+                            <p className="font-semibold text-green-600"><strong>Valor a Pagar:</strong> R$ {calculation.finalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} ✅ Em dia</p>
+                          )}
+                        </div>
+                      )
+                    })()}
                   </div>
                 </div>
 
