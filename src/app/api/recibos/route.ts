@@ -15,6 +15,10 @@ export async function GET(request: NextRequest) {
     console.log('🔍 Buscando recibos para usuário:', user.id)
     console.log('🔍 User completo:', JSON.stringify(user, null, 2))
 
+    // TESTE: Buscar TODOS os recibos primeiro
+    const allRecibos = await prisma.$queryRaw`SELECT id, "userId", "numeroRecibo" FROM recibos`
+    console.log('🔍 TODOS OS RECIBOS NO BANCO:', allRecibos)
+
     // Usar SQL direto mais simples para evitar problemas de BigInt
     let sqlQuery = `
       SELECT 
