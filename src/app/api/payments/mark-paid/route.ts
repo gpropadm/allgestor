@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { requireAuth } from '@/lib/auth-middleware'
+import { getFinancialSettings, calculateInterestAndPenalty } from '@/lib/financial-settings'
 
 // Função helper para gerar recibo - VERSAO SIMPLIFICADA
 async function gerarReciboParaPagamento(paymentId: string, userId: string) {
@@ -104,13 +105,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Configurações de multa e juros (mesmo que o frontend)
-    const paymentSettings = {
-      penaltyRate: 2.0,          // 2% padrão
-      dailyInterestRate: 0.033,  // 0.033% ao dia padrão
-      gracePeriodDays: 0,        // sem carência padrão
-      maxInterestDays: 365       // máximo 1 ano padrão
-    }
+    // Buscar configurações financeiras do usuário
+    const paymentSettings = await getFinancialSettings(user.id)
+    console.log('💰 Configurações financeiras do usuário:', paymentSettings)
 
     // Find the payment and verify ownership (only active contracts)
     console.log('🔍 Procurando pagamento no banco...')
@@ -156,39 +153,24 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Calcular multa e juros se o pagamento está atrasado
-    console.log('💰 Calculando multa e juros...')
-    const dueDate = new Date(payment.dueDate)
-    const currentDate = new Date()
-    const daysPastDue = Math.max(0, Math.floor((currentDate.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24)))
+    // Calcular multa e juros usando as configurações do usuário
+    console.log('💰 Calculando multa e juros com configurações personalizadas...')
+    const calculation = calculateInterestAndPenalty(
+      payment.amount, 
+      new Date(payment.dueDate), 
+      paymentSettings, 
+      includeInterest
+    )
     
-    let finalAmount = payment.amount
-    let penalty = 0
-    let interest = 0
+    console.log(`📊 Resultado do cálculo:`)
+    console.log(`  - Dias de atraso: ${calculation.daysPastDue}`)
+    console.log(`  - Valor original: R$ ${calculation.originalAmount.toFixed(2)}`)
+    console.log(`  - Multa (${paymentSettings.penaltyRate}%): R$ ${calculation.penalty.toFixed(2)}`)
+    console.log(`  - Juros (${paymentSettings.dailyInterestRate}% ao dia): R$ ${calculation.interest.toFixed(2)}`)
+    console.log(`  - Carência: ${paymentSettings.gracePeriodDays} dias`)
+    console.log(`  - Valor final: R$ ${calculation.finalAmount.toFixed(2)}`)
     
-    if (daysPastDue > 0 && includeInterest) {
-      // Aplicar período de carência
-      const effectiveDays = Math.max(0, daysPastDue - paymentSettings.gracePeriodDays)
-      
-      if (effectiveDays > 0) {
-        // Calcular multa e juros
-        penalty = payment.amount * (paymentSettings.penaltyRate / 100)
-        const daysForInterest = Math.min(effectiveDays, paymentSettings.maxInterestDays)
-        interest = payment.amount * (paymentSettings.dailyInterestRate / 100) * daysForInterest
-        finalAmount = payment.amount + penalty + interest
-        
-        console.log(`📊 Pagamento em atraso: ${daysPastDue} dias (COM juros)`)
-        console.log(`💸 Multa: R$ ${penalty.toFixed(2)}`)
-        console.log(`💸 Juros: R$ ${interest.toFixed(2)}`)
-        console.log(`💰 Valor final: R$ ${finalAmount.toFixed(2)}`)
-        console.log(`🔢 Valores arredondados: Amount=${Math.round(finalAmount * 100) / 100}, Penalty=${Math.round(penalty * 100) / 100}, Interest=${Math.round(interest * 100) / 100}`)
-      }
-    } else if (daysPastDue > 0 && !includeInterest) {
-      console.log(`📊 Pagamento em atraso: ${daysPastDue} dias (SEM juros - por escolha do usuário)`)
-      console.log(`💰 Valor registrado: R$ ${finalAmount.toFixed(2)} (apenas valor original)`)
-    } else {
-      console.log('✅ Pagamento em dia, sem multa ou juros')
-    }
+    const { penalty, interest, finalAmount } = calculation
 
     // Update payment
     console.log('💾 Atualizando pagamento no banco...')
@@ -198,11 +180,11 @@ export async function POST(request: NextRequest) {
         status: 'PAID',
         paidDate: new Date(),
         paymentMethod: paymentMethod,
-        amount: Math.round(finalAmount * 100) / 100, // Atualizar com valor total
-        penalty: Math.round(penalty * 100) / 100,
-        interest: Math.round(interest * 100) / 100,
+        amount: finalAmount, // Já arredondado na função
+        penalty: penalty,    // Já arredondado na função
+        interest: interest,  // Já arredondado na função
         receipts: receipts ? JSON.stringify(receipts) : null, // Usar apenas receipts
-        notes: notes || `Pagamento via ${paymentMethod} - ${new Date().toLocaleString('pt-BR')}${penalty > 0 || interest > 0 ? ` - Multa: R$ ${penalty.toFixed(2)} - Juros: R$ ${interest.toFixed(2)}` : ''}${daysPastDue > 0 && !includeInterest ? ' - Pagamento sem juros por escolha' : ''}`
+        notes: notes || `Pagamento via ${paymentMethod} - ${new Date().toLocaleString('pt-BR')}${penalty > 0 || interest > 0 ? ` - Multa: R$ ${penalty.toFixed(2)} - Juros: R$ ${interest.toFixed(2)}` : ''}${calculation.daysPastDue > 0 && !includeInterest ? ' - Pagamento sem juros por escolha' : ''}`
       },
       include: {
         contract: {

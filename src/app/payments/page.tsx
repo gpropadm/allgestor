@@ -97,6 +97,14 @@ export default function Payments() {
     amount: 0
   })
   const [uploadedReceipt, setUploadedReceipt] = useState<File | null>(null)
+  
+  // Configurações financeiras do usuário
+  const [financialSettings, setFinancialSettings] = useState({
+    penaltyRate: 2.0,
+    dailyInterestRate: 0.033,
+    gracePeriodDays: 0,
+    maxInterestDays: 365
+  })
   const [uploadedReceiptUrl, setUploadedReceiptUrl] = useState('')
   const [processingPayment, setProcessingPayment] = useState(false)
 
@@ -117,8 +125,25 @@ export default function Payments() {
     return () => clearInterval(interval)
   }, [autoRefresh])
 
+  // Função para carregar configurações financeiras
+  const fetchFinancialSettings = async () => {
+    try {
+      const response = await fetch('/api/settings')
+      if (response.ok) {
+        const settings = await response.json()
+        if (settings.financial) {
+          setFinancialSettings(settings.financial)
+          console.log('💰 Configurações financeiras carregadas:', settings.financial)
+        }
+      }
+    } catch (error) {
+      console.warn('⚠️ Erro ao buscar configurações financeiras, usando padrão:', error)
+    }
+  }
+
   useEffect(() => {
     fetchPayments()
+    fetchFinancialSettings() // Carregar configurações ao iniciar
   }, [])
 
   const fetchPayments = async (silent = false) => {
@@ -236,14 +261,9 @@ export default function Payments() {
     }
   }
 
-  // Função para calcular juros e multa (mesma lógica do backend)
+  // Função para calcular juros e multa usando as configurações do usuário
   const calculateInterestAndPenalty = (payment: Payment) => {
-    const paymentSettings = {
-      penaltyRate: 2.0,          // 2% padrão
-      dailyInterestRate: 0.033,  // 0.033% ao dia padrão
-      gracePeriodDays: 0,        // sem carência padrão
-      maxInterestDays: 365       // máximo 1 ano padrão
-    }
+    const paymentSettings = financialSettings
 
     const dueDate = new Date(payment.dueDate)
     const currentDate = new Date()
