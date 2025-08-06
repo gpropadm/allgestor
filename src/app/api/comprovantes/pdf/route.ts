@@ -204,7 +204,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
         table { 
             width: 100%; 
             border-collapse: collapse; 
-            margin: 15px 0;
+            margin: 2px 0 15px 0;
             page-break-inside: avoid;
         }
         
@@ -308,7 +308,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
     </div>
 
     <div class="section">
-        <div class="section-title">3. RENDIMENTOS (em Reais)</div>
+        <div class="section-title-no-border">3. RENDIMENTOS (em Reais)</div>
         <table>
             <thead>
                 <tr>
