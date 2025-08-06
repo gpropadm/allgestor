@@ -78,8 +78,8 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
         }
         
         .header-left {
-            flex: 1;
-            width: 50%;
+            flex: 0 0 30%;
+            width: 30%;
             padding: 15px;
             display: flex;
             align-items: center;
@@ -89,14 +89,14 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
         }
         
         .header-right {
-            flex: 1;
-            width: 50%;
+            flex: 0 0 70%;
+            width: 70%;
             padding: 15px;
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
             box-sizing: border-box;
+            position: relative;
         }
         
         .company-name { 
@@ -110,7 +110,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
         .title { 
             font-size: 14pt; 
             font-weight: bold; 
-            margin: 0 0 5px 0;
+            margin: 0 0 10px 0;
             line-height: 1.2;
             text-align: center;
         }
@@ -119,7 +119,10 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
             font-size: 12pt; 
             margin: 0;
             line-height: 1.2;
-            text-align: center;
+            text-align: right;
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
         }
         
         .section { 
