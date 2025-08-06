@@ -165,7 +165,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
             display: flex;
             flex-direction: column;
             justify-content: center;
-            text-align: right;
+            text-align: left;
         }
         
         .beneficiary-right {
@@ -176,7 +176,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
             display: flex;
             flex-direction: column;
             justify-content: center;
-            text-align: right;
+            text-align: left;
         }
         
         .field-label-small {
