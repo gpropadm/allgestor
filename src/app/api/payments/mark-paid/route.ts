@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
       include: {
         contract: {
           include: {
-            property: true,
+            property: { include: { owner: true } },
             tenant: true
           }
         }
@@ -235,7 +235,7 @@ export async function POST(request: NextRequest) {
       
       await prisma.recibo.create({
         data: {
-          userId: user.id,
+          userId: payment.contract.userId,
           contractId: updatedPayment.contractId,
           paymentId: updatedPayment.id,
           numeroRecibo: numeroRecibo,
@@ -246,11 +246,11 @@ export async function POST(request: NextRequest) {
           percentualTaxa: 10,
           valorRepassado: valorTotal * 0.9,
           pdfUrl: '/api/auto.pdf',
-          proprietarioNome: 'Proprietário',
-          proprietarioDoc: '000.000.000-00',
-          inquilinoNome: 'Inquilino',
-          inquilinoDoc: '000.000.000-00',
-          imovelEndereco: 'Endereço',
+          proprietarioNome: payment.contract.property.owner?.name || 'Proprietário',
+          proprietarioDoc: payment.contract.property.owner?.document || '000.000.000-00',
+          inquilinoNome: payment.contract.tenant?.name || 'Inquilino',
+          inquilinoDoc: payment.contract.tenant?.document || '000.000.000-00',
+          imovelEndereco: payment.contract.property?.address || 'Endereço',
           observacoes: 'Recibo automático'
         }
       })
