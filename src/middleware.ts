@@ -27,6 +27,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Rotas protegidas que ficam fora do dashboard mas precisam de auth
+  const protectedPaths = ['/recibos']
+  
+  if (protectedPaths.includes(pathname)) {
+    return NextResponse.next()
+  }
+
   // REDIRECIONAR todas as outras rotas para dashboard equivalente
   const routeMap: { [key: string]: string } = {
     '/payments': '/dashboard/payments',
