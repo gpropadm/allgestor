@@ -271,6 +271,41 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
             text-align: left;
         }
         
+        .property-col-38 {
+            flex: 0 0 38%;
+            width: 38%;
+            padding: 1px 15px;
+            border-right: 1px solid #333;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left;
+        }
+        
+        .property-col-31 {
+            flex: 0 0 31%;
+            width: 31%;
+            padding: 1px 15px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left;
+        }
+        
+        .property-col-31-with-border {
+            flex: 0 0 31%;
+            width: 31%;
+            padding: 1px 15px;
+            border-right: 1px solid #333;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left;
+        }
+        
         .info-section {
             border: 1px solid #333;
             margin-bottom: 0px;
@@ -474,15 +509,15 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
     <div class="section">
         <div class="section-title-no-border">5. INFORMAÇÕES COMPLEMENTARES</div>
         <div class="property-section">
-            <div class="property-col-35">
+            <div class="property-col-38">
                 <div class="field-label-small">CNPJ da administradora (Imobiliária):</div>
                 <div class="field-value">${data.imobiliaria.cnpj}</div>
             </div>
-            <div class="property-col-35">
+            <div class="property-col-31-with-border">
                 <div class="field-label-small">Nome da imobiliária:</div>
                 <div class="field-value">${data.imobiliaria.nome}</div>
             </div>
-            <div class="property-col-30">
+            <div class="property-col-31">
                 <div class="field-label-small">Endereço:</div>
                 <div class="field-value">${data.imobiliaria.endereco}</div>
             </div>
