@@ -1,0 +1,71 @@
+// ====================================
+// TESTE APIS QUE NÃO PRECISAM DE LOGIN
+// ====================================
+//
+// OBJETIVO: Identificar se o problema é geral ou específico
+// VOCÊ DISSE: "site funciona, cadastros funcionam"
+// VAMOS CONFIRMAR ISSO!
+
+// ====================================
+// TESTE 1: PÁGINA INICIAL (SEM LOGIN)
+// ====================================
+
+fetch('/').then(r => console.log('📱 Homepage status:', r.status)).catch(e => console.log('❌ Homepage failed:', e))
+
+// RESULTADO ESPERADO: Status 200 (rápido)
+// SE TRAVAR: Problema é geral mesmo
+
+// ====================================
+// TESTE 2: PÁGINA DE LOGIN
+// ====================================
+
+fetch('/login').then(r => console.log('🔐 Login page status:', r.status)).catch(e => console.log('❌ Login failed:', e))
+
+// RESULTADO ESPERADO: Status 200 (rápido)
+// SE TRAVAR: Problema geral no Next.js
+
+// ====================================
+// TESTE 3: ARQUIVOS ESTÁTICOS
+// ====================================
+
+fetch('/_next/static/css').then(r => console.log('🎨 CSS status:', r.status)).catch(e => console.log('🎨 CSS OK (404 esperado)'))
+
+// RESULTADO: Qualquer resposta rápida (mesmo 404)
+// SE TRAVAR: Problema no servidor
+
+// ====================================
+// TESTE 4: FAVICON
+// ====================================
+
+fetch('/favicon.ico').then(r => console.log('🔷 Favicon status:', r.status)).catch(e => console.log('🔷 Favicon OK'))
+
+// RESULTADO: Resposta rápida
+// SE TRAVAR: Servidor não responde
+
+// ====================================
+// TESTE 5: NEXT.JS API HELLO (se existir)
+// ====================================
+
+fetch('/api/hello').then(r => r.json()).then(console.log).catch(e => console.log('API hello não existe (OK)'))
+
+// ====================================
+// EXECUTE TODOS OS 5 TESTES ACIMA
+// ====================================
+//
+// ME DIGA OS RESULTADOS:
+//
+// ✅ SE TODOS FUNCIONAREM RÁPIDO:
+//    - Problema é específico de certas APIs
+//    - Site funciona, apenas APIs com DB/Prisma travando
+//    - Podemos isolar e corrigir
+//
+// ❌ SE TODOS TRAVAREM:
+//    - Problema é geral no Vercel
+//    - Contradiz o que você disse sobre site funcionar
+//    - Precisamos investigar mais
+//
+// 🤔 SE ALGUNS FUNCIONAM E OUTROS NÃO:
+//    - Problema específico de tipo de rota
+//    - Podemos identificar o padrão
+//
+// EXECUTE OS 5 TESTES E ME INFORME TODOS OS RESULTADOS!

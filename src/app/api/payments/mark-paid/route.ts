@@ -262,6 +262,11 @@ export async function POST(request: NextRequest) {
       console.error('❌ ERRO CRÍTICO AO GERAR RECIBO:', error)
       console.error('❌ Error message:', error.message)
       console.error('❌ Error stack:', error.stack)
+      
+      // Se já existe recibo para este pagamento, apenas continue
+      if (error.code === 'P2002' && error.meta?.target?.includes('paymentId')) {
+        console.log('⚠️ Recibo já existe para este pagamento')
+      }
     }
 
     return NextResponse.json({

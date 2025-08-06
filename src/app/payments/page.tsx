@@ -256,14 +256,17 @@ export default function Payments() {
         ...updateData
       })
 
-      const response = await fetch('/api/payments', {
-        method: 'PUT',
+      const response = await fetch('/api/payments/mark-paid', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          id: selectedPaymentForUpdate.id,
-          ...updateData
+          paymentId: selectedPaymentForUpdate.id,
+          paymentMethod: paymentData.paymentMethod,
+          receipts: uploadedReceiptUrl ? [{ url: uploadedReceiptUrl, type: 'receipt' }] : null,
+          notes: paymentData.notes,
+          includeInterest: true
         }),
       })
 
