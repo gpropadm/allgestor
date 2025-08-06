@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
     const mes = searchParams.get('mes')
 
     console.log('🔍 Buscando recibos para usuário:', user.id)
+    console.log('🔍 User completo:', JSON.stringify(user, null, 2))
 
     // Usar SQL direto mais simples para evitar problemas de BigInt
     let sqlQuery = `
@@ -53,6 +54,7 @@ export async function GET(request: NextRequest) {
 
     console.log('🔍 Buscando recibos para userId:', user.id)
     console.log('🔍 SQL Query:', sqlQuery)
+    console.log('🔍 SQL Params:', params)
 
     const rawRecibos = await prisma.$queryRawUnsafe(sqlQuery, ...params)
     
