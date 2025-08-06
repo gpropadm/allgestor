@@ -141,7 +141,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
         
         .section-title-no-border { 
             font-weight: bold; 
-            font-size: 11pt;
+            font-size: 10pt;
             padding: 2px 0;
             margin-bottom: 0px;
             border: none;
@@ -165,6 +165,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
             display: flex;
             flex-direction: column;
             justify-content: center;
+            text-align: right;
         }
         
         .beneficiary-right {
@@ -175,6 +176,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
             display: flex;
             flex-direction: column;
             justify-content: center;
+            text-align: right;
         }
         
         .field-label-small {
