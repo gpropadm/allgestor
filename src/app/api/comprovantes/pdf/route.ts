@@ -139,6 +139,42 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
             border: 1px solid #333;
         }
         
+        .beneficiary-section {
+            display: flex;
+            border: 2px solid #333;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        
+        .beneficiary-left {
+            flex: 0 0 70%;
+            width: 70%;
+            padding: 15px;
+            border-right: 2px solid #333;
+            box-sizing: border-box;
+        }
+        
+        .beneficiary-right {
+            flex: 0 0 30%;
+            width: 30%;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        
+        .field-label-small {
+            font-size: 9pt;
+            color: #666;
+            margin: 0 0 5px 0;
+            font-weight: normal;
+        }
+        
+        .field-value {
+            font-size: 11pt;
+            font-weight: normal;
+            margin: 0;
+            color: #000;
+        }
+        
         .field { 
             margin-bottom: 5px;
         }
@@ -225,10 +261,15 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
         </div>
     </div>
 
-    <div class="section">
-        <div class="section-title">1. BENEFICIÁRIO DO RENDIMENTO (LOCADOR)</div>
-        <div class="field"><span class="field-label">Nome/Nome Empresarial:</span> ${data.locador.nome}</div>
-        <div class="field"><span class="field-label">CPF/CNPJ:</span> ${data.locador.documento}</div>
+    <div class="beneficiary-section">
+        <div class="beneficiary-left">
+            <div class="field-label-small">Nome/Nome Empresarial:</div>
+            <div class="field-value">${data.locador.nome}</div>
+        </div>
+        <div class="beneficiary-right">
+            <div class="field-label-small">CPF/CNPJ:</div>
+            <div class="field-value">${data.locador.documento}</div>
+        </div>
     </div>
 
     <div class="section">
