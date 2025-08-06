@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { Search, Download, FileText, Calendar, AlertCircle } from 'lucide-react'
 
 interface Recibo {
@@ -19,13 +20,24 @@ interface Recibo {
 
 export default function RecibosPage() {
   const router = useRouter()
+  const { data: session, status } = useSession()
   const [recibos, setRecibos] = useState<Recibo[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
+  // Verificar autenticação
   useEffect(() => {
-    fetchRecibos()
-  }, [])
+    if (status === 'loading') return // Ainda carregando
+    
+    if (status === 'unauthenticated') {
+      router.push('/login')
+      return
+    }
+    
+    if (status === 'authenticated') {
+      fetchRecibos()
+    }
+  }, [status, router])
 
   const fetchRecibos = async () => {
     try {
@@ -75,12 +87,18 @@ export default function RecibosPage() {
     }
   }
 
-  if (loading) {
+  // Mostrar loading enquanto verifica autenticação
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2" style={{borderColor: '#f63c6a'}}></div>
       </div>
     )
+  }
+
+  // Se não autenticado, não renderizar nada (será redirecionado)
+  if (status === 'unauthenticated') {
+    return null
   }
 
   return (
