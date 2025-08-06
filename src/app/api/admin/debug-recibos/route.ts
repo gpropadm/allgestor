@@ -32,14 +32,28 @@ export async function GET(request: NextRequest) {
 
     console.log('🔢 Count via SQL:', countResult)
 
+    // Converter BigInt para string para evitar erro de serialização
+    const serializedRecibos = allRecibos.map(recibo => ({
+      ...recibo,
+      id: recibo.id?.toString(),
+      createdAt: recibo.createdAt?.toISOString(),
+      updatedAt: recibo.updatedAt?.toISOString()
+    }))
+
+    const serializedCount = Array.isArray(countResult) ? 
+      countResult.map(row => ({
+        ...row,
+        count: row.count?.toString()
+      })) : countResult
+
     return NextResponse.json({
       success: true,
       prismaFindMany: {
         count: allRecibos.length,
-        data: allRecibos
+        data: serializedRecibos
       },
       tableExists: Array.isArray(tableCheck) && tableCheck.length > 0,
-      sqlCount: countResult,
+      sqlCount: serializedCount,
       message: 'Debug concluído',
       timestamp: new Date().toISOString()
     })
