@@ -72,7 +72,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
         .header { 
             width: 100%;
             display: flex;
-            margin-bottom: 20px;
+            margin-bottom: 5px;
             border: 2px solid #333;
             box-sizing: border-box;
         }
@@ -126,7 +126,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
         }
         
         .section { 
-            margin-bottom: 20px;
+            margin-bottom: 5px;
             page-break-inside: avoid;
         }
         
@@ -151,7 +151,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
         .beneficiary-section {
             display: flex;
             border: 1px solid #333;
-            margin-bottom: 20px;
+            margin-bottom: 0px;
             box-sizing: border-box;
             min-height: 18px;
         }
@@ -196,7 +196,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
         .property-section {
             display: flex;
             border: 1px solid #333;
-            margin-bottom: 20px;
+            margin-bottom: 0px;
             box-sizing: border-box;
             min-height: 18px;
         }
@@ -235,13 +235,13 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
         table { 
             width: 100%; 
             border-collapse: collapse; 
-            margin: 2px 0 15px 0;
+            margin: 2px 0 0px 0;
             page-break-inside: avoid;
         }
         
         th, td { 
             border: 1px solid #333; 
-            padding: 8px; 
+            padding: 4px; 
             text-align: left;
         }
         
@@ -261,7 +261,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
         }
         
         .signature-area {
-            margin-top: 40px;
+            margin-top: 15px;
             text-align: center;
             page-break-inside: avoid;
         }
@@ -269,11 +269,11 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
         .signature-line {
             border-bottom: 1px solid #333;
             width: 300px;
-            margin: 30px auto 10px auto;
+            margin: 15px auto 5px auto;
         }
         
         .footer {
-            margin-top: 30px;
+            margin-top: 10px;
             font-size: 8pt;
             text-align: center;
             color: #666;
