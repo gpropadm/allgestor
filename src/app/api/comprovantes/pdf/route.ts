@@ -143,24 +143,24 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
             font-weight: bold; 
             font-size: 11pt;
             padding: 8px 0;
-            margin-bottom: 5px;
+            margin-bottom: 2px;
             border: none;
             background: none;
         }
         
         .beneficiary-section {
             display: flex;
-            border: 2px solid #333;
+            border: 1px solid #333;
             margin-bottom: 20px;
             box-sizing: border-box;
-            min-height: 28px;
+            min-height: 24px;
         }
         
         .beneficiary-left {
             flex: 0 0 70%;
             width: 70%;
-            padding: 4px 15px;
-            border-right: 2px solid #333;
+            padding: 3px 15px;
+            border-right: 1px solid #333;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
@@ -170,7 +170,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
         .beneficiary-right {
             flex: 0 0 30%;
             width: 30%;
-            padding: 4px 15px;
+            padding: 3px 15px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
