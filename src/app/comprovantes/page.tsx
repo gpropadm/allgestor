@@ -85,19 +85,15 @@ export default function ComprovantesPage() {
 
       if (response.ok) {
         if (tipo === 'pdf') {
-          // Download do PDF
-          const blob = await response.blob()
-          const url = window.URL.createObjectURL(blob)
-          const a = document.createElement('a')
-          a.style.display = 'none'
-          a.href = url
-          a.download = `comprovante-rendimentos-${ownerName.replace(/[^a-zA-Z0-9]/g, '-')}-${selectedYear}.pdf`
-          document.body.appendChild(a)
-          a.click()
-          window.URL.revokeObjectURL(url)
-          document.body.removeChild(a)
+          // HTML otimizado para PDF com auto-print
+          const html = await response.text()
+          const newWindow = window.open('', '_blank')
+          if (newWindow) {
+            newWindow.document.write(html)
+            newWindow.document.close()
+          }
           
-          showNotification('success', `PDF baixado para ${ownerName} - ${selectedYear}`, 'Sucesso!')
+          showNotification('success', `Janela de PDF aberta para ${ownerName} - ${selectedYear}`, 'Pronto para salvar!')
         } else {
           // HTML em nova janela
           const html = await response.text()

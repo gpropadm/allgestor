@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-middleware'
 import { gerarComprovanteRendimentos, gerarHTMLComprovante } from '@/lib/comprovante-rendimentos'
-import htmlToPdf from 'html-pdf-node'
 
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth(request)
     const { ownerId, contractId, ano } = await request.json()
     
-    console.log('📄 POST /api/comprovantes/pdf - Gerando PDF:', { ownerId, contractId, ano })
+    console.log('📄 POST /api/comprovantes/pdf - Gerando HTML para PDF:', { ownerId, contractId, ano })
     
     if (!ownerId || !contractId || !ano) {
       return NextResponse.json({
@@ -25,43 +24,237 @@ export async function POST(request: NextRequest) {
       }, { status: 404 })
     }
     
-    // Gerar HTML
-    const html = gerarHTMLComprovante(comprovanteData)
+    // Gerar HTML otimizado para PDF
+    const html = gerarHTMLComprovanteParaPDF(comprovanteData)
     
-    // Configurações para PDF
-    const options = {
-      format: 'A4',
-      border: {
-        top: '20mm',
-        right: '20mm',
-        bottom: '20mm',
-        left: '20mm'
-      },
-      printBackground: true,
-      displayHeaderFooter: false
-    }
-    
-    const file = { content: html }
-    
-    // Gerar PDF usando html-pdf-node
-    const pdfBuffer = await htmlToPdf.generatePdf(file, options)
-    
-    const filename = `comprovante-rendimentos-${comprovanteData.locador.nome.replace(/[^a-zA-Z0-9]/g, '-')}-${ano}.pdf`
-    
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(html, {
       status: 200,
       headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${filename}"`,
-        'Content-Length': pdfBuffer.length.toString()
+        'Content-Type': 'text/html; charset=utf-8',
+        'X-Filename': `comprovante-rendimentos-${comprovanteData.locador.nome.replace(/[^a-zA-Z0-9]/g, '-')}-${ano}.pdf`
       }
     })
     
   } catch (error) {
-    console.error('❌ Erro ao gerar PDF:', error)
+    console.error('❌ Erro ao gerar HTML para PDF:', error)
     return NextResponse.json({
-      error: 'Erro ao gerar PDF do comprovante',
+      error: 'Erro ao gerar comprovante para PDF',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
+}
+
+// HTML otimizado para conversão em PDF via browser
+function gerarHTMLComprovanteParaPDF(data: any): string {
+  const formatCurrency = (value: number) => 
+    `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+  
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Comprovante Anual de Rendimentos - ${data.locador.nome} - ${data.ano}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+        
+        body { 
+            font-family: Arial, sans-serif; 
+            font-size: 10pt; 
+            margin: 0; 
+            line-height: 1.4;
+            color: #000;
+        }
+        
+        .header { 
+            text-align: center; 
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 15px;
+        }
+        
+        .title { 
+            font-size: 16pt; 
+            font-weight: bold; 
+            margin-bottom: 10px;
+        }
+        
+        .subtitle { 
+            font-size: 12pt; 
+            margin-bottom: 20px;
+        }
+        
+        .section { 
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+        }
+        
+        .section-title { 
+            font-weight: bold; 
+            font-size: 11pt;
+            background-color: #f0f0f0;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #333;
+        }
+        
+        .field { 
+            margin-bottom: 5px;
+        }
+        
+        .field-label { 
+            font-weight: bold;
+        }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 15px 0;
+            page-break-inside: avoid;
+        }
+        
+        th, td { 
+            border: 1px solid #333; 
+            padding: 8px; 
+            text-align: left;
+        }
+        
+        th { 
+            background-color: #f0f0f0; 
+            font-weight: bold; 
+            text-align: center;
+        }
+        
+        .number { 
+            text-align: right;
+        }
+        
+        .total-row { 
+            font-weight: bold; 
+            background-color: #f9f9f9;
+        }
+        
+        .signature-area {
+            margin-top: 40px;
+            text-align: center;
+            page-break-inside: avoid;
+        }
+        
+        .signature-line {
+            border-bottom: 1px solid #333;
+            width: 300px;
+            margin: 30px auto 10px auto;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            font-size: 8pt;
+            text-align: center;
+            color: #666;
+        }
+        
+        @media print {
+            body { margin: 0; }
+            .no-print { display: none; }
+        }
+    </style>
+    <script>
+        // Auto-print quando carregado
+        window.onload = function() {
+            setTimeout(function() {
+                window.print();
+            }, 500);
+        }
+    </script>
+</head>
+<body>
+    <div class="no-print" style="position: fixed; top: 10px; right: 10px; z-index: 1000;">
+        <button onclick="window.print()" style="padding: 10px 20px; background: #f63c6a; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            📄 Salvar como PDF
+        </button>
+    </div>
+
+    <div class="header">
+        <div class="title">COMPROVANTE ANUAL DE RENDIMENTOS DE ALUGUÉIS</div>
+        <div class="subtitle">Ano-calendário: ${data.ano}</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">1. BENEFICIÁRIO DO RENDIMENTO (LOCADOR)</div>
+        <div class="field"><span class="field-label">Nome/Nome Empresarial:</span> ${data.locador.nome}</div>
+        <div class="field"><span class="field-label">CPF/CNPJ:</span> ${data.locador.documento}</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. FONTE PAGADORA (LOCATÁRIO)</div>
+        <div class="field"><span class="field-label">Nome/Nome Empresarial:</span> ${data.locatario.nome}</div>
+        <div class="field"><span class="field-label">CPF/CNPJ:</span> ${data.locatario.documento}</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">3. RENDIMENTOS (em Reais)</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Mês</th>
+                    <th>Rendimento Bruto</th>
+                    <th>Valor Comissão</th>
+                    <th>Imposto Retido</th>
+                    <th>Valor Líquido</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${data.rendimentosPorMes.map((mes: any) => `
+                <tr>
+                    <td>${mes.mes}</td>
+                    <td class="number">${formatCurrency(mes.rendimentoBruto)}</td>
+                    <td class="number">${formatCurrency(mes.valorComissao)}</td>
+                    <td class="number">${formatCurrency(mes.impostoRetido)}</td>
+                    <td class="number">${formatCurrency(mes.valorLiquido)}</td>
+                </tr>
+                `).join('')}
+                <tr class="total-row">
+                    <td><strong>TOTAL</strong></td>
+                    <td class="number"><strong>${formatCurrency(data.totais.rendimentoBruto)}</strong></td>
+                    <td class="number"><strong>${formatCurrency(data.totais.valorComissao)}</strong></td>
+                    <td class="number"><strong>${formatCurrency(data.totais.impostoRetido)}</strong></td>
+                    <td class="number"><strong>${formatCurrency(data.totais.valorLiquido)}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">4. DADOS DO IMÓVEL</div>
+        <div class="field"><span class="field-label">Contrato nº:</span> ${data.imovel.numeroContrato}</div>
+        <div class="field"><span class="field-label">Data do contrato:</span> ${data.imovel.dataContrato}</div>
+        <div class="field"><span class="field-label">Endereço do imóvel:</span> ${data.imovel.endereco}</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">5. INFORMAÇÕES COMPLEMENTARES</div>
+        <div class="field"><span class="field-label">CNPJ da administradora (Imobiliária):</span> ${data.imobiliaria.cnpj}</div>
+        <div class="field"><span class="field-label">Nome da imobiliária:</span> ${data.imobiliaria.nome}</div>
+        <div class="field"><span class="field-label">Endereço:</span> ${data.imobiliaria.endereco}</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">6. RESPONSÁVEL PELAS INFORMAÇÕES</div>
+        <div class="field"><span class="field-label">Cidade e Data:</span> ${data.imobiliaria.cidade}, ${new Date().toLocaleDateString('pt-BR')}</div>
+        
+        <div class="signature-area">
+            <div class="signature-line"></div>
+            <div>Assinatura do Responsável</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Este documento foi gerado automaticamente pelo sistema ${data.imobiliaria.nome} em ${new Date().toLocaleString('pt-BR')}
+    </div>
+</body>
+</html>
+  `
 }
