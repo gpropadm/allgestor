@@ -110,6 +110,11 @@ export default function RecibosPage() {
             <p className="text-gray-600 mt-1">
               Recibos gerados automaticamente quando pagamentos são marcados como pagos
             </p>
+            {session?.user?.email && (
+              <p className="text-sm text-blue-600 mt-1">
+                👤 Usuário logado: {session.user.email}
+              </p>
+            )}
           </div>
           <div className="flex gap-2 mt-4 sm:mt-0">
             <button 
