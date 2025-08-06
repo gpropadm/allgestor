@@ -44,6 +44,7 @@ const menuItems = [
   { icon: FileText, label: 'Contratos', href: '/contracts' },
   { icon: Receipt, label: 'Pagamentos', href: '/payments' },
   { icon: FileText, label: '🧾 Recibos', href: '/recibos', featured: true },
+  { icon: FileText, label: '📄 Comprovantes', href: '/comprovantes', featured: true },
   { icon: TrendingDown, label: 'Despesas', href: '/expenses' },
   { icon: Calculator, label: 'Financeiro', href: '/financial' },
   { icon: FileText, label: '📊 DIMOB', href: '/dashboard/dimob', featured: true },
