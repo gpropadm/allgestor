@@ -70,21 +70,43 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
         }
         
         .header { 
-            text-align: center; 
-            margin-bottom: 30px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
             border-bottom: 2px solid #333;
             padding-bottom: 15px;
+            box-sizing: border-box;
+        }
+        
+        .header-left {
+            flex: 0 0 auto;
+        }
+        
+        .header-right {
+            flex: 1;
+            text-align: right;
+        }
+        
+        .company-name { 
+            font-size: 18pt; 
+            font-weight: bold; 
+            color: #f63c6a;
+            margin: 0;
         }
         
         .title { 
-            font-size: 16pt; 
+            font-size: 14pt; 
             font-weight: bold; 
-            margin-bottom: 10px;
+            margin: 0 0 5px 0;
+            line-height: 1.2;
         }
         
         .subtitle { 
             font-size: 12pt; 
-            margin-bottom: 20px;
+            margin: 0;
+            line-height: 1.2;
         }
         
         .section { 
@@ -178,8 +200,13 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
     </div>
 
     <div class="header">
-        <div class="title">COMPROVANTE ANUAL DE RENDIMENTOS DE ALUGUÉIS</div>
-        <div class="subtitle">Ano-calendário: ${data.ano}</div>
+        <div class="header-left">
+            <div class="company-name">All Gestor</div>
+        </div>
+        <div class="header-right">
+            <div class="title">COMPROVANTE ANUAL DE RENDIMENTOS DE ALUGUÉIS</div>
+            <div class="subtitle">Ano-calendário: ${data.ano}</div>
+        </div>
     </div>
 
     <div class="section">
