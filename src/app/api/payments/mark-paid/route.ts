@@ -222,71 +222,41 @@ export async function POST(request: NextRequest) {
     console.log(`  - Interest: ${updatedPayment.interest}`)
     console.log(`  - Status: ${updatedPayment.status}`)
 
-    // 🧾 GERAR RECIBO AUTOMATICAMENTE - LOGS INTENSIVOS
-    console.log('🧾 ===== INICIANDO GERAÇÃO DE RECIBO =====')
-    console.log('🧾 Payment ID:', updatedPayment.id)
-    console.log('🧾 User ID:', user.id)
-    console.log('🧾 Contract ID:', updatedPayment.contractId)
-    console.log('🧾 Payment Amount:', updatedPayment.amount)
-    
+    // 🧾 GERAR RECIBO AUTOMATICAMENTE - VERSÃO ULTRA SIMPLES
+    console.log('🧾 INICIANDO GERAÇÃO DE RECIBO...')
     let recibo = null
     
     try {
-      // TESTE DE CONEXÃO COM BANCO PRIMEIRO
-      console.log('🔍 TESTANDO CONEXÃO COM BANCO...')
-      const testQuery = await prisma.$queryRaw`SELECT COUNT(*) as count FROM recibos`
-      console.log('✅ CONEXÃO OK - Recibos atuais no banco:', testQuery)
-
-      // DADOS DO RECIBO
       const now = new Date()
-      const reciboId = `recibo_${Date.now()}_auto`
       const numeroRecibo = `AUTO-${Date.now()}`
-      
       const valorTotal = Number(updatedPayment.amount)
-      const percentualTaxa = 10
-      const taxaAdministracao = valorTotal * 0.1
-      const valorRepassado = valorTotal - taxaAdministracao
-
-      console.log('🧾 DADOS CALCULADOS:', {
-        reciboId,
-        numeroRecibo, 
-        valorTotal,
-        taxaAdministracao,
-        valorRepassado,
-        userId: user.id,
-        contractId: updatedPayment.contractId,
-        paymentId: updatedPayment.id
+      
+      console.log('🧾 Inserindo recibo simples...')
+      
+      await prisma.recibo.create({
+        data: {
+          userId: user.id,
+          contractId: updatedPayment.contractId,
+          paymentId: updatedPayment.id,
+          numeroRecibo: numeroRecibo,
+          competencia: now,
+          dataPagamento: now,
+          valorTotal: valorTotal,
+          taxaAdministracao: valorTotal * 0.1,
+          percentualTaxa: 10,
+          valorRepassado: valorTotal * 0.9,
+          pdfUrl: '/api/auto.pdf',
+          proprietarioNome: 'Proprietário',
+          proprietarioDoc: '000.000.000-00',
+          inquilinoNome: 'Inquilino',
+          inquilinoDoc: '000.000.000-00',
+          imovelEndereco: 'Endereço',
+          observacoes: 'Recibo automático'
+        }
       })
 
-      // EXECUTAR INSERÇÃO
-      console.log('⚡ EXECUTANDO INSERÇÃO NA TABELA RECIBOS...')
-      
-      const insertResult = await prisma.$executeRaw`
-        INSERT INTO recibos (
-          id, "userId", "contractId", "paymentId", "numeroRecibo", 
-          competencia, "dataPagamento", "valorTotal", "taxaAdministracao", 
-          "percentualTaxa", "valorRepassado", "pdfUrl", "proprietarioNome", 
-          "proprietarioDoc", "inquilinoNome", "inquilinoDoc", "imovelEndereco",
-          "observacoes", "createdAt", "updatedAt"
-        ) VALUES (
-          ${reciboId}, ${user.id}, ${updatedPayment.contractId}, ${updatedPayment.id}, ${numeroRecibo},
-          ${now}, ${now}, 
-          ${valorTotal}, ${taxaAdministracao}, ${percentualTaxa}, ${valorRepassado},
-          ${'/api/auto.pdf'}, ${'Proprietário Auto'}, 
-          ${'000.000.000-00'}, ${'Inquilino Auto'}, 
-          ${'000.000.000-00'}, ${'Endereço Auto'},
-          ${'Recibo gerado automaticamente'}, ${now}, ${now}
-        )
-      `
-      
-      console.log('✅ INSERÇÃO EXECUTADA! Resultado:', insertResult)
-
-      // VERIFICAR SE REALMENTE INSERIU
-      const verification = await prisma.$queryRaw`SELECT COUNT(*) as count FROM recibos WHERE "paymentId" = ${updatedPayment.id}`
-      console.log('🔍 VERIFICAÇÃO PÓS-INSERÇÃO:', verification)
-
-      recibo = { id: reciboId, numeroRecibo, valorTotal, taxaAdministracao }
-      console.log('🎉 RECIBO CRIADO E VERIFICADO COM SUCESSO:', numeroRecibo)
+      recibo = { numeroRecibo, valorTotal }
+      console.log('✅ RECIBO CRIADO:', numeroRecibo)
       
     } catch (error: any) {
       console.error('❌ ERRO CRÍTICO AO GERAR RECIBO:', error)
