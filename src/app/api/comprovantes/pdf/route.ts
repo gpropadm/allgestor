@@ -294,9 +294,17 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
     </div>
 
     <div class="section">
-        <div class="section-title">2. FONTE PAGADORA (LOCATÁRIO)</div>
-        <div class="field"><span class="field-label">Nome/Nome Empresarial:</span> ${data.locatario.nome}</div>
-        <div class="field"><span class="field-label">CPF/CNPJ:</span> ${data.locatario.documento}</div>
+        <div class="section-title-no-border">2. FONTE PAGADORA (LOCATÁRIO)</div>
+        <div class="beneficiary-section">
+            <div class="beneficiary-left">
+                <div class="field-label-small">Nome/Nome Empresarial:</div>
+                <div class="field-value">${data.locatario.nome}</div>
+            </div>
+            <div class="beneficiary-right">
+                <div class="field-label-small">CPF/CNPJ:</div>
+                <div class="field-value">${data.locatario.documento}</div>
+            </div>
+        </div>
     </div>
 
     <div class="section">
