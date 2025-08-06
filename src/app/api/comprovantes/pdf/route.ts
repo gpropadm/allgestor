@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-middleware'
 import { gerarComprovanteRendimentos, gerarHTMLComprovante } from '@/lib/comprovante-rendimentos'
-import puppeteer from 'puppeteer'
+import htmlToPdf from 'html-pdf-node'
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,44 +28,34 @@ export async function POST(request: NextRequest) {
     // Gerar HTML
     const html = gerarHTMLComprovante(comprovanteData)
     
-    // Gerar PDF usando Puppeteer (alternativa para ambiente serverless)
-    let browser
-    try {
-      browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-      })
-      
-      const page = await browser.newPage()
-      await page.setContent(html)
-      
-      const pdfBuffer = await page.pdf({
-        format: 'A4',
-        margin: {
-          top: '20mm',
-          right: '20mm',
-          bottom: '20mm',
-          left: '20mm'
-        },
-        printBackground: true
-      })
-      
-      const filename = `comprovante-rendimentos-${comprovanteData.locador.nome.replace(/[^a-zA-Z0-9]/g, '-')}-${ano}.pdf`
-      
-      return new NextResponse(pdfBuffer, {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/pdf',
-          'Content-Disposition': `attachment; filename="${filename}"`,
-          'Content-Length': pdfBuffer.length.toString()
-        }
-      })
-      
-    } finally {
-      if (browser) {
-        await browser.close()
-      }
+    // Configurações para PDF
+    const options = {
+      format: 'A4',
+      border: {
+        top: '20mm',
+        right: '20mm',
+        bottom: '20mm',
+        left: '20mm'
+      },
+      printBackground: true,
+      displayHeaderFooter: false
     }
+    
+    const file = { content: html }
+    
+    // Gerar PDF usando html-pdf-node
+    const pdfBuffer = await htmlToPdf.generatePdf(file, options)
+    
+    const filename = `comprovante-rendimentos-${comprovanteData.locador.nome.replace(/[^a-zA-Z0-9]/g, '-')}-${ano}.pdf`
+    
+    return new NextResponse(pdfBuffer, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Length': pdfBuffer.length.toString()
+      }
+    })
     
   } catch (error) {
     console.error('❌ Erro ao gerar PDF:', error)

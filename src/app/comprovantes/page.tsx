@@ -64,12 +64,14 @@ export default function ComprovantesPage() {
     setTimeout(() => setNotification(null), 5000)
   }
 
-  const gerarComprovante = async (ownerId: string, contractId: string, ownerName: string) => {
+  const gerarComprovante = async (ownerId: string, contractId: string, ownerName: string, tipo: 'html' | 'pdf' = 'html') => {
     setGenerating(true)
     try {
-      console.log('🔄 Gerando comprovante:', { ownerId, contractId, selectedYear })
+      console.log('🔄 Gerando comprovante:', { ownerId, contractId, selectedYear, tipo })
       
-      const response = await fetch('/api/comprovantes/html', {
+      const endpoint = tipo === 'pdf' ? '/api/comprovantes/pdf' : '/api/comprovantes/html'
+      
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -82,16 +84,31 @@ export default function ComprovantesPage() {
       })
 
       if (response.ok) {
-        const html = await response.text()
-        
-        // Abrir em nova janela para visualizar/imprimir
-        const newWindow = window.open('', '_blank')
-        if (newWindow) {
-          newWindow.document.write(html)
-          newWindow.document.close()
+        if (tipo === 'pdf') {
+          // Download do PDF
+          const blob = await response.blob()
+          const url = window.URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.style.display = 'none'
+          a.href = url
+          a.download = `comprovante-rendimentos-${ownerName.replace(/[^a-zA-Z0-9]/g, '-')}-${selectedYear}.pdf`
+          document.body.appendChild(a)
+          a.click()
+          window.URL.revokeObjectURL(url)
+          document.body.removeChild(a)
+          
+          showNotification('success', `PDF baixado para ${ownerName} - ${selectedYear}`, 'Sucesso!')
+        } else {
+          // HTML em nova janela
+          const html = await response.text()
+          const newWindow = window.open('', '_blank')
+          if (newWindow) {
+            newWindow.document.write(html)
+            newWindow.document.close()
+          }
+          
+          showNotification('success', `Comprovante visualizado para ${ownerName} - ${selectedYear}`, 'Sucesso!')
         }
-        
-        showNotification('success', `Comprovante gerado para ${ownerName} - ${selectedYear}`, 'Sucesso!')
       } else {
         const errorData = await response.json()
         showNotification('error', errorData.error || 'Erro ao gerar comprovante')
@@ -246,11 +263,23 @@ export default function ComprovantesPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="ml-4">
+                        <div className="ml-4 flex gap-2">
                           <button
-                            onClick={() => gerarComprovante(proprietario.id, contrato.id, proprietario.nome)}
+                            onClick={() => gerarComprovante(proprietario.id, contrato.id, proprietario.nome, 'html')}
                             disabled={generating}
-                            className={`px-4 py-2 text-white rounded-lg transition-colors flex items-center space-x-2 ${
+                            className={`px-3 py-2 text-white rounded-lg transition-colors flex items-center space-x-1 text-sm ${
+                              generating 
+                                ? 'bg-gray-400 cursor-not-allowed' 
+                                : 'bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg'
+                            }`}
+                          >
+                            <FileText className="w-4 h-4" />
+                            <span>Ver</span>
+                          </button>
+                          <button
+                            onClick={() => gerarComprovante(proprietario.id, contrato.id, proprietario.nome, 'pdf')}
+                            disabled={generating}
+                            className={`px-3 py-2 text-white rounded-lg transition-colors flex items-center space-x-1 text-sm ${
                               generating 
                                 ? 'bg-gray-400 cursor-not-allowed' 
                                 : 'hover:opacity-90 shadow-md hover:shadow-lg'
@@ -258,7 +287,7 @@ export default function ComprovantesPage() {
                             style={{backgroundColor: generating ? undefined : '#f63c6a'}}
                           >
                             <Download className="w-4 h-4" />
-                            <span>{generating ? 'Gerando...' : 'Gerar'}</span>
+                            <span>{generating ? 'Gerando...' : 'PDF'}</span>
                           </button>
                         </div>
                       </div>
