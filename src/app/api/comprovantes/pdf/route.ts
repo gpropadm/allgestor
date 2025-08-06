@@ -193,6 +193,37 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
             color: #000;
         }
         
+        .property-section {
+            display: flex;
+            border: 1px solid #333;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            min-height: 18px;
+        }
+        
+        .property-col-25 {
+            flex: 0 0 25%;
+            width: 25%;
+            padding: 1px 15px;
+            border-right: 1px solid #333;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left;
+        }
+        
+        .property-col-50 {
+            flex: 0 0 50%;
+            width: 50%;
+            padding: 1px 15px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left;
+        }
+        
         .field { 
             margin-bottom: 5px;
         }
@@ -341,10 +372,21 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
     </div>
 
     <div class="section">
-        <div class="section-title">4. DADOS DO IMÓVEL</div>
-        <div class="field"><span class="field-label">Contrato nº:</span> ${data.imovel.numeroContrato}</div>
-        <div class="field"><span class="field-label">Data do contrato:</span> ${data.imovel.dataContrato}</div>
-        <div class="field"><span class="field-label">Endereço do imóvel:</span> ${data.imovel.endereco}</div>
+        <div class="section-title-no-border">4. DADOS DO IMÓVEL</div>
+        <div class="property-section">
+            <div class="property-col-25">
+                <div class="field-label-small">Contrato nº:</div>
+                <div class="field-value">${data.imovel.numeroContrato}</div>
+            </div>
+            <div class="property-col-25">
+                <div class="field-label-small">Data do contrato:</div>
+                <div class="field-value">${data.imovel.dataContrato}</div>
+            </div>
+            <div class="property-col-50">
+                <div class="field-label-small">Endereço do imóvel:</div>
+                <div class="field-value">${data.imovel.endereco}</div>
+            </div>
+        </div>
     </div>
 
     <div class="section">
