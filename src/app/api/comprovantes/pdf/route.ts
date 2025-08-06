@@ -232,10 +232,26 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
         
         .info-row {
             display: flex;
-            padding: 1px 15px;
             border-bottom: 1px solid #333;
             box-sizing: border-box;
             min-height: 18px;
+            align-items: center;
+        }
+        
+        .info-label {
+            flex: 0 0 50%;
+            padding: 1px 15px;
+            border-right: 1px solid #333;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+        }
+        
+        .info-value {
+            flex: 0 0 50%;
+            padding: 1px 15px;
+            box-sizing: border-box;
+            display: flex;
             align-items: center;
         }
         
@@ -412,16 +428,28 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
         <div class="section-title-no-border">5. INFORMAÇÕES COMPLEMENTARES</div>
         <div class="info-section">
             <div class="info-row">
-                <div class="field-label-small">CNPJ da administradora (Imobiliária):</div>
-                <div class="field-value" style="margin-left: 10px;">${data.imobiliaria.cnpj}</div>
+                <div class="info-label">
+                    <div class="field-label-small">CNPJ da administradora (Imobiliária):</div>
+                </div>
+                <div class="info-value">
+                    <div class="field-value">${data.imobiliaria.cnpj}</div>
+                </div>
             </div>
             <div class="info-row">
-                <div class="field-label-small">Nome da imobiliária:</div>
-                <div class="field-value" style="margin-left: 10px;">${data.imobiliaria.nome}</div>
+                <div class="info-label">
+                    <div class="field-label-small">Nome da imobiliária:</div>
+                </div>
+                <div class="info-value">
+                    <div class="field-value">${data.imobiliaria.nome}</div>
+                </div>
             </div>
             <div class="info-row">
-                <div class="field-label-small">Endereço:</div>
-                <div class="field-value" style="margin-left: 10px;">${data.imobiliaria.endereco}</div>
+                <div class="info-label">
+                    <div class="field-label-small">Endereço:</div>
+                </div>
+                <div class="info-value">
+                    <div class="field-value">${data.imobiliaria.endereco}</div>
+                </div>
             </div>
         </div>
     </div>
