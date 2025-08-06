@@ -224,6 +224,29 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
             text-align: left;
         }
         
+        .property-col-30 {
+            flex: 0 0 30%;
+            width: 30%;
+            padding: 1px 15px;
+            border-right: 1px solid #333;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left;
+        }
+        
+        .property-col-40 {
+            flex: 0 0 40%;
+            width: 40%;
+            padding: 1px 15px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left;
+        }
+        
         .info-section {
             border: 1px solid #333;
             margin-bottom: 0px;
@@ -427,15 +450,15 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
     <div class="section">
         <div class="section-title-no-border">5. INFORMAÇÕES COMPLEMENTARES</div>
         <div class="property-section">
-            <div class="property-col-25">
+            <div class="property-col-30">
                 <div class="field-label-small">CNPJ da administradora (Imobiliária):</div>
                 <div class="field-value">${data.imobiliaria.cnpj}</div>
             </div>
-            <div class="property-col-25">
+            <div class="property-col-30">
                 <div class="field-label-small">Nome da imobiliária:</div>
                 <div class="field-value">${data.imobiliaria.nome}</div>
             </div>
-            <div class="property-col-50">
+            <div class="property-col-40">
                 <div class="field-label-small">Endereço:</div>
                 <div class="field-value">${data.imobiliaria.endereco}</div>
             </div>
