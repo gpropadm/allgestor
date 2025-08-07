@@ -21,18 +21,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(results, { status: 500 })
     }
     
-    // Verificar tabelas principais
-    const tables = ['Contract', 'Property', 'Owner', 'Tenant', 'Payment', 'User']
+    // Verificar tabelas principais usando Prisma methods
+    const tableTests = {
+      Contract: () => prisma.contract.count(),
+      Property: () => prisma.property.count(), 
+      Owner: () => prisma.owner.count(),
+      Tenant: () => prisma.tenant.count(),
+      Payment: () => prisma.payment.count(),
+      User: () => prisma.user.count()
+    }
     
-    for (const table of tables) {
+    for (const [table, countFn] of Object.entries(tableTests)) {
       try {
-        const count = await prisma.$queryRaw`
-          SELECT COUNT(*) as count 
-          FROM ${table}
-        `
+        const count = await countFn()
         results.tables[table] = {
           status: '✅ OK',
-          count: Number((count as any)[0].count)
+          count: count
         }
       } catch (error: any) {
         results.tables[table] = {
@@ -45,29 +49,26 @@ export async function GET(request: NextRequest) {
     
     // Verificar especificamente o campo contractNumber
     try {
-      const contractFields = await prisma.$queryRaw`
-        SELECT column_name, data_type, is_nullable
-        FROM information_schema.columns 
-        WHERE table_name = 'Contract' 
-        AND table_schema = 'public'
-        ORDER BY ordinal_position
+      // Tentar buscar um contrato com contractNumber
+      await prisma.$queryRaw`
+        SELECT id, "contractNumber" 
+        FROM "Contract" 
+        LIMIT 1
       `
       
-      results.contract_schema = contractFields
-      
-      const hasContractNumber = (contractFields as any[]).some(
-        field => field.column_name === 'contractNumber'
-      )
-      
-      results.contractNumber_field = hasContractNumber ? '✅ Exists' : '❌ Missing'
-      
-      if (!hasContractNumber) {
-        results.schema_issues.push('Campo contractNumber não existe na tabela Contract')
-      }
+      results.contractNumber_field = '✅ Exists'
+      results.contract_schema = 'Field exists and accessible'
       
     } catch (error: any) {
-      results.contract_schema = 'Error checking schema'
-      results.schema_issues.push(`Schema check error: ${error.message}`)
+      if (error.message.includes('contractNumber') || error.message.includes('column') || error.message.includes('does not exist')) {
+        results.contractNumber_field = '❌ Missing'
+        results.contract_schema = 'Field does not exist in database'
+        results.schema_issues.push('Campo contractNumber não existe na tabela Contract')
+      } else {
+        results.contractNumber_field = '⚠️ Unknown'
+        results.contract_schema = `Error checking: ${error.message}`
+        results.schema_issues.push(`Schema check error: ${error.message}`)
+      }
     }
     
     // Verificar se há problemas de Prisma Client
