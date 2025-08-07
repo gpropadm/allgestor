@@ -73,7 +73,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
             width: 100%;
             display: flex;
             margin-bottom: 5px;
-            border: 2px solid #333;
+            border: 1px solid #333;
             box-sizing: border-box;
         }
         
@@ -84,7 +84,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
             display: flex;
             align-items: center;
             justify-content: center;
-            border-right: 2px solid #333;
+            border-right: 1px solid #333;
             box-sizing: border-box;
         }
         
@@ -116,7 +116,7 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
         }
         
         .subtitle { 
-            font-size: 12pt; 
+            font-size: 10pt; 
             margin: 0;
             line-height: 1.2;
             text-align: right;
