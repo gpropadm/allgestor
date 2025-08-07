@@ -181,6 +181,7 @@ model Tenant {
 
 model Contract {
   id                        String         @id @default(cuid())
+  contractNumber            String?        @unique // Número amigável do contrato (ex: CTR-2024-001)
   propertyId                String
   tenantId                  String
   companyId                 String

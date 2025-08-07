@@ -161,7 +161,7 @@ export async function gerarComprovanteRendimentos(
       },
       imovel: {
         endereco: contract.property.address || 'Endereço não informado',
-        numeroContrato: contract.id,
+        numeroContrato: contract.contractNumber || contract.id,
         dataContrato: contract.startDate.toLocaleDateString('pt-BR')
       },
       imobiliaria: {
