@@ -964,8 +964,8 @@ export default function Settings() {
                   </div>
                 </div>
 
-                {/* Seção DIMOB - Completamente removida até migration */}
-                {false && false && (
+                {/* Seção DIMOB - Reativada após migration executada */}
+                {true && (
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
                   <div className="mb-6">
                     <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
