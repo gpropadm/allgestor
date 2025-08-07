@@ -33,6 +33,9 @@ interface CompanySettings {
   zipCode: string
   logo: string
   website: string
+  // Campos DIMOB obrigatórios
+  responsibleCpf: string
+  municipalityCode: string
 }
 
 interface SystemSettings {
@@ -116,7 +119,10 @@ export default function Settings() {
     state: 'SP',
     zipCode: '',
     logo: '',
-    website: ''
+    website: '',
+    // Campos DIMOB obrigatórios
+    responsibleCpf: '',
+    municipalityCode: ''
   })
 
   const [systemSettings, setSystemSettings] = useState<SystemSettings>({
@@ -409,6 +415,14 @@ export default function Settings() {
     const numbers = value.replace(/\D/g, '').slice(0, 8)
     if (numbers.length <= 5) return numbers
     return numbers.replace(/(\d{5})(\d{0,3})/, '$1-$2')
+  }
+
+  const formatCPF = (value: string) => {
+    const numbers = value.replace(/\D/g, '').slice(0, 11)
+    if (numbers.length <= 3) return numbers
+    if (numbers.length <= 6) return numbers.replace(/(\d{3})(\d{0,3})/, '$1.$2')
+    if (numbers.length <= 9) return numbers.replace(/(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3')
+    return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4')
   }
 
   const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -787,6 +801,72 @@ export default function Settings() {
                       className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="https://exemplo.com"
                     />
+                  </div>
+                </div>
+
+                {/* Seção DIMOB */}
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                  <div className="mb-6">
+                    <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                      📄 Configurações DIMOB (Receita Federal)
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Campos obrigatórios para gerar o arquivo DIMOB da Receita Federal
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        CPF do Responsável pela Empresa na RFB *
+                      </label>
+                      <input
+                        type="text"
+                        value={companySettings.responsibleCpf}
+                        onChange={(e) => setCompanySettings(prev => ({ ...prev, responsibleCpf: formatCPF(e.target.value) }))}
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="000.000.000-00"
+                        maxLength={14}
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        CPF da pessoa responsável pela empresa perante à Receita Federal
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Código do Município (IBGE) *
+                      </label>
+                      <input
+                        type="text"
+                        value={companySettings.municipalityCode}
+                        onChange={(e) => setCompanySettings(prev => ({ ...prev, municipalityCode: e.target.value.replace(/\D/g, '').slice(0, 7) }))}
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="5300108"
+                        maxLength={7}
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Código IBGE do município da empresa (ex: 5300108 para Brasília)
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-shrink-0">
+                        <SettingsIcon className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h5 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
+                          ℹ️ Sobre os campos DIMOB
+                        </h5>
+                        <div className="text-xs text-blue-800 dark:text-blue-200 space-y-1">
+                          <p><strong>DIMOB:</strong> Declaração obrigatória para imobiliárias na Receita Federal</p>
+                          <p><strong>CPF Responsável:</strong> Pessoa física responsável pela empresa (geralmente sócio ou administrador)</p>
+                          <p><strong>Código IBGE:</strong> Consulte em <a href="https://cidades.ibge.gov.br/" target="_blank" className="underline">cidades.ibge.gov.br</a></p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 

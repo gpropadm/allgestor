@@ -59,6 +59,10 @@ model Company {
   active        Boolean   @default(true)
   subscription  String    @default("BASIC") // BASIC, PREMIUM, ENTERPRISE
   
+  // Campos obrigatórios para DIMOB
+  responsibleCpf   String? // CPF do responsável pela pessoa jurídica perante à RFB
+  municipalityCode String? // Código IBGE do município da empresa
+  
   // Configurações ASAAS para Split
   asaasApiKey   String?   // API Key principal da imobiliária no ASAAS
   asaasWalletId String?   // Wallet ID da imobiliária para receber comissões
@@ -111,6 +115,11 @@ model Property {
   amenities    String         // JSON string for SQLite
   acceptsPartnership Boolean    @default(false) // Aceita parceria com outros usuários
   acceptsFinancing   Boolean    @default(false) // Aceita financiamento bancário
+  
+  // Campos obrigatórios para DIMOB
+  dimobPropertyType String? @default("U") // U=Urbano, R=Rural (obrigatório DIMOB)
+  municipalityCode  String? // Código IBGE do município do imóvel
+  extractedCep      String? // CEP extraído/validado para DIMOB (8 dígitos)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   contracts     Contract[]
