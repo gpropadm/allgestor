@@ -9,8 +9,9 @@ export async function POST(request: NextRequest) {
     const user = await requireAuthWithCompany(request)
     console.log('User ID:', user.id)
     
-    const { year } = await request.json()
+    const { year, ownerId } = await request.json()
     console.log('Year requested:', year)
+    console.log('Owner ID:', ownerId)
     
     if (!year || year < 2020 || year > 2030) {
       return NextResponse.json(
@@ -19,10 +20,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`🚀 Iniciando geração DIMOB para ano ${year}...`)
+    if (!ownerId) {
+      return NextResponse.json(
+        { error: 'ID do proprietário é obrigatório.' },
+        { status: 400 }
+      )
+    }
+
+    console.log(`🚀 Iniciando geração DIMOB para proprietário ${ownerId}, ano ${year}...`)
     
-    // Gerar arquivo TXT usando a função oficial
-    const txtContent = await gerarArquivoDimobTxt(user.id, year)
+    // Gerar arquivo TXT usando a função oficial (modificada para aceitar ownerId)
+    const txtContent = await gerarArquivoDimobTxt(user.id, year, ownerId)
     
     console.log(`✅ DIMOB gerado com sucesso! Tamanho: ${txtContent.length} caracteres`)
     

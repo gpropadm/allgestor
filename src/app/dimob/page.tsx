@@ -5,8 +5,10 @@ import { Download, FileText, Calendar, Building, Users } from 'lucide-react'
 
 export default function DimobPage() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+  const [selectedOwnerId, setSelectedOwnerId] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [contracts, setContracts] = useState([])
+  const [owners, setOwners] = useState([])
   const [settings, setSettings] = useState(null)
 
   // Anos disponíveis (últimos 5 anos + próximo)
@@ -14,8 +16,14 @@ export default function DimobPage() {
 
   useEffect(() => {
     loadSettings()
-    loadContracts()
-  }, [selectedYear])
+    loadOwners()
+  }, [])
+
+  useEffect(() => {
+    if (selectedOwnerId) {
+      loadContracts()
+    }
+  }, [selectedYear, selectedOwnerId])
 
   const loadSettings = async () => {
     try {
@@ -29,9 +37,23 @@ export default function DimobPage() {
     }
   }
 
-  const loadContracts = async () => {
+  const loadOwners = async () => {
     try {
-      const response = await fetch(`/api/contracts?year=${selectedYear}&status=ACTIVE&withPayments=true`)
+      const response = await fetch('/api/owners')
+      if (response.ok) {
+        const data = await response.json()
+        setOwners(data.owners || [])
+      }
+    } catch (error) {
+      console.error('Erro ao carregar proprietários:', error)
+    }
+  }
+
+  const loadContracts = async () => {
+    if (!selectedOwnerId) return
+    
+    try {
+      const response = await fetch(`/api/contracts?year=${selectedYear}&status=ACTIVE&withPayments=true&ownerId=${selectedOwnerId}`)
       if (response.ok) {
         const data = await response.json()
         setContracts(data.contracts || [])
@@ -47,12 +69,22 @@ export default function DimobPage() {
       return
     }
 
+    if (!selectedOwnerId) {
+      alert('❌ Selecione um proprietário para gerar o DIMOB!')
+      return
+    }
+
+    const selectedOwner = owners.find(o => o.id === selectedOwnerId)
+    
     setIsGenerating(true)
     try {
       const response = await fetch('/api/dimob/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ year: selectedYear })
+        body: JSON.stringify({ 
+          year: selectedYear,
+          ownerId: selectedOwnerId
+        })
       })
 
       if (response.ok) {
@@ -60,7 +92,7 @@ export default function DimobPage() {
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = `DIMOB_${selectedYear}.txt`
+        a.download = `DIMOB_${selectedYear}_${selectedOwner?.name?.replace(/\s+/g, '_') || 'Proprietario'}.txt`
         document.body.appendChild(a)
         a.click()
         document.body.removeChild(a)
@@ -132,7 +164,28 @@ export default function DimobPage() {
           Geração do Arquivo DIMOB
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Proprietário *
+            </label>
+            <select
+              value={selectedOwnerId}
+              onChange={(e) => setSelectedOwnerId(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg font-medium"
+            >
+              <option value="">Selecione o proprietário</option>
+              {owners.map(owner => (
+                <option key={owner.id} value={owner.id}>
+                  {owner.name} - {owner.document}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 mt-1">
+              DIMOB é gerado individualmente por proprietário
+            </p>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Ano-Calendário *
@@ -151,7 +204,7 @@ export default function DimobPage() {
           <div className="md:col-span-2 flex items-end">
             <button
               onClick={generateDimob}
-              disabled={isGenerating || !settings?.responsibleCpf || !settings?.municipalityCode}
+              disabled={isGenerating || !settings?.responsibleCpf || !settings?.municipalityCode || !selectedOwnerId}
               className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-medium flex items-center justify-center space-x-2 transition-colors"
             >
               {isGenerating ? (

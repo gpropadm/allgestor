@@ -41,8 +41,8 @@ interface DimobData {
 /**
  * Gera arquivo DIMOB seguindo EXATAMENTE a especificação oficial da Basesoft
  */
-export async function gerarArquivoDimobTxt(userId: string, ano: number): Promise<string> {
-  console.log(`📄 [DIMOB OFICIAL] Gerando arquivo para ano ${ano}, usuário ${userId}`)
+export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?: string): Promise<string> {
+  console.log(`📄 [DIMOB OFICIAL] Gerando arquivo para ano ${ano}, usuário ${userId}${ownerId ? `, proprietário ${ownerId}` : ''}`)
 
   // Buscar dados da empresa declarante
   const empresa = await prisma.company.findFirst({
@@ -61,21 +61,30 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number): Promise
     throw new Error('Empresa não encontrada para gerar DIMOB')
   }
 
-  // Buscar contratos ativos com pagamentos do ano
-  const contratos = await prisma.contract.findMany({
-    where: {
-      userId: userId,
-      status: 'ACTIVE',
-      payments: {
-        some: {
-          status: 'PAID',
-          dueDate: {
-            gte: new Date(ano, 0, 1),
-            lte: new Date(ano, 11, 31)
-          }
+  // Buscar contratos ativos com pagamentos do ano (filtrado por proprietário se especificado)
+  const whereCondition: any = {
+    userId: userId,
+    status: 'ACTIVE',
+    payments: {
+      some: {
+        status: 'PAID',
+        dueDate: {
+          gte: new Date(ano, 0, 1),
+          lte: new Date(ano, 11, 31)
         }
       }
-    },
+    }
+  }
+
+  // Se ownerId foi especificado, filtrar apenas contratos deste proprietário
+  if (ownerId) {
+    whereCondition.property = {
+      ownerId: ownerId
+    }
+  }
+
+  const contratos = await prisma.contract.findMany({
+    where: whereCondition,
     include: {
       property: {
         include: { owner: true }
@@ -94,10 +103,13 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number): Promise
     }
   })
 
-  console.log(`📄 [DIMOB] Encontrados ${contratos.length} contratos com pagamentos`)
+  console.log(`📄 [DIMOB] Encontrados ${contratos.length} contratos com pagamentos${ownerId ? ' para o proprietário especificado' : ''}`)
 
   if (contratos.length === 0) {
-    throw new Error('Nenhum contrato com pagamentos encontrado para o ano especificado')
+    const errorMsg = ownerId 
+      ? 'Nenhum contrato com pagamentos encontrado para este proprietário no ano especificado'
+      : 'Nenhum contrato com pagamentos encontrado para o ano especificado'
+    throw new Error(errorMsg)
   }
 
   // Validar dados obrigatórios antes de gerar
