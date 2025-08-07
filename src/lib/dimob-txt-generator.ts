@@ -158,9 +158,8 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
           tipo: contrato.property.dimobPropertyType || 'U',
           endereco: contrato.property.address?.toUpperCase() || 'ENDERECO NAO INFORMADO',
           cep: '70000000', // CEP padrão Brasília para evitar erro de faixa
-          codigoMunicipio: '    ', // 4 espaços em branco
-          uf: contrato.property.state || 'DF',
-          municipio: 'BRASILIA' // Campo município que estava faltando
+          codigoMunicipio: '9701', // Código oficial Brasília
+          uf: contrato.property.state || 'DF'
         }
       }
     })
@@ -194,7 +193,7 @@ function gerarConteudoDimob(data: DimobData, ano: number): string {
   conteudo += limparDocumento(data.empresa.cpfResponsavel, 11) // CPF Responsável (11 posições)
   conteudo += data.empresa.endereco.padEnd(120, ' ').slice(0, 120) // Endereço (120 posições)
   conteudo += data.empresa.uf.padEnd(2, ' ').slice(0, 2) // UF (2 posições)
-  conteudo += ' '.repeat(4) // Código Município omitido (4 espaços)
+  conteudo += '9701' // Código Município Brasília (posições 237-240)
   conteudo += ' '.repeat(20) // Reservado (20 posições)
   conteudo += ' '.repeat(10) // Reservado (10 posições)
   
@@ -212,7 +211,7 @@ function gerarConteudoDimob(data: DimobData, ano: number): string {
     conteudo += 'R02' // Tipo (3 posições)
     conteudo += data.empresa.cnpj // CNPJ declarante (14 posições)
     conteudo += ano.toString() // Ano-calendário (4 posições)
-    conteudo += contrato.sequencial.toString().padStart(5, '0') // Sequencial (5 posições)
+    conteudo += contrato.sequencial.toString().padStart(7, '0') // Sequencial (7 posições)
     conteudo += contrato.locador.documento // CPF/CNPJ Locador (14 posições)
     conteudo += contrato.locador.nome.padEnd(60, ' ').slice(0, 60) // Nome Locador (60 posições)
     conteudo += contrato.locatario.documento // CPF/CNPJ Locatário (14 posições)
@@ -230,7 +229,7 @@ function gerarConteudoDimob(data: DimobData, ano: number): string {
     conteudo += contrato.imovel.tipo // Tipo Imóvel (1 posição)
     conteudo += contrato.imovel.endereco.padEnd(60, ' ').slice(0, 60) // Endereço (60 posições)
     conteudo += contrato.imovel.cep.padStart(8, '0').slice(0, 8) // CEP (8 posições)
-    conteudo += ' '.repeat(4) // Código Município omitido (4 espaços)
+    conteudo += '9701' // Código Município Brasília (posições 764-767)
     conteudo += ' '.repeat(20) // Reservado (20 posições)
     conteudo += contrato.imovel.uf.padEnd(2, ' ').slice(0, 2) // UF (2 posições)
     conteudo += ' '.repeat(10) // Reservado (10 posições)
