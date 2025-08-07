@@ -49,9 +49,9 @@ export async function GET(request: NextRequest) {
         zipCode: company.zipCode,
         logo: company.logo,
         website: company.website,
-        // Campos DIMOB - seguros para acessar
-        responsibleCpf: (company as any).responsibleCpf || '',
-        municipalityCode: (company as any).municipalityCode || ''
+        // Campos DIMOB - temporariamente removidos até migration ser executada
+        responsibleCpf: '',
+        municipalityCode: ''
       },
       system: settingsMap.system || {
         theme: 'light',
@@ -140,9 +140,9 @@ export async function POST(request: NextRequest) {
           zipCode: data.company.zipCode,
           logo: data.company.logo,
           website: data.company.website,
-          // Campos DIMOB - condicionais para evitar erro se campos não existem
-          ...(data.company.responsibleCpf !== undefined && { responsibleCpf: data.company.responsibleCpf }),
-          ...(data.company.municipalityCode !== undefined && { municipalityCode: data.company.municipalityCode })
+          // Campos DIMOB - desabilitados até migration ser executada
+          // ...(data.company.responsibleCpf !== undefined && { responsibleCpf: data.company.responsibleCpf }),
+          // ...(data.company.municipalityCode !== undefined && { municipalityCode: data.company.municipalityCode })
         }
       })
       console.log('Company updated successfully:', updatedCompany.name)

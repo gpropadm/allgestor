@@ -964,8 +964,8 @@ export default function Settings() {
                   </div>
                 </div>
 
-                {/* Seção DIMOB */}
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                {/* Seção DIMOB - Temporariamente desabilitada até migration */}
+                {false && <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
                   <div className="mb-6">
                     <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                       📄 Configurações DIMOB (Receita Federal)
