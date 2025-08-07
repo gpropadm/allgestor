@@ -72,12 +72,19 @@ export async function gerarComprovanteRendimentos(
       return null
     }
     
-    // Debug: verificar se contractNumber está disponível
-    console.log('🔍 Contract debug:', {
-      id: contract.id,
-      contractNumber: (contract as any).contractNumber,
-      hasContractNumber: !!(contract as any).contractNumber
-    })
+    // Debug: verificar se contractNumber está disponível (com tratamento de erro)
+    let contractNumberValue = null
+    try {
+      contractNumberValue = (contract as any).contractNumber
+      console.log('🔍 Contract debug:', {
+        id: contract.id,
+        contractNumber: contractNumberValue,
+        hasContractNumber: !!contractNumberValue
+      })
+    } catch (error) {
+      console.log('⚠️ Campo contractNumber não disponível, usando ID como fallback')
+      contractNumberValue = null
+    }
     
     // Buscar todos os pagamentos PAGOS do contrato no ano específico
     const startDate = new Date(ano, 0, 1) // 1º de janeiro
@@ -168,7 +175,7 @@ export async function gerarComprovanteRendimentos(
       },
       imovel: {
         endereco: contract.property.address || 'Endereço não informado',
-        numeroContrato: (contract as any).contractNumber || contract.id,
+        numeroContrato: contractNumberValue || contract.id,
         dataContrato: contract.startDate.toLocaleDateString('pt-BR')
       },
       imobiliaria: {
