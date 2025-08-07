@@ -122,7 +122,7 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
       nome: empresa.name || empresa.tradeName || 'EMPRESA',
       endereco: empresa.address || 'ENDERECO NAO INFORMADO',
       uf: empresa.state || 'DF',
-      codigoMunicipio: '0000', // Código vazio - muitas vezes aceito no DIMOB
+      codigoMunicipio: '    ', // 4 espaços em branco
       cpfResponsavel: empresa.responsibleCpf || '00000000000'
     },
     contratos: contratos.map((contrato, index) => {
@@ -158,7 +158,7 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
           tipo: contrato.property.dimobPropertyType || 'U',
           endereco: contrato.property.address?.toUpperCase() || 'ENDERECO NAO INFORMADO',
           cep: '70000000', // CEP padrão Brasília para evitar erro de faixa
-          codigoMunicipio: '0000', // Código vazio
+          codigoMunicipio: '    ', // 4 espaços em branco
           uf: contrato.property.state || 'DF',
           municipio: 'BRASILIA' // Campo município que estava faltando
         }
