@@ -51,6 +51,15 @@ async function gerarReciboParaPagamento(paymentId: string, userId: string) {
   }
 
   // Inserção com parâmetros seguros
+  // IMPORTANTE: Competência deve ser a data de vencimento, não a data atual
+  const competenciaDate = new Date(payment.dueDate)
+  
+  console.log('🧾 [RECIBO] Competência:', {
+    vencimento: payment.dueDate,
+    competencia: competenciaDate,
+    mes: competenciaDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+  })
+  
   await prisma.$executeRaw`
     INSERT INTO recibos (
       id, "userId", "contractId", "paymentId", "numeroRecibo", 
@@ -60,7 +69,7 @@ async function gerarReciboParaPagamento(paymentId: string, userId: string) {
       "observacoes", "createdAt", "updatedAt"
     ) VALUES (
       ${reciboId}, ${userId}, ${payment.contractId}, ${payment.id}, ${numeroRecibo},
-      ${now}, ${now}, 
+      ${competenciaDate}, ${now}, 
       ${valorTotal}, ${taxaAdministracao}, ${percentualTaxa}, ${valorRepassado},
       ${'/api/auto.pdf'}, ${payment.contract.property.owner.name}, 
       ${payment.contract.property.owner.document}, ${payment.contract.tenant.name}, 
