@@ -122,7 +122,7 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
       nome: empresa.name || empresa.tradeName || 'EMPRESA',
       endereco: empresa.address || 'ENDERECO NAO INFORMADO',
       uf: empresa.state || 'DF',
-      codigoMunicipio: empresa.municipalityCode || obterCodigoMunicipio(empresa.city || 'BRASILIA'),
+      codigoMunicipio: obterCodigoMunicipio(empresa.city || 'BRASILIA'), // Sempre usar código DIMOB de 4 dígitos
       cpfResponsavel: empresa.responsibleCpf || '00000000000'
     },
     contratos: contratos.map((contrato, index) => {
