@@ -33,9 +33,9 @@ interface CompanySettings {
   zipCode: string
   logo: string
   website: string
-  // Campos DIMOB obrigatórios
-  responsibleCpf: string
-  municipalityCode: string
+  // Campos DIMOB - removidos temporariamente
+  // responsibleCpf: string
+  // municipalityCode: string
 }
 
 interface SystemSettings {
@@ -119,10 +119,10 @@ export default function Settings() {
     state: 'SP',
     zipCode: '',
     logo: '',
-    website: '',
-    // Campos DIMOB obrigatórios
-    responsibleCpf: '',
-    municipalityCode: ''
+    website: ''
+    // Campos DIMOB - removidos temporariamente
+    // responsibleCpf: '',
+    // municipalityCode: ''
   })
 
   const [systemSettings, setSystemSettings] = useState<SystemSettings>({

@@ -48,10 +48,10 @@ export async function GET(request: NextRequest) {
         state: company.state,
         zipCode: company.zipCode,
         logo: company.logo,
-        website: company.website,
-        // Campos DIMOB - temporariamente removidos até migration ser executada
-        responsibleCpf: '',
-        municipalityCode: ''
+        website: company.website
+        // Campos DIMOB - completamente removidos até migration
+        // responsibleCpf: '',
+        // municipalityCode: ''
       },
       system: settingsMap.system || {
         theme: 'light',
