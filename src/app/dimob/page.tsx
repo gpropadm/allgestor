@@ -39,13 +39,18 @@ export default function DimobPage() {
 
   const loadOwners = async () => {
     try {
+      console.log('🔍 Carregando proprietários...')
       const response = await fetch('/api/owners')
       if (response.ok) {
         const data = await response.json()
-        setOwners(data.owners || [])
+        console.log('📊 Proprietários recebidos:', data)
+        // A API retorna array direto, não objeto com owners
+        setOwners(Array.isArray(data) ? data : [])
+      } else {
+        console.error('❌ Erro na resposta:', response.status, response.statusText)
       }
     } catch (error) {
-      console.error('Erro ao carregar proprietários:', error)
+      console.error('❌ Erro ao carregar proprietários:', error)
     }
   }
 
@@ -174,7 +179,9 @@ export default function DimobPage() {
               onChange={(e) => setSelectedOwnerId(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg font-medium"
             >
-              <option value="">Selecione o proprietário</option>
+              <option value="">
+                {owners.length === 0 ? 'Carregando proprietários...' : 'Selecione o proprietário'}
+              </option>
               {owners.map(owner => (
                 <option key={owner.id} value={owner.id}>
                   {owner.name} - {owner.document}
@@ -182,7 +189,10 @@ export default function DimobPage() {
               ))}
             </select>
             <p className="text-xs text-gray-500 mt-1">
-              DIMOB é gerado individualmente por proprietário
+              {owners.length === 0 
+                ? '⚠️ Nenhum proprietário cadastrado. Cadastre proprietários primeiro.' 
+                : 'DIMOB é gerado individualmente por proprietário'
+              }
             </p>
           </div>
 
