@@ -448,17 +448,53 @@ export default function Payments() {
     let paymentsToShow = payments
 
     if (!showAllMonths) {
-      // Agrupar por contractId e pegar o pagamento mais recente de cada contrato
-      const paymentsByContract = payments.reduce((acc, payment) => {
-        const contractId = payment.contract?.id || payment.id
-        if (!acc[contractId] || new Date(payment.dueDate) > new Date(acc[contractId].dueDate)) {
-          acc[contractId] = payment
-        }
-        return acc
-      }, {} as Record<string, Payment>)
-      
-      paymentsToShow = Object.values(paymentsByContract)
-      console.log('📊 Mostrando apenas o pagamento mais recente de cada contrato:', paymentsToShow.length)
+      // Se há inquilinos expandidos, incluir todos os pagamentos deles
+      if (expandedTenants.size > 0) {
+        const expandedPayments: Payment[] = []
+        const nonExpandedContracts = new Set<string>()
+        
+        payments.forEach(payment => {
+          const tenantName = payment.tenant?.name || payment.contract?.tenant?.name || ''
+          if (expandedTenants.has(tenantName)) {
+            // Adicionar todos os pagamentos do inquilino expandido
+            expandedPayments.push(payment)
+          } else {
+            // Marcar contrato como não expandido
+            const contractId = payment.contract?.id || payment.id
+            nonExpandedContracts.add(contractId)
+          }
+        })
+        
+        // Para contratos não expandidos, pegar apenas o mais recente
+        const latestFromNonExpanded: Payment[] = []
+        nonExpandedContracts.forEach(contractId => {
+          const contractPayments = payments.filter(p => 
+            (p.contract?.id || p.id) === contractId &&
+            !expandedTenants.has(p.tenant?.name || p.contract?.tenant?.name || '')
+          )
+          if (contractPayments.length > 0) {
+            const latest = contractPayments.reduce((latest, current) => 
+              new Date(current.dueDate) > new Date(latest.dueDate) ? current : latest
+            )
+            latestFromNonExpanded.push(latest)
+          }
+        })
+        
+        paymentsToShow = [...expandedPayments, ...latestFromNonExpanded]
+        console.log('📊 Mostrando:', expandedPayments.length, 'expandidos +', latestFromNonExpanded.length, 'mais recentes')
+      } else {
+        // Nenhum inquilino expandido - mostrar apenas o mais recente de cada contrato
+        const paymentsByContract = payments.reduce((acc, payment) => {
+          const contractId = payment.contract?.id || payment.id
+          if (!acc[contractId] || new Date(payment.dueDate) > new Date(acc[contractId].dueDate)) {
+            acc[contractId] = payment
+          }
+          return acc
+        }, {} as Record<string, Payment>)
+        
+        paymentsToShow = Object.values(paymentsByContract)
+        console.log('📊 Mostrando apenas o pagamento mais recente de cada contrato:', paymentsToShow.length)
+      }
     }
 
     // Agora aplicar filtros de busca e status
@@ -480,16 +516,6 @@ export default function Payments() {
         matchesStatus = isOverdue
       } else if (filterStatus !== 'all') {
         matchesStatus = payment.status?.toUpperCase() === filterStatus.toUpperCase()
-      }
-
-      // Expandir inquilino específico (mostrar todos os pagamentos dele)
-      const isTenantExpanded = expandedTenants.has(tenantName)
-      if (isTenantExpanded && !showAllMonths) {
-        // Se inquilino está expandido, buscar todos os pagamentos dele
-        const allTenantPayments = payments.filter(p => 
-          (p.tenant?.name || p.contract?.tenant?.name) === tenantName
-        )
-        return allTenantPayments.includes(payment) && matchesSearch && matchesStatus
       }
 
       return matchesSearch && matchesStatus
