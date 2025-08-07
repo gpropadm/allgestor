@@ -37,7 +37,11 @@ export function PropertyForm({ isOpen, onClose, onSubmit, property }: PropertyFo
     images: [] as string[],
     amenities: [] as string[],
     acceptsPartnership: false,
-    acceptsFinancing: false
+    acceptsFinancing: false,
+    // Campos DIMOB obrigatórios
+    dimobPropertyType: 'U', // U=Urbano, R=Rural
+    municipalityCode: '',
+    extractedCep: ''
   })
 
   const [displayValues, setDisplayValues] = useState({
@@ -105,7 +109,11 @@ export function PropertyForm({ isOpen, onClose, onSubmit, property }: PropertyFo
             images: images,
             amenities: amenities,
             acceptsPartnership: property.acceptsPartnership || false,
-            acceptsFinancing: property.acceptsFinancing || false
+            acceptsFinancing: property.acceptsFinancing || false,
+            // Campos DIMOB
+            dimobPropertyType: property.dimobPropertyType || 'U',
+            municipalityCode: property.municipalityCode || '',
+            extractedCep: property.extractedCep || ''
           })
         } catch (error) {
           console.error('Error parsing property data:', error)
@@ -192,7 +200,11 @@ export function PropertyForm({ isOpen, onClose, onSubmit, property }: PropertyFo
       images: [],
       amenities: [],
       acceptsPartnership: false,
-      acceptsFinancing: false
+      acceptsFinancing: false,
+      // Campos DIMOB
+      dimobPropertyType: 'U',
+      municipalityCode: '',
+      extractedCep: ''
     })
     setDisplayValues({
       rentPrice: '',
@@ -640,7 +652,79 @@ export function PropertyForm({ isOpen, onClose, onSubmit, property }: PropertyFo
             </div>
           </div>
 
-          {/* DIMOB Section temporarily disabled - will be reactivated after database migration */}
+          {/* === SEÇÃO DIMOB === */}
+          <div className="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                📄 Configuração DIMOB
+              </h3>
+              <p className="text-sm text-gray-600">
+                Campos obrigatórios para geração do arquivo DIMOB da Receita Federal
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tipo do Imóvel (DIMOB) *
+                </label>
+                <select
+                  value={formData.dimobPropertyType || 'U'}
+                  onChange={(e) => setFormData(prev => ({ ...prev, dimobPropertyType: e.target.value }))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                >
+                  <option value="U">Urbano</option>
+                  <option value="R">Rural</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Classificação para DIMOB: Urbano ou Rural
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Código Município (IBGE) *
+                </label>
+                <input
+                  type="text"
+                  value={formData.municipalityCode || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, municipalityCode: e.target.value.replace(/\D/g, '').slice(0, 7) }))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="5300108"
+                  maxLength={7}
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Código IBGE (ex: 5300108 = Brasília)
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  CEP Validado (DIMOB)
+                </label>
+                <input
+                  type="text"
+                  value={formData.extractedCep || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, extractedCep: e.target.value.replace(/\D/g, '').slice(0, 8) }))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="70000000"
+                  maxLength={8}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  CEP validado para DIMOB (apenas números)
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-xs text-blue-800">
+                <strong>💡 Dica:</strong> Os campos DIMOB são obrigatórios para gerar corretamente o arquivo txt da Receita Federal. 
+                O código do município pode ser consultado em <a href="https://cidades.ibge.gov.br/" target="_blank" className="underline">cidades.ibge.gov.br</a>
+              </p>
+            </div>
+          </div>
 
           {/* Características */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
