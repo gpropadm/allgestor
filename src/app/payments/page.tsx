@@ -152,9 +152,18 @@ export default function Payments() {
     
     try {
       const url = showAllMonths ? '/api/payments?showAll=true' : '/api/payments'
+      console.log('🔗 Fazendo fetch para:', url)
       const response = await fetch(url)
+      console.log('📡 Resposta da API:', response.status, response.statusText)
+      
       if (response.ok) {
         const data = await response.json()
+        console.log('📊 Dados recebidos:', {
+          total: data.length,
+          isEmpty: data.length === 0,
+          sample: data.length > 0 ? data[0] : 'Nenhum dado',
+          raw: data
+        })
         
         // Debug: mostrar estrutura dos dados
         if (!silent && data.length > 0) {
@@ -163,6 +172,8 @@ export default function Payments() {
             sample: data[0],
             statuses: data.map((p: any) => p.status)
           })
+        } else if (!silent) {
+          console.log('⚠️ Nenhum pagamento retornado pela API')
         }
         
         // Verifica se há novos pagamentos pagos
@@ -185,8 +196,14 @@ export default function Payments() {
         
         setPayments(data)
         setLastRefresh(new Date())
+        
+        // Se não houver dados no mês atual e não estiver mostrando todos os meses, tentar mostrar todos
+        if (data.length === 0 && !showAllMonths && !silent) {
+          console.log('🔄 Nenhum pagamento no mês atual, tentando mostrar todos os meses...')
+          setShowAllMonths(true)
+        }
       } else {
-        console.error('❌ Erro na API:', response.status)
+        console.error('❌ Erro na API:', response.status, await response.text())
         if (!silent) {
           showNotification('error', 'Erro ao carregar pagamentos. Tente novamente.')
         }
