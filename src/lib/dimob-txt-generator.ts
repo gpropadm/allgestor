@@ -157,7 +157,7 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
         imovel: {
           tipo: contrato.property.dimobPropertyType || 'U',
           endereco: contrato.property.address?.toUpperCase() || 'ENDERECO NAO INFORMADO',
-          cep: '70000000', // CEP padrão Brasília para evitar erro de faixa
+          cep: '72000000', // CEP válido Brasília (faixa 70000-76999)
           codigoMunicipio: '9701', // Código oficial Brasília
           uf: contrato.property.state || 'DF'
         }
@@ -301,7 +301,7 @@ function extrairCep(endereco: string): string {
   if (match) {
     return match[0].replace('-', '').padStart(8, '0')
   }
-  return '70000000' // CEP padrão Brasília
+  return '72000000' // CEP válido Brasília
 }
 
 /**
