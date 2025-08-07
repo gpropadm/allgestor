@@ -525,12 +525,20 @@ function gerarHTMLComprovanteParaPDF(data: any): string {
     </div>
 
     <div class="section">
-        <div class="section-title">6. RESPONSÁVEL PELAS INFORMAÇÕES</div>
-        <div class="field"><span class="field-label">Cidade e Data:</span> ${data.imobiliaria.cidade}, ${new Date().toLocaleDateString('pt-BR')}</div>
-        
-        <div class="signature-area">
-            <div class="signature-line"></div>
-            <div>Assinatura do Responsável</div>
+        <div class="section-title-no-border">6. RESPONSÁVEL PELAS INFORMAÇÕES</div>
+        <div class="property-section">
+            <div class="property-col-25">
+                <div class="field-label-small">Cidade:</div>
+                <div class="field-value">${data.imobiliaria.cidade}</div>
+            </div>
+            <div class="property-col-25">
+                <div class="field-label-small">Data:</div>
+                <div class="field-value">${new Date().toLocaleDateString('pt-BR')}</div>
+            </div>
+            <div class="property-col-50">
+                <div class="field-label-small">Assinatura do Responsável:</div>
+                <div class="signature-line" style="margin: 15px 0 5px 0; width: 100%; border-bottom: 1px solid #333;"></div>
+            </div>
         </div>
     </div>
 
