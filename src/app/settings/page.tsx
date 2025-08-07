@@ -306,6 +306,147 @@ export default function Settings() {
     }
   }
 
+  // Funções de salvamento individuais
+  const saveCompanySettings = async () => {
+    try {
+      setSaveStatus('saving')
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ company: companySettings })
+      })
+      
+      if (response.ok) {
+        showSuccess('Dados da empresa salvos!')
+        setSaveStatus('saved')
+        setTimeout(() => setSaveStatus('idle'), 2000)
+      } else {
+        const errorData = await response.json()
+        showError('Erro ao salvar empresa', errorData.error)
+        setSaveStatus('error')
+      }
+    } catch (error) {
+      console.error('Erro:', error)
+      showError('Erro ao salvar empresa')
+      setSaveStatus('error')
+    }
+  }
+
+  const saveSystemSettings = async () => {
+    try {
+      setSaveStatus('saving')
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ system: systemSettings })
+      })
+      
+      if (response.ok) {
+        showSuccess('Configurações do sistema salvas!')
+        setSaveStatus('saved')
+        setTimeout(() => setSaveStatus('idle'), 2000)
+      } else {
+        showError('Erro ao salvar sistema')
+        setSaveStatus('error')
+      }
+    } catch (error) {
+      showError('Erro ao salvar sistema')
+      setSaveStatus('error')
+    }
+  }
+
+  const saveNotificationSettings = async () => {
+    try {
+      setSaveStatus('saving')
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notifications: notificationSettings })
+      })
+      
+      if (response.ok) {
+        showSuccess('Configurações de notificação salvas!')
+        setSaveStatus('saved')
+        setTimeout(() => setSaveStatus('idle'), 2000)
+      } else {
+        showError('Erro ao salvar notificações')
+        setSaveStatus('error')
+      }
+    } catch (error) {
+      showError('Erro ao salvar notificações')
+      setSaveStatus('error')
+    }
+  }
+
+  const saveFinancialSettings = async () => {
+    try {
+      setSaveStatus('saving')
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ financial: financialSettings })
+      })
+      
+      if (response.ok) {
+        showSuccess('Configurações financeiras salvas!')
+        setSaveStatus('saved')
+        setTimeout(() => setSaveStatus('idle'), 2000)
+      } else {
+        showError('Erro ao salvar configurações financeiras')
+        setSaveStatus('error')
+      }
+    } catch (error) {
+      showError('Erro ao salvar configurações financeiras')
+      setSaveStatus('error')
+    }
+  }
+
+  const savePaymentSettings = async () => {
+    try {
+      setSaveStatus('saving')
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payment: paymentSettings })
+      })
+      
+      if (response.ok) {
+        showSuccess('Configurações PIX salvas!')
+        setSaveStatus('saved')
+        setTimeout(() => setSaveStatus('idle'), 2000)
+      } else {
+        showError('Erro ao salvar PIX')
+        setSaveStatus('error')
+      }
+    } catch (error) {
+      showError('Erro ao salvar PIX')
+      setSaveStatus('error')
+    }
+  }
+
+  const saveApiSettings = async () => {
+    try {
+      setSaveStatus('saving')
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api: apiSettings })
+      })
+      
+      if (response.ok) {
+        showSuccess('Configurações de API salvas!')
+        setSaveStatus('saved')
+        setTimeout(() => setSaveStatus('idle'), 2000)
+      } else {
+        showError('Erro ao salvar APIs')
+        setSaveStatus('error')
+      }
+    } catch (error) {
+      showError('Erro ao salvar APIs')
+      setSaveStatus('error')
+    }
+  }
+
   const saveUserProfile = async () => {
     try {
       const response = await fetch('/api/users/profile', {
@@ -534,7 +675,7 @@ export default function Settings() {
               Gerencie as configurações do sistema e da empresa
             </p>
           </div>
-          {activeTab === 'profile' ? (
+          {activeTab === 'profile' && (
             <button 
               onClick={saveUserProfile}
               className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 text-white rounded-lg transition-colors"
@@ -550,24 +691,6 @@ export default function Settings() {
             >
               <Save className="w-5 h-5 mr-2" />
               Salvar Perfil
-            </button>
-          ) : (
-            <button 
-              onClick={saveSettings}
-              disabled={saveStatus === 'saving'}
-              className={`mt-4 sm:mt-0 inline-flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${
-                saveStatus === 'saved' 
-                  ? 'bg-green-600 text-white' 
-                  : saveStatus === 'error'
-                  ? 'bg-red-600 text-white'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              } disabled:opacity-50`}
-            >
-              <Save className="w-5 h-5 mr-2" />
-              {saveStatus === 'saving' && 'Salvando...'}
-              {saveStatus === 'saved' && 'Salvo!'}
-              {saveStatus === 'error' && 'Erro ao salvar'}
-              {saveStatus === 'idle' && 'Salvar Configurações'}
             </button>
           )}
         </div>
@@ -725,7 +848,23 @@ export default function Settings() {
 
             {activeTab === 'company' && (
               <div className="space-y-6">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Informações da Empresa</h3>
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Informações da Empresa</h3>
+                  <button 
+                    onClick={saveCompanySettings}
+                    disabled={saveStatus === 'saving'}
+                    className={`inline-flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${
+                      saveStatus === 'saved' 
+                        ? 'bg-green-600 text-white' 
+                        : saveStatus === 'error'
+                        ? 'bg-red-600 text-white'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    } disabled:opacity-50`}
+                  >
+                    <Save className="w-5 h-5 mr-2" />
+                    {saveStatus === 'saving' ? 'Salvando...' : saveStatus === 'saved' ? 'Salvo!' : saveStatus === 'error' ? 'Erro' : 'Salvar Empresa'}
+                  </button>
+                </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
