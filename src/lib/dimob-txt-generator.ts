@@ -194,7 +194,7 @@ function gerarConteudoDimob(data: DimobData, ano: number): string {
   conteudo += limparDocumento(data.empresa.cpfResponsavel, 11) // CPF Responsável (11 posições)
   conteudo += data.empresa.endereco.padEnd(120, ' ').slice(0, 120) // Endereço (120 posições)
   conteudo += data.empresa.uf.padEnd(2, ' ').slice(0, 2) // UF (2 posições)
-  conteudo += data.empresa.codigoMunicipio.padStart(4, '0').slice(0, 4) // Código Município (4 posições)
+  conteudo += ' '.repeat(4) // Código Município omitido (4 espaços)
   conteudo += ' '.repeat(20) // Reservado (20 posições)
   conteudo += ' '.repeat(10) // Reservado (10 posições)
   
@@ -230,7 +230,7 @@ function gerarConteudoDimob(data: DimobData, ano: number): string {
     conteudo += contrato.imovel.tipo // Tipo Imóvel (1 posição)
     conteudo += contrato.imovel.endereco.padEnd(60, ' ').slice(0, 60) // Endereço (60 posições)
     conteudo += contrato.imovel.cep.padStart(8, '0').slice(0, 8) // CEP (8 posições)
-    conteudo += contrato.imovel.codigoMunicipio.padStart(4, '0').slice(0, 4) // Código Município (4 posições)
+    conteudo += ' '.repeat(4) // Código Município omitido (4 espaços)
     conteudo += ' '.repeat(20) // Reservado (20 posições)
     conteudo += contrato.imovel.uf.padEnd(2, ' ').slice(0, 2) // UF (2 posições)
     conteudo += ' '.repeat(10) // Reservado (10 posições)
