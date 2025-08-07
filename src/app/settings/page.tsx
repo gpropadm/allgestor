@@ -33,9 +33,9 @@ interface CompanySettings {
   zipCode: string
   logo: string
   website: string
-  // Campos DIMOB - removidos temporariamente
-  // responsibleCpf: string
-  // municipalityCode: string
+  // Campos DIMOB - reativados após migration
+  responsibleCpf: string
+  municipalityCode: string
 }
 
 interface SystemSettings {
@@ -119,10 +119,10 @@ export default function Settings() {
     state: 'SP',
     zipCode: '',
     logo: '',
-    website: ''
-    // Campos DIMOB - removidos temporariamente
-    // responsibleCpf: '',
-    // municipalityCode: ''
+    website: '',
+    // Campos DIMOB - reativados após migration
+    responsibleCpf: '',
+    municipalityCode: ''
   })
 
   const [systemSettings, setSystemSettings] = useState<SystemSettings>({
@@ -324,10 +324,10 @@ export default function Settings() {
         state: companySettings.state,
         zipCode: companySettings.zipCode,
         logo: companySettings.logo,
-        website: companySettings.website
-        // Campos DIMOB comentados temporariamente
-        // responsibleCpf: companySettings.responsibleCpf,
-        // municipalityCode: companySettings.municipalityCode
+        website: companySettings.website,
+        // Campos DIMOB - reativados após migration
+        responsibleCpf: companySettings.responsibleCpf,
+        municipalityCode: companySettings.municipalityCode
       }
       
       const response = await fetch('/api/settings', {

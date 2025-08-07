@@ -48,10 +48,10 @@ export async function GET(request: NextRequest) {
         state: company.state,
         zipCode: company.zipCode,
         logo: company.logo,
-        website: company.website
-        // Campos DIMOB - completamente removidos até migration
-        // responsibleCpf: '',
-        // municipalityCode: ''
+        website: company.website,
+        // Campos DIMOB - agora disponíveis após migration
+        responsibleCpf: company.responsibleCpf || '',
+        municipalityCode: company.municipalityCode || ''
       },
       system: settingsMap.system || {
         theme: 'light',
@@ -140,9 +140,9 @@ export async function POST(request: NextRequest) {
           zipCode: data.company.zipCode,
           logo: data.company.logo,
           website: data.company.website,
-          // Campos DIMOB - desabilitados até migration ser executada
-          // ...(data.company.responsibleCpf !== undefined && { responsibleCpf: data.company.responsibleCpf }),
-          // ...(data.company.municipalityCode !== undefined && { municipalityCode: data.company.municipalityCode })
+          // Campos DIMOB - reativados após migration
+          ...(data.company.responsibleCpf !== undefined && { responsibleCpf: data.company.responsibleCpf }),
+          ...(data.company.municipalityCode !== undefined && { municipalityCode: data.company.municipalityCode })
         }
       })
       console.log('Company updated successfully:', updatedCompany.name)
