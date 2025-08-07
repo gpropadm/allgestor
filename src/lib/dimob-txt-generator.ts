@@ -308,20 +308,20 @@ function extrairCep(endereco: string): string {
  * Obter código do município (simplificado - usar tabela IBGE real)
  */
 function obterCodigoMunicipio(cidade: string): string {
-  // Códigos mais comuns - expandir conforme necessário
+  // Códigos DIMOB (4 dígitos) - diferentes do IBGE completo
   const codigos: { [key: string]: string } = {
-    'BRASILIA': '5300108',
-    'SAO PAULO': '3550308',
-    'RIO DE JANEIRO': '3304557',
-    'BELO HORIZONTE': '3106200',
-    'SALVADOR': '2927408',
-    'FORTALEZA': '2304400',
-    'RECIFE': '2611606',
-    'PORTO ALEGRE': '4314902',
-    'CURITIBA': '4106902'
+    'BRASILIA': '9701', // Brasília - código DIMOB
+    'SAO PAULO': '7107', // São Paulo - código DIMOB  
+    'RIO DE JANEIRO': '6001', // Rio de Janeiro - código DIMOB
+    'BELO HORIZONTE': '3106', // Belo Horizonte
+    'SALVADOR': '2927', // Salvador
+    'FORTALEZA': '2304', // Fortaleza
+    'RECIFE': '2611', // Recife
+    'PORTO ALEGRE': '4314', // Porto Alegre
+    'CURITIBA': '4106' // Curitiba
   }
   
-  return codigos[cidade.toUpperCase()] || '5300108' // Default: Brasília
+  return codigos[cidade.toUpperCase()] || '9701' // Default: Brasília DIMOB
 }
 
 /**
