@@ -310,10 +310,30 @@ export default function Settings() {
   const saveCompanySettings = async () => {
     try {
       setSaveStatus('saving')
+      console.log('Salvando dados da empresa:', companySettings)
+      
+      // Dados sem campos DIMOB para teste inicial
+      const companyData = {
+        name: companySettings.name,
+        tradeName: companySettings.tradeName,
+        document: companySettings.document,
+        email: companySettings.email,
+        phone: companySettings.phone,
+        address: companySettings.address,
+        city: companySettings.city,
+        state: companySettings.state,
+        zipCode: companySettings.zipCode,
+        logo: companySettings.logo,
+        website: companySettings.website
+        // Campos DIMOB comentados temporariamente
+        // responsibleCpf: companySettings.responsibleCpf,
+        // municipalityCode: companySettings.municipalityCode
+      }
+      
       const response = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ company: companySettings })
+        body: JSON.stringify({ company: companyData })
       })
       
       if (response.ok) {
@@ -322,7 +342,8 @@ export default function Settings() {
         setTimeout(() => setSaveStatus('idle'), 2000)
       } else {
         const errorData = await response.json()
-        showError('Erro ao salvar empresa', errorData.error)
+        console.error('Erro completo do servidor:', errorData)
+        showError('Erro ao salvar empresa', errorData.details || errorData.error)
         setSaveStatus('error')
       }
     } catch (error) {

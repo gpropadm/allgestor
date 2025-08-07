@@ -284,14 +284,26 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Error saving settings:', error)
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'No stack trace',
+      name: error instanceof Error ? error.name : 'Unknown error name'
+    })
+    
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json(
         { error: 'Não autorizado' },
         { status: 401 }
       )
     }
+    
+    // Retornar erro mais detalhado
     return NextResponse.json(
-      { error: 'Erro ao salvar configurações' },
+      { 
+        error: 'Erro ao salvar configurações',
+        details: error instanceof Error ? error.message : 'Erro desconhecido',
+        timestamp: new Date().toISOString()
+      },
       { status: 500 }
     )
   }
