@@ -190,12 +190,20 @@ function gerarConteudoDimob(data: DimobData, ano: number): string {
   conteudo += '0'.repeat(8) // Data evento (8 posições)
   conteudo += '00' // Código situação (2 posições)
   conteudo += data.empresa.nome.padEnd(60, ' ').slice(0, 60) // Nome Empresarial (60 posições)
-  conteudo += data.empresa.cpfResponsavel // CPF Responsável (11 posições)
+  conteudo += limparDocumento(data.empresa.cpfResponsavel, 11) // CPF Responsável (11 posições)
   conteudo += data.empresa.endereco.padEnd(120, ' ').slice(0, 120) // Endereço (120 posições)
   conteudo += data.empresa.uf.padEnd(2, ' ').slice(0, 2) // UF (2 posições)
   conteudo += data.empresa.codigoMunicipio.padStart(4, '0').slice(0, 4) // Código Município (4 posições)
   conteudo += ' '.repeat(20) // Reservado (20 posições)
   conteudo += ' '.repeat(10) // Reservado (10 posições)
+  
+  // Validar tamanho R01 (deve ter 272 chars sem EOL)
+  const r01Length = conteudo.split('\r\n')[1].length
+  console.log(`📏 [DIMOB] Tamanho R01: ${r01Length} chars (deve ser 272)`)
+  if (r01Length !== 272) {
+    console.error(`❌ [DIMOB] R01 com tamanho incorreto: ${r01Length}, esperado: 272`)
+  }
+  
   conteudo += '\r\n' // EOL
 
   // === R02 - LOCAÇÕES (uma para cada contrato) ===
