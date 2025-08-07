@@ -72,6 +72,13 @@ export async function gerarComprovanteRendimentos(
       return null
     }
     
+    // Debug: verificar se contractNumber está disponível
+    console.log('🔍 Contract debug:', {
+      id: contract.id,
+      contractNumber: (contract as any).contractNumber,
+      hasContractNumber: !!(contract as any).contractNumber
+    })
+    
     // Buscar todos os pagamentos PAGOS do contrato no ano específico
     const startDate = new Date(ano, 0, 1) // 1º de janeiro
     const endDate = new Date(ano, 11, 31, 23, 59, 59) // 31 de dezembro
@@ -161,7 +168,7 @@ export async function gerarComprovanteRendimentos(
       },
       imovel: {
         endereco: contract.property.address || 'Endereço não informado',
-        numeroContrato: contract.contractNumber || contract.id,
+        numeroContrato: (contract as any).contractNumber || contract.id,
         dataContrato: contract.startDate.toLocaleDateString('pt-BR')
       },
       imobiliaria: {
