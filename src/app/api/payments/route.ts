@@ -8,6 +8,10 @@ export async function GET(request: NextRequest) {
     const user = await requireAuth(request)
     console.log('👤 Usuário autenticado:', { id: user.id, email: user.email })
     
+    // Get query parameters
+    const url = new URL(request.url)
+    const showAll = url.searchParams.get('showAll') === 'true'
+    
     // Check if user is admin
     const userIsAdmin = await isUserAdmin(user.id)
     console.log('🔐 Usuário é admin:', userIsAdmin)
@@ -35,14 +39,37 @@ export async function GET(request: NextRequest) {
       return NextResponse.json([])
     }
     
-    // Get ALL payments (remove month filter!)
-    console.log('🗓️ Searching ALL payments for user contracts')
+    // Build where clause based on showAll parameter
+    let dateFilter = {}
+    
+    if (!showAll) {
+      // Get payments for current month only
+      const currentDate = new Date()
+      const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+      const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59)
+      
+      dateFilter = {
+        dueDate: {
+          gte: startOfMonth,
+          lte: endOfMonth
+        }
+      }
+      
+      console.log('🗓️ Filtering payments for current month:', {
+        startOfMonth: startOfMonth.toISOString(),
+        endOfMonth: endOfMonth.toISOString(),
+        currentMonth: startOfMonth.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })
+      })
+    } else {
+      console.log('📅 Showing ALL payments (no date filter)')
+    }
     
     const allPayments = await prisma.payment.findMany({
       where: {
         contractId: {
           in: contractIds
-        }
+        },
+        ...dateFilter
       },
       select: {
         id: true,

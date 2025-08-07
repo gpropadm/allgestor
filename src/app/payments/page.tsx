@@ -86,6 +86,7 @@ export default function Payments() {
   const [autoRefresh, setAutoRefresh] = useState(true)
   const [lastRefresh, setLastRefresh] = useState(new Date())
   const [notification, setNotification] = useState<{type: 'success' | 'error' | 'info', message: string, title?: string} | null>(null)
+  const [showAllMonths, setShowAllMonths] = useState(false)
   
   // Modal Marcar Pago
   const [showPaymentModal, setShowPaymentModal] = useState(false)
@@ -144,13 +145,14 @@ export default function Payments() {
   useEffect(() => {
     fetchPayments()
     fetchFinancialSettings() // Carregar configurações ao iniciar
-  }, [])
+  }, [showAllMonths])
 
   const fetchPayments = async (silent = false) => {
     if (!silent) setLoading(true)
     
     try {
-      const response = await fetch('/api/payments')
+      const url = showAllMonths ? '/api/payments?showAll=true' : '/api/payments'
+      const response = await fetch(url)
       if (response.ok) {
         const data = await response.json()
         
@@ -450,18 +452,22 @@ export default function Payments() {
       matchesStatus = payment.status?.toUpperCase() === filterStatus.toUpperCase()
     }
 
-    // ✅ CORRIGIDO: Mostrar mês atual OU pagamentos overdue OU inquilino expandido
-    const currentMonth = new Date().getMonth()
-    const currentYear = new Date().getFullYear()
-    const paymentMonth = dueDate.getMonth()
-    const paymentYear = dueDate.getFullYear()
+    // Filtro por mês (quando não estiver mostrando todos os meses)
+    let matchesMonth = true
     
-    const isCurrentMonth = paymentMonth === currentMonth && paymentYear === currentYear
-    const isTenantExpanded = expandedTenants.has(tenantName)
-    const isPaymentOverdue = payment.status === 'OVERDUE'
-    
-    // Mostrar se: inquilino expandido OU mês atual OU pagamento em atraso
-    const matchesMonth = isTenantExpanded || isCurrentMonth || isPaymentOverdue
+    if (!showAllMonths) {
+      const currentMonth = new Date().getMonth()
+      const currentYear = new Date().getFullYear()
+      const paymentMonth = dueDate.getMonth()
+      const paymentYear = dueDate.getFullYear()
+      
+      const isCurrentMonth = paymentMonth === currentMonth && paymentYear === currentYear
+      const isTenantExpanded = expandedTenants.has(tenantName)
+      const isPaymentOverdue = payment.status === 'OVERDUE'
+      
+      // Mostrar se: inquilino expandido OU mês atual OU pagamento em atraso
+      matchesMonth = isTenantExpanded || isCurrentMonth || isPaymentOverdue
+    }
 
     return matchesSearch && matchesStatus && matchesMonth
   })
@@ -527,16 +533,33 @@ export default function Payments() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Pagamentos</h1>
               <p className="text-gray-600 mt-1">
-                Mostrando apenas {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                {showAllMonths 
+                  ? 'Mostrando todos os meses' 
+                  : `Mostrando apenas ${new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`
+                }
               </p>
-              <p className="text-sm text-blue-600 mt-1">
-                💡 Clique no nome do inquilino para ver todos os meses
-                {expandedTenants.size > 0 && (
-                  <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
-                    {expandedTenants.size} expandido{expandedTenants.size > 1 ? 's' : ''}
-                  </span>
+              <div className="flex items-center space-x-4 mt-2">
+                <button
+                  onClick={() => setShowAllMonths(!showAllMonths)}
+                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                    showAllMonths
+                      ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {showAllMonths ? '📅 Mostrar só este mês' : '📅 Ver todos os meses'}
+                </button>
+                {!showAllMonths && (
+                  <p className="text-sm text-blue-600">
+                    💡 Ou clique no nome do inquilino para ver todos os meses dele
+                    {expandedTenants.size > 0 && (
+                      <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                        {expandedTenants.size} expandido{expandedTenants.size > 1 ? 's' : ''}
+                      </span>
+                    )}
+                  </p>
                 )}
-              </p>
+              </div>
             </div>
             <div className="mt-4 sm:mt-0 flex items-center space-x-3">
               <div className="flex items-center space-x-2 text-sm text-gray-600">
