@@ -48,7 +48,10 @@ export async function GET(request: NextRequest) {
         state: company.state,
         zipCode: company.zipCode,
         logo: company.logo,
-        website: company.website
+        website: company.website,
+        // Campos DIMOB
+        responsibleCpf: company.responsibleCpf,
+        municipalityCode: company.municipalityCode
       },
       system: settingsMap.system || {
         theme: 'light',
@@ -136,7 +139,10 @@ export async function POST(request: NextRequest) {
           state: data.company.state,
           zipCode: data.company.zipCode,
           logo: data.company.logo,
-          website: data.company.website
+          website: data.company.website,
+          // Campos DIMOB
+          responsibleCpf: data.company.responsibleCpf,
+          municipalityCode: data.company.municipalityCode
         }
       })
       console.log('Company updated successfully:', updatedCompany.name)
