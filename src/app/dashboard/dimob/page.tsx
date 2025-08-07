@@ -69,6 +69,39 @@ export default function DimobPage() {
     }).format(value)
   }
 
+  const downloadDimobTxt = async (ano: number) => {
+    try {
+      setLoading(true)
+      console.log('📄 Iniciando download DIMOB TXT para ano:', ano)
+      
+      const response = await fetch(`/api/dimob/generate-txt?ano=${ano}`)
+      
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Erro ao gerar arquivo DIMOB')
+      }
+      
+      // Download do arquivo
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `DIMOB_${ano}.txt`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      
+      console.log('✅ Download DIMOB TXT concluído')
+      
+    } catch (error) {
+      console.error('❌ Erro ao baixar DIMOB TXT:', error)
+      alert(`Erro ao gerar arquivo DIMOB: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -78,7 +111,16 @@ export default function DimobPage() {
             <h1 className="text-2xl font-bold text-gray-900">DIMOB - Declaração Imobiliária</h1>
             <p className="text-gray-600">Gerencie suas obrigações fiscais imobiliárias</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 items-center">
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value={2024}>2024</option>
+              <option value={2023}>2023</option>
+              <option value={2025}>2025</option>
+            </select>
             <Link href="/dashboard/dimob/upload" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors">
               <Upload size={16} />
               Upload XMLs
@@ -87,6 +129,18 @@ export default function DimobPage() {
               <Download size={16} />
               Gerar DIMOB
             </Link>
+            <button
+              onClick={() => downloadDimobTxt(selectedYear)}
+              disabled={loading}
+              className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
+                loading 
+                  ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                  : 'bg-red-600 text-white hover:bg-red-700'
+              }`}
+            >
+              <FileText size={16} />
+              {loading ? 'Gerando...' : `Download TXT ${selectedYear}`}
+            </button>
           </div>
         </div>
 
