@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     
     // Verificar se já existe
     try {
-      await prisma.$queryRaw`SELECT "contractNumber" FROM "Contract" LIMIT 1`
+      await prisma.$queryRaw`SELECT "contractNumber" FROM "contracts" LIMIT 1`
       return NextResponse.json({
         success: true,
         message: 'Campo contractNumber já existe - sistema OK!',
@@ -27,11 +27,11 @@ export async function GET(request: NextRequest) {
     // Aplicar fix
     try {
       // Adicionar coluna
-      await prisma.$executeRaw`ALTER TABLE "Contract" ADD COLUMN "contractNumber" VARCHAR(50)`
+      await prisma.$executeRaw`ALTER TABLE "contracts" ADD COLUMN "contractNumber" VARCHAR(50)`
       results.steps.push('✅ Coluna adicionada')
       
       // Criar índice
-      await prisma.$executeRaw`CREATE INDEX "Contract_contractNumber_idx" ON "Contract"("contractNumber")`
+      await prisma.$executeRaw`CREATE INDEX "contracts_contractNumber_idx" ON "contracts"("contractNumber")`
       results.steps.push('✅ Índice criado')
       
       // Contar contratos
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
           const contractNumber = `CTR-${year}-${seq}`
           
           await prisma.$executeRaw`
-            UPDATE "Contract" 
+            UPDATE "contracts" 
             SET "contractNumber" = ${contractNumber}
             WHERE id = ${contract.id}
           `
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
       }
       
       // Teste final
-      await prisma.$queryRaw`SELECT "contractNumber" FROM "Contract" LIMIT 1`
+      await prisma.$queryRaw`SELECT "contractNumber" FROM "contracts" LIMIT 1`
       results.steps.push('✅ Teste final OK')
       
       results.success = true

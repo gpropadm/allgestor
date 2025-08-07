@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     console.log('🔍 Verificando status do banco de dados...')
     
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       // Tentar buscar um contrato com contractNumber
       await prisma.$queryRaw`
         SELECT id, "contractNumber" 
-        FROM "Contract" 
+        FROM "contracts" 
         LIMIT 1
       `
       
