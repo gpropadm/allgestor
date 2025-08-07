@@ -158,7 +158,7 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
           tipo: contrato.property.dimobPropertyType || 'U',
           endereco: contrato.property.address?.toUpperCase() || 'ENDERECO NAO INFORMADO',
           cep: '70000000', // CEP padrão Brasília para evitar erro de faixa
-          codigoMunicipio: '9701', // Código oficial Brasília DIMOB
+          codigoMunicipio: '1001', // Código Brasília DIMOB
           uf: contrato.property.state || 'DF',
           municipio: 'BRASILIA' // Campo município que estava faltando
         }
@@ -309,17 +309,17 @@ function extrairCep(endereco: string): string {
  * Obter código do município (simplificado - usar tabela IBGE real)
  */
 function obterCodigoMunicipio(cidade: string): string {
-  // Códigos DIMOB (4 dígitos) - diferentes do IBGE completo
+  // Códigos DIMOB (4 dígitos) - usar tabela oficial
   const codigos: { [key: string]: string } = {
-    'BRASILIA': '9701', // Brasília - código DIMOB
-    'SAO PAULO': '7107', // São Paulo - código DIMOB  
-    'RIO DE JANEIRO': '6001', // Rio de Janeiro - código DIMOB
+    'BRASILIA': '1001', // Tentativa código Brasília 
+    'SAO PAULO': '3101', // São Paulo
+    'RIO DE JANEIRO': '3301', // Rio de Janeiro
     'BELO HORIZONTE': '3106', // Belo Horizonte
-    'SALVADOR': '2927', // Salvador
-    'FORTALEZA': '2304', // Fortaleza
-    'RECIFE': '2611', // Recife
-    'PORTO ALEGRE': '4314', // Porto Alegre
-    'CURITIBA': '4106' // Curitiba
+    'SALVADOR': '2901', // Salvador
+    'FORTALEZA': '2301', // Fortaleza
+    'RECIFE': '2601', // Recife
+    'PORTO ALEGRE': '4301', // Porto Alegre
+    'CURITIBA': '4101' // Curitiba
   }
   
   return codigos[cidade.toUpperCase()] || '0000' // Default: código vazio
