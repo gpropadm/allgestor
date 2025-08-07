@@ -91,7 +91,11 @@ export async function PUT(
         images: data.images || "[]",
         amenities: data.amenities || "[]",
         acceptsPartnership: data.acceptsPartnership || false,
-        acceptsFinancing: data.acceptsFinancing || false
+        acceptsFinancing: data.acceptsFinancing || false,
+        // Campos DIMOB
+        dimobPropertyType: data.dimobPropertyType || 'U',
+        municipalityCode: data.municipalityCode || null,
+        extractedCep: data.extractedCep || null
       },
       include: {
         owner: true
