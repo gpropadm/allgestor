@@ -69,7 +69,7 @@ async function gerarReciboParaPagamento(paymentId: string, userId: string) {
       "observacoes", "createdAt", "updatedAt"
     ) VALUES (
       ${reciboId}, ${userId}, ${payment.contractId}, ${payment.id}, ${numeroRecibo},
-      ${competenciaDate}, ${now}, 
+      ${competenciaDate}, ${competenciaDate}, 
       ${valorTotal}, ${taxaAdministracao}, ${percentualTaxa}, ${valorRepassado},
       ${'/api/auto.pdf'}, ${payment.contract.property.owner.name}, 
       ${payment.contract.property.owner.document}, ${payment.contract.tenant.name}, 
