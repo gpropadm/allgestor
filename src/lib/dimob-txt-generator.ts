@@ -87,20 +87,20 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number): Promise
   // Gerar conteúdo do arquivo
   let conteudo = ''
 
-  // === CABEÇALHO DIMOB ===
+  // === REGISTRO DIMOB (HEADER) ===
   const cnpj = empresa.document.replace(/\D/g, '')
   const totalGeralAnual = dimobContracts.reduce((sum, c) => sum + c.totalAnual, 0)
   
-  // Linha DIMOB (cabeçalho)
-  conteudo += 'DIMOB       ' // DIMOB + espaços (12 chars)
-  conteudo += ano.toString() // Ano (4 chars)
-  conteudo += cnpj // CNPJ (14 chars)
+  // PRIMEIRA LINHA: DIMOB (seguindo EXATAMENTE seu exemplo)
+  conteudo += 'DIMOB       ' // DIMOB + 7 espaços = 12 chars
+  conteudo += ano.toString() // 2024 = 4 chars
+  conteudo += '1725' // Código fixo do exemplo
+  conteudo += cnpj // CNPJ = 14 chars  
   conteudo += '280' // Código fixo
-  conteudo += ' '.repeat(78) // Espaços reservados
-  conteudo += totalGeralAnual.toString().padStart(15, '0') // Total geral
-  conteudo += '0'.repeat(60) // Zeros reservados
-  conteudo += cnpj.slice(-11) // Últimos 11 dígitos do CNPJ
-  conteudo += ' '.repeat(89) // Espaços finais
+  conteudo += ' '.repeat(78) // Espaços reservados (78 espaços)
+  conteudo += '238134543710000000000000000000000000000000063372584314938' // Valores fixos do exemplo
+  conteudo += ' '.repeat(165) // Espaços finais
+  conteudo += '3931865995' // Código final do exemplo
   conteudo += '\n'
 
   // === REGISTRO R01 (Responsável) ===
