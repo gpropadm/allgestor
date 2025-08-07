@@ -110,8 +110,8 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number): Promise
       nome: empresa.name || empresa.tradeName || 'EMPRESA',
       endereco: empresa.address || 'ENDERECO NAO INFORMADO',
       uf: empresa.state || 'DF',
-      codigoMunicipio: obterCodigoMunicipio(empresa.city || 'BRASILIA'), // Hardcoded até migration
-      cpfResponsavel: '00000000000' // Hardcoded até migration ser executada
+      codigoMunicipio: empresa.municipalityCode || obterCodigoMunicipio(empresa.city || 'BRASILIA'),
+      cpfResponsavel: empresa.responsibleCpf || '00000000000'
     },
     contratos: contratos.map((contrato, index) => {
       // Calcular valores mensais
@@ -143,10 +143,10 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number): Promise
         },
         valoresMensais,
         imovel: {
-          tipo: 'U', // Hardcoded até migration
+          tipo: contrato.property.dimobPropertyType || 'U',
           endereco: contrato.property.address?.toUpperCase() || 'ENDERECO NAO INFORMADO',
-          cep: extrairCep(contrato.property.address || ''), // Sem campo até migration
-          codigoMunicipio: obterCodigoMunicipio(contrato.property.city), // Sem campo até migration
+          cep: contrato.property.extractedCep || extrairCep(contrato.property.address || ''),
+          codigoMunicipio: contrato.property.municipalityCode || obterCodigoMunicipio(contrato.property.city),
           uf: contrato.property.state || 'DF'
         }
       }
@@ -311,14 +311,12 @@ async function validarDadosDimob(empresa: any, contratos: any[]): Promise<void> 
   const erros: string[] = []
 
   // Validar dados da empresa
-  // Validação temporariamente desabilitada até migration
-  // if (!empresa.responsibleCpf) {
-  //   erros.push('❌ CPF do responsável da empresa não informado (obrigatório DIMOB)')
-  // }
-  // Validação temporariamente desabilitada até migration
-  // if (!empresa.municipalityCode) {
-  //   erros.push('❌ Código do município da empresa não informado (obrigatório DIMOB)')
-  // }
+  if (!empresa.responsibleCpf) {
+    erros.push('❌ CPF do responsável da empresa não informado (obrigatório DIMOB)')
+  }
+  if (!empresa.municipalityCode) {
+    erros.push('❌ Código do município da empresa não informado (obrigatório DIMOB)')
+  }
   if (!empresa.document || empresa.document.length < 14) {
     erros.push('❌ CNPJ da empresa inválido (obrigatório DIMOB)')
   }

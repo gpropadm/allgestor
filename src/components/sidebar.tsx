@@ -47,7 +47,7 @@ const menuItems = [
   { icon: FileText, label: '📄 Comprovantes', href: '/comprovantes', featured: true },
   { icon: TrendingDown, label: 'Despesas', href: '/expenses' },
   { icon: Calculator, label: 'Financeiro', href: '/financial' },
-  { icon: FileText, label: '📊 DIMOB', href: '/dashboard/dimob', featured: true },
+  { icon: FileText, label: '📊 DIMOB', href: '/dimob', featured: true },
   { icon: Zap, label: 'Leads', href: '/leads' },
   { icon: CreditCard, label: 'PIX Pagamento', href: '/pix' },
   { icon: Wallet, label: 'Gateway', href: '/gateway' },
