@@ -39,37 +39,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json([])
     }
     
-    // Build where clause based on showAll parameter
-    let dateFilter = {}
-    
-    if (!showAll) {
-      // Get payments for current month only
-      const currentDate = new Date()
-      const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
-      const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59)
-      
-      dateFilter = {
-        dueDate: {
-          gte: startOfMonth,
-          lte: endOfMonth
-        }
-      }
-      
-      console.log('🗓️ Filtering payments for current month:', {
-        startOfMonth: startOfMonth.toISOString(),
-        endOfMonth: endOfMonth.toISOString(),
-        currentMonth: startOfMonth.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })
-      })
-    } else {
-      console.log('📅 Showing ALL payments (no date filter)')
-    }
+    // Get ALL payments (no date filter by default, let frontend handle it)
+    console.log('📅 Getting ALL payments for user contracts')
     
     const allPayments = await prisma.payment.findMany({
       where: {
         contractId: {
           in: contractIds
-        },
-        ...dateFilter
+        }
       },
       select: {
         id: true,

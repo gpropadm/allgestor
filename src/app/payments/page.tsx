@@ -145,15 +145,13 @@ export default function Payments() {
   useEffect(() => {
     fetchPayments()
     fetchFinancialSettings() // Carregar configurações ao iniciar
-  }, [showAllMonths])
+  }, [])
 
   const fetchPayments = async (silent = false) => {
     if (!silent) setLoading(true)
     
     try {
-      const url = showAllMonths ? '/api/payments?showAll=true' : '/api/payments'
-      console.log('🔗 Fazendo fetch para:', url)
-      const response = await fetch(url)
+      const response = await fetch('/api/payments')
       console.log('📡 Resposta da API:', response.status, response.statusText)
       
       if (response.ok) {
@@ -197,11 +195,7 @@ export default function Payments() {
         setPayments(data)
         setLastRefresh(new Date())
         
-        // Se não houver dados no mês atual e não estiver mostrando todos os meses, tentar mostrar todos
-        if (data.length === 0 && !showAllMonths && !silent) {
-          console.log('🔄 Nenhum pagamento no mês atual, tentando mostrar todos os meses...')
-          setShowAllMonths(true)
-        }
+        // Removido auto-fallback - sempre mostra os dados como estão
       } else {
         console.error('❌ Erro na API:', response.status, await response.text())
         if (!silent) {
@@ -449,45 +443,60 @@ export default function Payments() {
     setExpandedTenants(newExpanded)
   }
 
-  const filteredPayments = payments.filter(payment => {
-    const tenantName = payment.tenant?.name || payment.contract?.tenant?.name || ''
-    const propertyTitle = payment.property?.title || payment.contract?.property?.title || ''
-    
-    const matchesSearch = 
-      tenantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      propertyTitle.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    // Verificar se está vencido (para filtro especial)
-    const dueDate = new Date(payment.dueDate)
-    const today = new Date()
-    const isOverdue = dueDate < today && payment.status !== 'PAID'
-    
-    let matchesStatus = true
-    if (filterStatus === 'VENCIDOS') {
-      matchesStatus = isOverdue
-    } else if (filterStatus !== 'all') {
-      matchesStatus = payment.status?.toUpperCase() === filterStatus.toUpperCase()
-    }
+  // Primeiro, agrupar pagamentos por contrato e pegar o mais recente de cada um
+  const getFilteredPayments = () => {
+    let paymentsToShow = payments
 
-    // Filtro por mês (quando não estiver mostrando todos os meses)
-    let matchesMonth = true
-    
     if (!showAllMonths) {
-      const currentMonth = new Date().getMonth()
-      const currentYear = new Date().getFullYear()
-      const paymentMonth = dueDate.getMonth()
-      const paymentYear = dueDate.getFullYear()
+      // Agrupar por contractId e pegar o pagamento mais recente de cada contrato
+      const paymentsByContract = payments.reduce((acc, payment) => {
+        const contractId = payment.contract?.id || payment.id
+        if (!acc[contractId] || new Date(payment.dueDate) > new Date(acc[contractId].dueDate)) {
+          acc[contractId] = payment
+        }
+        return acc
+      }, {} as Record<string, Payment>)
       
-      const isCurrentMonth = paymentMonth === currentMonth && paymentYear === currentYear
-      const isTenantExpanded = expandedTenants.has(tenantName)
-      const isPaymentOverdue = payment.status === 'OVERDUE'
-      
-      // Mostrar se: inquilino expandido OU mês atual OU pagamento em atraso
-      matchesMonth = isTenantExpanded || isCurrentMonth || isPaymentOverdue
+      paymentsToShow = Object.values(paymentsByContract)
+      console.log('📊 Mostrando apenas o pagamento mais recente de cada contrato:', paymentsToShow.length)
     }
 
-    return matchesSearch && matchesStatus && matchesMonth
-  })
+    // Agora aplicar filtros de busca e status
+    return paymentsToShow.filter(payment => {
+      const tenantName = payment.tenant?.name || payment.contract?.tenant?.name || ''
+      const propertyTitle = payment.property?.title || payment.contract?.property?.title || ''
+      
+      const matchesSearch = 
+        tenantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        propertyTitle.toLowerCase().includes(searchTerm.toLowerCase())
+      
+      // Verificar se está vencido (para filtro especial)
+      const dueDate = new Date(payment.dueDate)
+      const today = new Date()
+      const isOverdue = dueDate < today && payment.status !== 'PAID'
+      
+      let matchesStatus = true
+      if (filterStatus === 'VENCIDOS') {
+        matchesStatus = isOverdue
+      } else if (filterStatus !== 'all') {
+        matchesStatus = payment.status?.toUpperCase() === filterStatus.toUpperCase()
+      }
+
+      // Expandir inquilino específico (mostrar todos os pagamentos dele)
+      const isTenantExpanded = expandedTenants.has(tenantName)
+      if (isTenantExpanded && !showAllMonths) {
+        // Se inquilino está expandido, buscar todos os pagamentos dele
+        const allTenantPayments = payments.filter(p => 
+          (p.tenant?.name || p.contract?.tenant?.name) === tenantName
+        )
+        return allTenantPayments.includes(payment) && matchesSearch && matchesStatus
+      }
+
+      return matchesSearch && matchesStatus
+    })
+  }
+
+  const filteredPayments = getFilteredPayments()
 
   const stats = {
     total: payments.length,
