@@ -34,7 +34,8 @@ import {
   DollarSign,
   Plug,
   Link2,
-  ShieldCheck
+  ShieldCheck,
+  Home
 } from 'lucide-react'
 
 // OPÇÃO 1: Ícones mais modernos
@@ -45,9 +46,7 @@ const menuItems = [
   { icon: Calculator, label: '💰 Simulador Financeiro', href: '/simulador-financeiro', featured: true },
   { icon: BarChart3, label: '📈 Analytics', href: '/analytics', featured: true },
   { icon: MessageCircle, label: '💬 WhatsApp', href: '/whatsapp', featured: true },
-  { icon: Users, label: 'Proprietários', href: '/owners' },
-  { icon: Building, label: 'Imóveis', href: '/properties' },
-  { icon: User, label: 'Inquilinos', href: '/tenants' },
+  { icon: Home, label: 'Gestão Imobiliária', href: '#', isDropdown: true },
   { icon: FileText, label: 'Contratos', href: '/contracts' },
   { icon: Receipt, label: 'Pagamentos', href: '/payments' },
   { icon: FileText, label: '🧾 Recibos', href: '/recibos', featured: true },
@@ -100,6 +99,7 @@ const menuItems = [
 export function Sidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isConfigExpanded, setIsConfigExpanded] = useState(false)
+  const [isImobiliariaExpanded, setIsImobiliariaExpanded] = useState(false)
   const pathname = usePathname()
   const { data: session } = useSession()
   const [isAdmin, setIsAdmin] = useState(false)
@@ -114,6 +114,13 @@ export function Sidebar() {
     { icon: Plug, label: 'APIs Externas', href: '/settings?tab=apis' },
     { icon: Link2, label: 'Integrações', href: '/settings?tab=integracoes' },
     { icon: ShieldCheck, label: 'Segurança', href: '/settings?tab=seguranca' },
+  ]
+
+  // Subitens de Gestão Imobiliária
+  const imobiliariaMenuItems = [
+    { icon: Users, label: 'Proprietários', href: '/owners' },
+    { icon: Building, label: 'Imóveis', href: '/properties' },
+    { icon: User, label: 'Inquilinos', href: '/tenants' },
   ]
 
   // Verificar se é admin usando a mesma lógica da página de settings
@@ -230,6 +237,56 @@ export function Sidebar() {
                   </li>
                 )
               }
+
+              // Se é Gestão Imobiliária, renderizar como expansível
+              if (item.label === 'Gestão Imobiliária') {
+                return (
+                  <li key="imobiliaria">
+                    {/* Header Gestão Imobiliária */}
+                    <button
+                      onClick={() => setIsImobiliariaExpanded(!isImobiliariaExpanded)}
+                      className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <Home className="w-5 h-5" />
+                        <span className="font-medium">Gestão Imobiliária</span>
+                      </div>
+                      {isImobiliariaExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                    </button>
+                    
+                    {/* Subitens */}
+                    {isImobiliariaExpanded && (
+                      <ul className="ml-6 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-600 pl-4">
+                        {imobiliariaMenuItems.map((subItem) => {
+                          const isActive = pathname === subItem.href
+                          return (
+                            <li key={subItem.href}>
+                              <Link
+                                href={subItem.href}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors border-r-2 text-sm ${
+                                  isActive
+                                    ? ''
+                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 border-transparent'
+                                }`}
+                                style={isActive ? {backgroundColor: '#fef2f2', color: '#f63c6a', borderColor: '#f63c6a'} : {}}
+                              >
+                                <subItem.icon className="w-4 h-4" />
+                                <span className="font-medium">{subItem.label}</span>
+                              </Link>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    )}
+                  </li>
+                )
+              }
+              
+              // Se é um item dropdown, não renderizar link
+              if (item.isDropdown) {
+                return null
+              }
               
               // Itens normais
               const isActive = pathname === item.href
@@ -327,6 +384,53 @@ export function Sidebar() {
                     </div>
                   </li>
                 )
+              }
+
+              // Se é Gestão Imobiliária no desktop, criar dropdown hover
+              if (item.label === 'Gestão Imobiliária') {
+                return (
+                  <li key={item.href} className="px-2 relative group">
+                    <div
+                      className="relative flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
+                      title="Gestão Imobiliária"
+                    >
+                      <Home className="w-5 h-5" />
+                    </div>
+                    
+                    {/* Dropdown Menu */}
+                    <div className="absolute left-16 top-0 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                      <div className="p-2">
+                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+                          GESTÃO IMOBILIÁRIA
+                        </div>
+                        <nav className="mt-2">
+                          {imobiliariaMenuItems.map((subItem) => {
+                            const isActive = pathname === subItem.href
+                            return (
+                              <Link
+                                key={subItem.href}
+                                href={subItem.href}
+                                className={`flex items-center space-x-3 px-3 py-2.5 rounded-md transition-all duration-200 text-sm ${
+                                  isActive
+                                    ? 'bg-red-50 text-red-600 border-l-2 border-red-600'
+                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                }`}
+                              >
+                                <subItem.icon className="w-4 h-4" />
+                                <span className="font-medium">{subItem.label}</span>
+                              </Link>
+                            )
+                          })}
+                        </nav>
+                      </div>
+                    </div>
+                  </li>
+                )
+              }
+              
+              // Se é um item dropdown, não renderizar link
+              if (item.isDropdown) {
+                return null
               }
               
               const isActive = pathname === item.href
