@@ -63,6 +63,10 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
     throw new Error('Empresa não encontrada para gerar DIMOB')
   }
 
+  // 🚨 CORREÇÃO CRÍTICA: Usar filtro de data igual ao comprovante (que funciona)
+  const startDate = new Date(ano, 0, 1) // 1º de janeiro
+  const endDate = new Date(ano, 11, 31, 23, 59, 59) // 31 de dezembro COM horário
+  
   // Buscar contratos ativos com pagamentos do ano (filtrado por proprietário se especificado)
   const whereCondition: any = {
     userId: userId,
@@ -70,10 +74,21 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
     payments: {
       some: {
         status: 'PAID',
-        dueDate: {
-          gte: new Date(ano, 0, 1),
-          lte: new Date(ano, 11, 31)
-        }
+        OR: [
+          {
+            paidDate: {
+              gte: startDate,
+              lte: endDate
+            }
+          },
+          {
+            paidDate: null,
+            dueDate: {
+              gte: startDate,
+              lte: endDate
+            }
+          }
+        ]
       }
     }
   }
@@ -95,12 +110,26 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
       payments: {
         where: {
           status: 'PAID',
-          dueDate: {
-            gte: new Date(ano, 0, 1),
-            lte: new Date(ano, 11, 31)
-          }
+          OR: [
+            {
+              paidDate: {
+                gte: startDate,
+                lte: endDate
+              }
+            },
+            {
+              paidDate: null,
+              dueDate: {
+                gte: startDate,
+                lte: endDate
+              }
+            }
+          ]
         },
-        orderBy: { dueDate: 'asc' }
+        orderBy: [
+          { paidDate: 'asc' },
+          { dueDate: 'asc' }
+        ]
       }
     }
   })
@@ -126,10 +155,21 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
           userId: userId,
           property: ownerId ? { ownerId: ownerId } : undefined
         },
-        dueDate: {
-          gte: new Date(ano, 0, 1),
-          lte: new Date(ano, 11, 31)
-        }
+        OR: [
+          {
+            paidDate: {
+              gte: startDate,
+              lte: endDate
+            }
+          },
+          {
+            paidDate: null,
+            dueDate: {
+              gte: startDate,
+              lte: endDate
+            }
+          }
+        ]
       },
       select: {
         status: true,
