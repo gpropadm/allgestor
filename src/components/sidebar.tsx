@@ -4,153 +4,71 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
+// Phosphor Icons
 import {
-  Building2,
-  Users,
+  ChartPieSlice,
+  Robot,
+  TrendUp,
+  Calculator,
+  ChartBar,
+  WhatsappLogo,
   FileText,
-  Settings,
+  Target,
+  PixLogo,
+  CreditCard,
+  Buildings,
+  UserCircle,
+  House,
+  Users,
+  FileContract,
+  Wallet,
+  Money,
+  Receipt,
+  FileArrowUp,
+  TrendDown,
+  ChartPie,
+  UserGear,
+  GearSix,
+  Shield,
   Menu,
   X,
-  LayoutDashboard,
-  Building,
-  User,
-  Receipt,
-  Calculator,
-  Zap,
-  UserPlus,
-  Power,
-  TrendingDown,
-  CreditCard,
-  Shield,
-  Wallet,
-  TestTube,
-  Bot,
-  BarChart3,
-  TrendingUp,
-  MessageCircle,
   ChevronDown,
   ChevronRight,
   Bell,
-  DollarSign,
+  CurrencyDollar,
   Plug,
-  Link2,
+  Link,
   ShieldCheck,
-  Home,
-  Banknote,
-  PieChart,
-  HousePlus,
-  Contact,
-  UserCheck,
-  ScrollText,
-  Target,
-  Mail,
-  Activity,
-  Wrench,
-  Brain,
-  MessageSquare,
-  Coins,
-  FileContract,
-  UserCog,
-  Sparkles,
-  Rocket,
-  Crown,
-  Gem,
-  Star,
-  Flame,
-  Castle,
-  Diamond,
-  MapPin,
-  Compass,
-  Globe,
-  Briefcase,
-  Archive,
-  BookOpen,
-  Layers
+  Building2,
+  Power
+} from '@phosphor-icons/react'
+
+// Manter alguns ícones do Lucide para funcionalidades específicas
+import {
+  TestTube,
 } from 'lucide-react'
 
-// OPÇÃO 1: Ícones mais modernos
+// Nova configuração com ícones Phosphor otimizados
 const menuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-  { icon: Bot, label: '🤖 Assistente IA', href: '/ai-assistant', featured: true },
-  { icon: TrendingUp, label: '📊 Pipeline Vendas', href: '/sales-pipeline', featured: true },
+  { icon: ChartPieSlice, label: 'Dashboard', href: '/dashboard' },
+  { icon: Robot, label: '🤖 Assistente IA', href: '/ai-assistant', featured: true },
+  { icon: TrendUp, label: '📊 Pipeline Vendas', href: '/sales-pipeline', featured: true },
   { icon: Calculator, label: '💰 Simulador Financeiro', href: '/simulador-financeiro', featured: true },
-  { icon: BarChart3, label: '📈 Analytics', href: '/analytics', featured: true },
-  { icon: MessageCircle, label: '💬 WhatsApp', href: '/whatsapp', featured: true },
-  { icon: Home, label: 'Gestão Imobiliária', href: '#', isDropdown: true },
-  { icon: Banknote, label: 'Gestão Financeira', href: '#', isDropdown: true },
-  { icon: FileText, label: '📊 DIMOB', href: '/dimob', featured: true },
-  { icon: Zap, label: 'Leads', href: '/leads' },
-  { icon: CreditCard, label: 'PIX Pagamento', href: '/pix' },
-  { icon: Wallet, label: 'Gateway', href: '/gateway' },
-  { icon: UserPlus, label: 'Usuários', href: '/users', adminOnly: true },
-  { icon: Wallet, label: 'Config Gateway', href: '/admin/gateway-settings', adminOnly: true },
-  { icon: TestTube, label: 'Teste Gateway', href: '/gateway-test', adminOnly: true },
-  { icon: Shield, label: 'Backup', href: '/admin/backup', adminOnly: true },
-  { icon: Settings, label: 'Configurações', href: '/settings' }
-]
-
-// OPÇÃO 2: Ícones mais visuais - MODELO ALTERNATIVO
-const menuItemsAlternativo = [
-  { icon: PieChart, label: 'Dashboard', href: '/dashboard' },
-  { icon: Bot, label: '🤖 Assistente IA', href: '/ai-assistant', featured: true },
-  { icon: TrendingUp, label: '📊 Pipeline Vendas', href: '/sales-pipeline', featured: true },
-  { icon: Calculator, label: '💰 Simulador Financeiro', href: '/simulador-financeiro', featured: true },
-  { icon: Activity, label: '📈 Analytics', href: '/analytics', featured: true },
-  { icon: MessageCircle, label: '💬 WhatsApp', href: '/whatsapp', featured: true },
-  { icon: HousePlus, label: 'Gestão Imobiliária', href: '#', isDropdown: true },
-  { icon: Banknote, label: 'Gestão Financeira', href: '#', isDropdown: true },
-  { icon: ScrollText, label: 'DIMOB', href: '/dimob', featured: true },
-  { icon: Target, label: 'Leads', href: '/leads' },
-  { icon: CreditCard, label: 'PIX Pagamento', href: '/pix' },
-  { icon: Wallet, label: 'Gateway', href: '/gateway' },
-  { icon: UserPlus, label: 'Usuários', href: '/users', adminOnly: true },
-  { icon: Wallet, label: 'Config Gateway', href: '/admin/gateway-settings', adminOnly: true },
-  { icon: TestTube, label: 'Teste Gateway', href: '/gateway-test', adminOnly: true },
-  { icon: Shield, label: 'Backup', href: '/admin/backup', adminOnly: true },
-  { icon: Wrench, label: 'Configurações', href: '/settings' }
-]
-
-// OPÇÃO 3: Mix balanceado - MODELO TERCEIRO
-const menuItemsTerceiro = [
-  { icon: BarChart3, label: 'Dashboard', href: '/dashboard' },
-  { icon: Bot, label: '🤖 Assistente IA', href: '/ai-assistant', featured: true },
-  { icon: TrendingUp, label: '📊 Pipeline Vendas', href: '/sales-pipeline', featured: true },
-  { icon: Calculator, label: '💰 Simulador Financeiro', href: '/simulador-financeiro', featured: true },
-  { icon: Brain, label: '📈 Analytics', href: '/analytics', featured: true },
-  { icon: MessageSquare, label: '💬 WhatsApp', href: '/whatsapp', featured: true },
-  { icon: Building, label: 'Gestão Imobiliária', href: '#', isDropdown: true },
-  { icon: Coins, label: 'Gestão Financeira', href: '#', isDropdown: true },
+  { icon: ChartBar, label: '📈 Analytics', href: '/analytics', featured: true },
+  { icon: WhatsappLogo, label: '💬 WhatsApp', href: '/whatsapp', featured: true },
+  { icon: Buildings, label: 'Gestão Imobiliária', href: '#', isDropdown: true },
+  { icon: Wallet, label: 'Gestão Financeira', href: '#', isDropdown: true },
   { icon: FileText, label: '📊 DIMOB', href: '/dimob', featured: true },
   { icon: Target, label: 'Leads', href: '/leads' },
-  { icon: CreditCard, label: 'PIX Pagamento', href: '/pix' },
-  { icon: Wallet, label: 'Gateway', href: '/gateway' },
-  { icon: UserPlus, label: 'Usuários', href: '/users', adminOnly: true },
-  { icon: Wallet, label: 'Config Gateway', href: '/admin/gateway-settings', adminOnly: true },
+  { icon: PixLogo, label: 'PIX Pagamento', href: '/pix' },
+  { icon: CreditCard, label: 'Gateway', href: '/gateway' },
+  { icon: UserGear, label: 'Usuários', href: '/users', adminOnly: true },
+  { icon: GearSix, label: 'Config Gateway', href: '/admin/gateway-settings', adminOnly: true },
   { icon: TestTube, label: 'Teste Gateway', href: '/gateway-test', adminOnly: true },
   { icon: Shield, label: 'Backup', href: '/admin/backup', adminOnly: true },
-  { icon: Settings, label: 'Configurações', href: '/settings' }
+  { icon: GearSix, label: 'Configurações', href: '/settings' }
 ]
 
-// OPÇÃO 4: Ícones únicos e criativos - MODELO QUARTO
-const menuItemsQuarto = [
-  { icon: Sparkles, label: 'Dashboard', href: '/dashboard' },
-  { icon: Rocket, label: '🤖 Assistente IA', href: '/ai-assistant', featured: true },
-  { icon: Flame, label: '📊 Pipeline Vendas', href: '/sales-pipeline', featured: true },
-  { icon: Diamond, label: '💰 Simulador Financeiro', href: '/simulador-financeiro', featured: true },
-  { icon: Star, label: '📈 Analytics', href: '/analytics', featured: true },
-  { icon: Globe, label: '💬 WhatsApp', href: '/whatsapp', featured: true },
-  { icon: Castle, label: 'Gestão Imobiliária', href: '#', isDropdown: true },
-  { icon: Crown, label: 'Gestão Financeira', href: '#', isDropdown: true },
-  { icon: BookOpen, label: 'DIMOB', href: '/dimob', featured: true },
-  { icon: Compass, label: 'Leads', href: '/leads' },
-  { icon: Zap, label: 'PIX Pagamento', href: '/pix' },
-  { icon: Layers, label: 'Gateway', href: '/gateway' },
-  { icon: UserPlus, label: 'Usuários', href: '/users', adminOnly: true },
-  { icon: Briefcase, label: 'Config Gateway', href: '/admin/gateway-settings', adminOnly: true },
-  { icon: TestTube, label: 'Teste Gateway', href: '/gateway-test', adminOnly: true },
-  { icon: Archive, label: 'Backup', href: '/admin/backup', adminOnly: true },
-  { icon: Gem, label: 'Configurações', href: '/settings' }
-]
 
 export function Sidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -161,33 +79,33 @@ export function Sidebar() {
   const { data: session } = useSession()
   const [isAdmin, setIsAdmin] = useState(false)
 
-  // Subitens de Configurações
+  // Subitens de Configurações com ícones Phosphor
   const configMenuItems = [
     { icon: Building2, label: 'Empresa', href: '/settings?tab=empresa' },
-    { icon: Settings, label: 'Sistema', href: '/settings?tab=sistema' },
+    { icon: GearSix, label: 'Sistema', href: '/settings?tab=sistema' },
     { icon: Bell, label: 'Notificações', href: '/settings?tab=notifications' },
-    { icon: DollarSign, label: 'Financeiro', href: '/settings?tab=financeiro' },
+    { icon: CurrencyDollar, label: 'Financeiro', href: '/settings?tab=financeiro' },
     { icon: CreditCard, label: 'ASAAS Split', href: '/settings?tab=split' },
     { icon: Plug, label: 'APIs Externas', href: '/settings?tab=apis' },
-    { icon: Link2, label: 'Integrações', href: '/settings?tab=integracoes' },
+    { icon: Link, label: 'Integrações', href: '/settings?tab=integracoes' },
     { icon: ShieldCheck, label: 'Segurança', href: '/settings?tab=seguranca' },
   ]
 
-  // Subitens de Gestão Imobiliária
+  // Subitens de Gestão Imobiliária com ícones Phosphor
   const imobiliariaMenuItems = [
-    { icon: Users, label: 'Proprietários', href: '/owners' },
-    { icon: Building, label: 'Imóveis', href: '/properties' },
-    { icon: User, label: 'Inquilinos', href: '/tenants' },
-    { icon: FileText, label: 'Contratos', href: '/contracts' },
+    { icon: UserCircle, label: 'Proprietários', href: '/owners' },
+    { icon: House, label: 'Imóveis', href: '/properties' },
+    { icon: Users, label: 'Inquilinos', href: '/tenants' },
+    { icon: FileContract, label: 'Contratos', href: '/contracts' },
   ]
 
-  // Subitens de Gestão Financeira
+  // Subitens de Gestão Financeira com ícones Phosphor
   const financeiroMenuItems = [
-    { icon: Receipt, label: 'Pagamentos', href: '/payments' },
-    { icon: FileText, label: 'Recibos', href: '/recibos' },
-    { icon: FileText, label: 'Comprovantes', href: '/comprovantes' },
-    { icon: TrendingDown, label: 'Despesas', href: '/expenses' },
-    { icon: Calculator, label: 'Financeiro', href: '/financial' },
+    { icon: Money, label: 'Pagamentos', href: '/payments' },
+    { icon: Receipt, label: 'Recibos', href: '/recibos' },
+    { icon: FileArrowUp, label: 'Comprovantes', href: '/comprovantes' },
+    { icon: TrendDown, label: 'Despesas', href: '/expenses' },
+    { icon: ChartPie, label: 'Financeiro', href: '/financial' },
   ]
 
   // Verificar se é admin usando a mesma lógica da página de settings
@@ -241,7 +159,7 @@ export function Sidebar() {
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-3">
             <div className="p-2 rounded-lg" style={{backgroundColor: '#f63c6a'}}>
-              <Building2 className="w-6 h-6 text-white" />
+              <Buildings className="w-6 h-6 text-white" />
             </div>
             <div>
               <h1 className="logo-font text-xl font-bold text-gray-900 dark:text-white tracking-tight">
@@ -270,7 +188,7 @@ export function Sidebar() {
                       className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                     >
                       <div className="flex items-center space-x-3">
-                        <Settings className="w-5 h-5" />
+                        <GearSix className="w-5 h-5" />
                         <span className="font-medium">Configurações</span>
                       </div>
                       {isConfigExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -315,7 +233,7 @@ export function Sidebar() {
                       className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                     >
                       <div className="flex items-center space-x-3">
-                        <Home className="w-5 h-5" />
+                        <Buildings className="w-5 h-5" />
                         <span className="font-medium">Gestão Imobiliária</span>
                       </div>
                       {isImobiliariaExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -360,7 +278,7 @@ export function Sidebar() {
                       className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                     >
                       <div className="flex items-center space-x-3">
-                        <Banknote className="w-5 h-5" />
+                        <Wallet className="w-5 h-5" />
                         <span className="font-medium">Gestão Financeira</span>
                       </div>
                       {isFinanceiroExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -443,7 +361,7 @@ export function Sidebar() {
         {/* Logo */}
         <div className="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-700">
           <div className="p-2 rounded-lg" style={{backgroundColor: '#f63c6a'}}>
-            <Building2 className="w-6 h-6 text-white" />
+            <Buildings className="w-6 h-6 text-white" />
           </div>
         </div>
 
@@ -464,7 +382,7 @@ export function Sidebar() {
                       className="relative flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
                       title="Configurações"
                     >
-                      <Settings className="w-5 h-5" />
+                      <GearSix className="w-5 h-5" />
                     </div>
                     
                     {/* Dropdown Menu */}
@@ -506,7 +424,7 @@ export function Sidebar() {
                       className="relative flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
                       title="Gestão Imobiliária"
                     >
-                      <Home className="w-5 h-5" />
+                      <Buildings className="w-5 h-5" />
                     </div>
                     
                     {/* Dropdown Menu */}
@@ -548,7 +466,7 @@ export function Sidebar() {
                       className="relative flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
                       title="Gestão Financeira"
                     >
-                      <Banknote className="w-5 h-5" />
+                      <Wallet className="w-5 h-5" />
                     </div>
                     
                     {/* Dropdown Menu */}
