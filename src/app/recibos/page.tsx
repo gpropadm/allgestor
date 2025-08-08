@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Search, Download, FileText, Calendar, AlertCircle } from 'lucide-react'
+import { DashboardLayout } from '@/components/dashboard-layout'
 
 interface Recibo {
   id: string
@@ -102,7 +103,7 @@ export default function RecibosPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <DashboardLayout>
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
           <div>
@@ -271,6 +272,6 @@ export default function RecibosPage() {
           )}
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   )
 }
