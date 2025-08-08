@@ -73,7 +73,10 @@ export default function RecibosPage() {
       
       if (response.ok) {
         const data = await response.json()
-        setRecibos(Array.isArray(data) ? data : [])
+        const recibosArray = Array.isArray(data) ? data : []
+        console.log('📋 Recibos carregados:', recibosArray.length)
+        console.log('📋 Primeiro recibo:', recibosArray[0])
+        setRecibos(recibosArray)
       } else if (response.status === 500) {
         setError('Erro ao carregar recibos')
       } else {
@@ -113,37 +116,41 @@ export default function RecibosPage() {
     
     // Filtro por ano/mês
     let matchPeriodo = true
-    if (filtros.ano || filtros.mes) {
+    if (filtros.ano && filtros.ano !== '' || filtros.mes && filtros.mes !== '') {
       try {
         const dataRecibo = new Date(recibo.competencia || recibo.dataPagamento)
         
-        if (filtros.ano) {
+        if (filtros.ano && filtros.ano !== '') {
           const anoRecibo = dataRecibo.getFullYear().toString()
           matchPeriodo = matchPeriodo && (anoRecibo === filtros.ano)
         }
         
-        if (filtros.mes) {
+        if (filtros.mes && filtros.mes !== '') {
           const mesRecibo = (dataRecibo.getMonth() + 1).toString()
           matchPeriodo = matchPeriodo && (mesRecibo === filtros.mes)
         }
       } catch (error) {
-        console.log('Erro ao filtrar por data:', error)
+        console.log('Erro ao filtrar por data:', error, recibo)
         matchPeriodo = false
       }
     }
       
     // Debug apenas quando há filtros ativos
-    if ((buscaLower || filtros.mes || filtros.ano) && recibo === recibos[0]) {
-      console.log('🔍 Debug filtros:', {
-        busca: buscaLower,
-        ano: filtros.ano,
-        mes: filtros.mes,
-        numeroRecibo: recibo.numeroRecibo,
-        competencia: recibo.competencia,
-        dataPagamento: recibo.dataPagamento,
-        matchBusca,
-        matchProprietario,
-        matchPeriodo
+    if ((buscaLower || filtros.mes || filtros.ano || filtros.proprietario) && recibo === recibos[0]) {
+      console.log('🔍 Debug filtros completo:', {
+        filtros: filtros,
+        recibo: {
+          numero: recibo.numeroRecibo,
+          proprietario: recibo.proprietarioNome,
+          competencia: recibo.competencia,
+          dataPagamento: recibo.dataPagamento
+        },
+        resultados: {
+          matchBusca,
+          matchProprietario,
+          matchPeriodo,
+          final: matchBusca && matchProprietario && matchPeriodo
+        }
       })
     }
       
@@ -155,8 +162,15 @@ export default function RecibosPage() {
   const startIndex = (currentPage - 1) * itemsPerPage
   const recibosExibidos = recibosFiltrados.slice(startIndex, startIndex + itemsPerPage)
   
-  // Proprietários únicos para o filtro
-  const proprietariosUnicos = [...new Set(recibos.map(r => r.proprietarioNome))].sort()
+  // Proprietários únicos para o filtro (sempre de todos os recibos, não filtrados)
+  const proprietariosUnicos = [...new Set(recibos.map(r => r.proprietarioNome).filter(Boolean))].sort()
+  
+  // Debug proprietários apenas uma vez
+  useEffect(() => {
+    if (recibos.length > 0 && proprietariosUnicos.length > 0) {
+      console.log('👥 Proprietários únicos encontrados:', proprietariosUnicos)
+    }
+  }, [recibos.length, proprietariosUnicos.length])
   
   // Reset página ao filtrar
   useEffect(() => {
