@@ -30,22 +30,22 @@ import {
   UserGear,
   GearSix,
   Shield,
-  Menu,
-  X,
-  ChevronDown,
-  ChevronRight,
   Bell,
   CurrencyDollar,
   Plug,
-  Link,
+  LinkSimple,
   ShieldCheck,
-  Building2,
   Power
 } from '@phosphor-icons/react'
 
 // Manter alguns ícones do Lucide para funcionalidades específicas
 import {
   TestTube,
+  Menu,
+  X,
+  ChevronDown,
+  ChevronRight,
+  Building2
 } from 'lucide-react'
 
 // Nova configuração com ícones Phosphor otimizados
@@ -87,7 +87,7 @@ export function Sidebar() {
     { icon: CurrencyDollar, label: 'Financeiro', href: '/settings?tab=financeiro' },
     { icon: CreditCard, label: 'ASAAS Split', href: '/settings?tab=split' },
     { icon: Plug, label: 'APIs Externas', href: '/settings?tab=apis' },
-    { icon: Link, label: 'Integrações', href: '/settings?tab=integracoes' },
+    { icon: LinkSimple, label: 'Integrações', href: '/settings?tab=integracoes' },
     { icon: ShieldCheck, label: 'Segurança', href: '/settings?tab=seguranca' },
   ]
 
