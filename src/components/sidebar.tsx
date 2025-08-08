@@ -36,7 +36,16 @@ import {
   Link2,
   ShieldCheck,
   Home,
-  Banknote
+  Banknote,
+  PieChart,
+  HousePlus,
+  Contact,
+  UserCheck,
+  ScrollText,
+  Target,
+  Mail,
+  Activity,
+  Wrench
 } from 'lucide-react'
 
 // OPÇÃO 1: Ícones mais modernos
@@ -60,21 +69,26 @@ const menuItems = [
   { icon: Settings, label: 'Configurações', href: '/settings' }
 ]
 
-// OPÇÃO 2: Ícones mais visuais (descomente para usar)
-// const menuItems = [
-//   { icon: PieChart, label: 'Dashboard', href: '/dashboard' },
-//   { icon: HousePlus, label: 'Imóveis', href: '/properties' },
-//   { icon: Contact, label: 'Proprietários', href: '/owners' },
-//   { icon: UserCheck, label: 'Inquilinos', href: '/tenants' },
-//   { icon: ScrollText, label: 'Contratos', href: '/contracts' },
-//   { icon: Banknote, label: 'Pagamentos', href: '/payments' },
-//   { icon: TrendingUp, label: 'Financeiro', href: '/financial' },
-//   { icon: Target, label: 'Leads', href: '/leads' },
-//   { icon: Mail, label: 'Chat OLX', href: '/olx-chat' },
-//   { icon: Activity, label: 'Analytics & IA', href: '/analytics' },
-//   { icon: Users, label: 'Usuários', href: '/users' },
-//   { icon: Wrench, label: 'Configurações', href: '/settings' }
-// ]
+// OPÇÃO 2: Ícones mais visuais - MODELO ALTERNATIVO
+const menuItemsAlternativo = [
+  { icon: PieChart, label: 'Dashboard', href: '/dashboard' },
+  { icon: Bot, label: '🤖 Assistente IA', href: '/ai-assistant', featured: true },
+  { icon: TrendingUp, label: '📊 Pipeline Vendas', href: '/sales-pipeline', featured: true },
+  { icon: Calculator, label: '💰 Simulador Financeiro', href: '/simulador-financeiro', featured: true },
+  { icon: Activity, label: '📈 Analytics', href: '/analytics', featured: true },
+  { icon: MessageCircle, label: '💬 WhatsApp', href: '/whatsapp', featured: true },
+  { icon: HousePlus, label: 'Gestão Imobiliária', href: '#', isDropdown: true },
+  { icon: Banknote, label: 'Gestão Financeira', href: '#', isDropdown: true },
+  { icon: ScrollText, label: '📊 DIMOB', href: '/dimob', featured: true },
+  { icon: Target, label: 'Leads', href: '/leads' },
+  { icon: CreditCard, label: 'PIX Pagamento', href: '/pix' },
+  { icon: Wallet, label: 'Gateway', href: '/gateway' },
+  { icon: UserPlus, label: 'Usuários', href: '/users', adminOnly: true },
+  { icon: Wallet, label: 'Config Gateway', href: '/admin/gateway-settings', adminOnly: true },
+  { icon: TestTube, label: 'Teste Gateway', href: '/gateway-test', adminOnly: true },
+  { icon: Shield, label: 'Backup', href: '/admin/backup', adminOnly: true },
+  { icon: Wrench, label: 'Configurações', href: '/settings' }
+]
 
 // OPÇÃO 3: Mix balanceado (descomente para usar)
 // const menuItems = [
@@ -124,8 +138,8 @@ export function Sidebar() {
   // Subitens de Gestão Financeira
   const financeiroMenuItems = [
     { icon: Receipt, label: 'Pagamentos', href: '/payments' },
-    { icon: FileText, label: '🧾 Recibos', href: '/recibos' },
-    { icon: FileText, label: '📄 Comprovantes', href: '/comprovantes' },
+    { icon: FileText, label: 'Recibos', href: '/recibos' },
+    { icon: FileText, label: 'Comprovantes', href: '/comprovantes' },
     { icon: TrendingDown, label: 'Despesas', href: '/expenses' },
     { icon: Calculator, label: 'Financeiro', href: '/financial' },
   ]
@@ -194,7 +208,7 @@ export function Sidebar() {
 
         <nav className="flex-1 p-4">
           <ul className="space-y-2">
-            {menuItems.map((item) => {
+            {menuItemsAlternativo.map((item) => {
               // Ocultar itens adminOnly se não for admin
               if (item.adminOnly && !isAdmin) {
                 return null
@@ -390,7 +404,7 @@ export function Sidebar() {
         {/* Navigation */}
         <nav className="flex-1 py-4 flex flex-col">
           <ul className="space-y-1 flex-1">
-            {menuItems.map((item) => {
+            {menuItemsAlternativo.map((item) => {
               // Ocultar itens adminOnly se não for admin
               if (item.adminOnly && !isAdmin) {
                 return null
