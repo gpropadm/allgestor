@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Download, FileText, Calendar, Building, Users } from 'lucide-react'
+import { DashboardLayout } from '@/components/dashboard-layout'
 
 export default function DimobPage() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
@@ -117,7 +118,8 @@ export default function DimobPage() {
   const contractsWithPayments = contracts.filter(c => c.payments?.length > 0)
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-8">
+    <DashboardLayout>
+      <div className="max-w-6xl mx-auto space-y-8">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-8 rounded-xl shadow-lg">
         <div className="flex items-center space-x-4">
@@ -293,6 +295,7 @@ export default function DimobPage() {
           <p>• O arquivo gerado deve ser importado no programa oficial DIMOB da Receita Federal</p>
         </div>
       </div>
-    </div>
+      </div>
+    </DashboardLayout>
   )
 }
