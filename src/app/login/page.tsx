@@ -41,50 +41,100 @@ export default function Login() {
   }
 
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0)
-  const [displayedText, setDisplayedText] = useState('')
-  const [isTyping, setIsTyping] = useState(true)
+  const [displayedQuestion, setDisplayedQuestion] = useState('')
+  const [displayedAnswer, setDisplayedAnswer] = useState('')
+  const [isTypingQuestion, setIsTypingQuestion] = useState(true)
+  const [isTypingAnswer, setIsTypingAnswer] = useState(false)
+  const [showAnswer, setShowAnswer] = useState(false)
 
-  const phrases = [
-    "DIMOB automático em segundos",
-    "Leads qualificados na sua mão", 
-    "Gestão completa da sua imobiliária",
-    "Feche mais negócios com IA",
-    "Contratos digitais inteligentes",
-    "Relatórios que vendem por você"
+  const conversations = [
+    {
+      question: "Como posso automatizar meu DIMOB?",
+      answer: "Com IA integrada, geramos relatórios DIMOB completos em segundos, sem erros manuais."
+    },
+    {
+      question: "Onde encontro leads qualificados?",
+      answer: "Capturamos e qualificamos leads automaticamente de múltiplas fontes para você."
+    },
+    {
+      question: "Como organizar minha gestão imobiliária?",
+      answer: "Sistema completo: contratos, pagamentos, inquilinos e proprietários em um só lugar."
+    },
+    {
+      question: "Como fechar mais negócios?",
+      answer: "IA analisa padrões e sugere as melhores oportunidades na hora certa."
+    },
+    {
+      question: "Posso digitalizar meus contratos?",
+      answer: "Contratos digitais inteligentes com assinatura eletrônica e automação completa."
+    },
+    {
+      question: "Como ter relatórios que vendem?",
+      answer: "Relatórios personalizados que destacam seus resultados e conquistam clientes."
+    }
   ]
 
-  // Efeito de digitação estilo ChatGPT
+  // Efeito de conversação estilo ChatGPT
   useEffect(() => {
     let timeout: NodeJS.Timeout
-    let phraseTimeout: NodeJS.Timeout
+    let answerTimeout: NodeJS.Timeout
+    let nextConversationTimeout: NodeJS.Timeout
 
-    const typePhrase = () => {
-      const currentPhrase = phrases[currentPhraseIndex]
+    const currentConversation = conversations[currentPhraseIndex]
+
+    const typeQuestion = () => {
       let charIndex = 0
       
       const typeChar = () => {
-        if (charIndex < currentPhrase.length) {
-          setDisplayedText(currentPhrase.slice(0, charIndex + 1))
+        if (charIndex < currentConversation.question.length) {
+          setDisplayedQuestion(currentConversation.question.slice(0, charIndex + 1))
           charIndex++
-          timeout = setTimeout(typeChar, 50)
+          timeout = setTimeout(typeChar, 40)
         } else {
-          setIsTyping(false)
-          phraseTimeout = setTimeout(() => {
-            setIsTyping(true)
-            setDisplayedText('')
-            setCurrentPhraseIndex((prev) => (prev + 1) % phrases.length)
-          }, 3000)
+          setIsTypingQuestion(false)
+          // Espera 800ms e começa a resposta
+          answerTimeout = setTimeout(() => {
+            setShowAnswer(true)
+            setIsTypingAnswer(true)
+            typeAnswer()
+          }, 800)
         }
       }
       
       typeChar()
     }
 
-    typePhrase()
+    const typeAnswer = () => {
+      let charIndex = 0
+      
+      const typeChar = () => {
+        if (charIndex < currentConversation.answer.length) {
+          setDisplayedAnswer(currentConversation.answer.slice(0, charIndex + 1))
+          charIndex++
+          timeout = setTimeout(typeChar, 35)
+        } else {
+          setIsTypingAnswer(false)
+          // Espera 4s e vai para próxima conversa
+          nextConversationTimeout = setTimeout(() => {
+            setDisplayedQuestion('')
+            setDisplayedAnswer('')
+            setShowAnswer(false)
+            setIsTypingQuestion(true)
+            setIsTypingAnswer(false)
+            setCurrentPhraseIndex((prev) => (prev + 1) % conversations.length)
+          }, 4000)
+        }
+      }
+      
+      typeChar()
+    }
+
+    typeQuestion()
 
     return () => {
       clearTimeout(timeout)
-      clearTimeout(phraseTimeout)
+      clearTimeout(answerTimeout)
+      clearTimeout(nextConversationTimeout)
     }
   }, [currentPhraseIndex])
 
@@ -102,13 +152,36 @@ export default function Login() {
               <span className="text-5xl font-bold" style={{ color: '#fe7600' }}>ALL-GESTOR</span>
             </div>
 
-            {/* Animated Phrase */}
-            <div className="mb-20">
-              <h1 className="text-6xl lg:text-7xl font-bold mb-8" style={{ color: '#fe7600' }}>
-                {displayedText}
-                <span className={`inline-block w-2 ml-2 ${isTyping ? 'animate-pulse' : ''}`} 
-                      style={{ backgroundColor: '#fe7600', height: '1em' }}></span>
-              </h1>
+            {/* Conversation Simulation */}
+            <div className="mb-20 text-left max-w-4xl">
+              {/* Question */}
+              <div className="mb-6">
+                <div className="bg-gray-100 rounded-2xl p-6 inline-block max-w-3xl">
+                  <p className="text-2xl text-gray-800 font-medium">
+                    {displayedQuestion}
+                    <span className={`inline-block w-0.5 ml-1 ${isTypingQuestion ? 'animate-pulse' : 'hidden'}`} 
+                          style={{ backgroundColor: '#333', height: '1.2em' }}></span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Answer */}
+              {showAnswer && (
+                <div className="ml-0">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full flex-shrink-0" style={{ backgroundColor: '#fe7600' }}>
+                      <Building2 className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xl text-gray-700 leading-relaxed">
+                        {displayedAnswer}
+                        <span className={`inline-block w-0.5 ml-1 ${isTypingAnswer ? 'animate-pulse' : 'hidden'}`} 
+                              style={{ backgroundColor: '#fe7600', height: '1.2em' }}></span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -144,7 +217,6 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
-                style={{ focusRingColor: '#fe7600' }}
                 onFocus={(e) => {
                   e.target.style.borderColor = '#fe7600'
                   e.target.style.boxShadow = '0 0 0 2px rgba(254, 118, 0, 0.2)'
@@ -205,8 +277,7 @@ export default function Login() {
               disabled={loading || !email || !password}
               className="w-full text-white font-medium py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed"
               style={{ 
-                backgroundColor: loading || !email || !password ? '#d1d5db' : '#fe7600',
-                focusRingColor: '#fe7600' 
+                backgroundColor: loading || !email || !password ? '#d1d5db' : '#fe7600'
               }}
               onMouseEnter={(e) => {
                 if (!loading && email && password) {
