@@ -79,7 +79,7 @@ const menuItemsAlternativo = [
   { icon: MessageCircle, label: '💬 WhatsApp', href: '/whatsapp', featured: true },
   { icon: HousePlus, label: 'Gestão Imobiliária', href: '#', isDropdown: true },
   { icon: Banknote, label: 'Gestão Financeira', href: '#', isDropdown: true },
-  { icon: ScrollText, label: '📊 DIMOB', href: '/dimob', featured: true },
+  { icon: ScrollText, label: 'DIMOB', href: '/dimob', featured: true },
   { icon: Target, label: 'Leads', href: '/leads' },
   { icon: CreditCard, label: 'PIX Pagamento', href: '/pix' },
   { icon: Wallet, label: 'Gateway', href: '/gateway' },
@@ -224,7 +224,7 @@ export function Sidebar() {
                       className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                     >
                       <div className="flex items-center space-x-3">
-                        <Settings className="w-5 h-5" />
+                        <Wrench className="w-5 h-5" />
                         <span className="font-medium">Configurações</span>
                       </div>
                       {isConfigExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -269,7 +269,7 @@ export function Sidebar() {
                       className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                     >
                       <div className="flex items-center space-x-3">
-                        <Home className="w-5 h-5" />
+                        <HousePlus className="w-5 h-5" />
                         <span className="font-medium">Gestão Imobiliária</span>
                       </div>
                       {isImobiliariaExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -418,7 +418,7 @@ export function Sidebar() {
                       className="relative flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
                       title="Configurações"
                     >
-                      <Settings className="w-5 h-5" />
+                      <Wrench className="w-5 h-5" />
                     </div>
                     
                     {/* Dropdown Menu */}
@@ -460,7 +460,7 @@ export function Sidebar() {
                       className="relative flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
                       title="Gestão Imobiliária"
                     >
-                      <Home className="w-5 h-5" />
+                      <HousePlus className="w-5 h-5" />
                     </div>
                     
                     {/* Dropdown Menu */}
