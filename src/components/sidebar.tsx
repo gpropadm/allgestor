@@ -27,7 +27,14 @@ import {
   Bot,
   BarChart3,
   TrendingUp,
-  MessageCircle
+  MessageCircle,
+  ChevronDown,
+  ChevronRight,
+  Bell,
+  DollarSign,
+  Plug,
+  Link2,
+  ShieldCheck
 } from 'lucide-react'
 
 // OPÇÃO 1: Ícones mais modernos
@@ -92,9 +99,23 @@ const menuItems = [
 
 export function Sidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isConfigExpanded, setIsConfigExpanded] = useState(false)
   const pathname = usePathname()
   const { data: session } = useSession()
   const [isAdmin, setIsAdmin] = useState(false)
+
+  // Subitens de Configurações
+  const configMenuItems = [
+    { icon: User, label: 'Meu Perfil', href: '/settings' },
+    { icon: Building2, label: 'Empresa', href: '/settings?tab=empresa' },
+    { icon: Settings, label: 'Sistema', href: '/settings?tab=sistema' },
+    { icon: Bell, label: 'Notificações', href: '/settings?tab=notifications' },
+    { icon: DollarSign, label: 'R$ Financeiro', href: '/settings?tab=financeiro' },
+    { icon: CreditCard, label: '$ ASAAS Split', href: '/settings?tab=split' },
+    { icon: Plug, label: 'APIs Externas', href: '/settings?tab=apis' },
+    { icon: Link2, label: 'Integrações', href: '/settings?tab=integracoes' },
+    { icon: ShieldCheck, label: 'Segurança', href: '/settings?tab=seguranca' },
+  ]
 
   // Verificar se é admin usando a mesma lógica da página de settings
   const checkAdminStatus = async () => {
@@ -166,6 +187,52 @@ export function Sidebar() {
                 return null
               }
               
+              // Se é Configurações, renderizar como expansível
+              if (item.label === 'Configurações') {
+                return (
+                  <li key="configuracoes">
+                    {/* Header Configurações */}
+                    <button
+                      onClick={() => setIsConfigExpanded(!isConfigExpanded)}
+                      className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <Settings className="w-5 h-5" />
+                        <span className="font-medium">Configurações</span>
+                      </div>
+                      {isConfigExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                    </button>
+                    
+                    {/* Subitens */}
+                    {isConfigExpanded && (
+                      <ul className="ml-6 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-600 pl-4">
+                        {configMenuItems.map((subItem) => {
+                          const isActive = pathname === subItem.href
+                          return (
+                            <li key={subItem.href}>
+                              <Link
+                                href={subItem.href}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors border-r-2 text-sm ${
+                                  isActive
+                                    ? ''
+                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 border-transparent'
+                                }`}
+                                style={isActive ? {backgroundColor: '#fef2f2', color: '#f63c6a', borderColor: '#f63c6a'} : {}}
+                              >
+                                <subItem.icon className="w-4 h-4" />
+                                <span className="font-medium">{subItem.label}</span>
+                              </Link>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    )}
+                  </li>
+                )
+              }
+              
+              // Itens normais
               const isActive = pathname === item.href
               return (
                 <li key={item.href}>
