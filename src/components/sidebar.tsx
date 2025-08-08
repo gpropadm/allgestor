@@ -52,7 +52,6 @@ import {
 // Nova configuração com ícones Phosphor otimizados
 const menuItems = [
   { icon: ChartPieSlice, label: 'Dashboard', href: '/dashboard' },
-  { icon: Lightning, label: 'IA & Analytics', href: '#', isDropdown: true, featured: true },
   { icon: WhatsappLogo, label: '💬 WhatsApp', href: '/whatsapp', featured: true },
   { icon: Buildings, label: 'Gestão Imobiliária', href: '#', isDropdown: true },
   { icon: Wallet, label: 'Gestão Financeira', href: '#', isDropdown: true },
@@ -64,6 +63,7 @@ const menuItems = [
   { icon: GearSix, label: 'Config Gateway', href: '/admin/gateway-settings', adminOnly: true },
   { icon: TestTube, label: 'Teste Gateway', href: '/gateway-test', adminOnly: true },
   { icon: Shield, label: 'Backup', href: '/admin/backup', adminOnly: true },
+  { icon: Lightning, label: 'IA & Analytics', href: '#', isDropdown: true, featured: true },
   { icon: GearSix, label: 'Configurações', href: '/settings' }
 ]
 
