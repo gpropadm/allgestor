@@ -206,6 +206,22 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
         }
       }) // MANTER TODOS OS 12 MESES (com zeros onde necessário)
 
+      // 🚨 VALIDAÇÃO OBRIGATÓRIA: Garantir que temos EXATAMENTE 12 meses
+      if (valoresMensais.length !== 12) {
+        console.error(`❌ [DIMOB] ERRO CRÍTICO: valoresMensais tem ${valoresMensais.length} meses, deve ter 12!`)
+        throw new Error(`DIMOB: Array deve ter 12 meses, encontrado: ${valoresMensais.length}`)
+      }
+      
+      // Validar se os meses estão na ordem correta (1 a 12)
+      valoresMensais.forEach((mes, index) => {
+        if (mes.mes !== index + 1) {
+          console.error(`❌ [DIMOB] ERRO: Mês na posição ${index} deve ser ${index + 1}, encontrado: ${mes.mes}`)
+          throw new Error(`DIMOB: Mês fora de ordem na posição ${index}`)
+        }
+      })
+      
+      console.log(`✅ [DIMOB] Validação OK: 12 meses completos em ordem correta`)
+
       return {
         sequencial: index + 1,
         locador: {
@@ -285,6 +301,14 @@ function gerarConteudoDimob(data: DimobData, ano: number): string {
     conteudo += contrato.locatario.nome.padEnd(60, ' ').slice(0, 60) // Nome Locatário (60 posições)
     conteudo += contrato.contrato.numero.padEnd(6, ' ').slice(0, 6) // Número Contrato (6 posições)
     conteudo += contrato.contrato.data // Data Contrato (8 posições)
+    
+    // 🚨 VALIDAÇÃO FINAL: Confirmar 12 meses antes de gerar arquivo
+    if (contrato.valoresMensais.length !== 12) {
+      console.error(`❌ [DIMOB] CONTRATO ${contrato.sequencial}: ${contrato.valoresMensais.length} meses, deve ser 12!`)
+      throw new Error(`DIMOB Contrato ${contrato.sequencial}: Deve ter 12 meses, encontrado: ${contrato.valoresMensais.length}`)
+    }
+    
+    console.log(`  📊 [DIMOB] Contrato ${contrato.sequencial}: CONFIRMADO 12 meses completos`)
     
     // 🚨 CORREÇÃO: DIMOB exige exatamente 36 campos (12 meses × 3 valores)
     // valoresMensais já contém todos os 12 meses na ordem correta (Jan=1 a Dez=12)
