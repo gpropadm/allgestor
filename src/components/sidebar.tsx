@@ -35,7 +35,6 @@ import {
   LinkSimple,
   ShieldCheck,
   Power,
-  Sparkle,
   Lightning
 } from '@phosphor-icons/react'
 
@@ -193,19 +192,18 @@ export function Sidebar() {
                     {/* Header IA & Analytics */}
                     <button
                       onClick={() => setIsIAAnalyticsExpanded(!isIAAnalyticsExpanded)}
-                      className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 text-gray-700 dark:text-gray-300"
+                      className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                     >
                       <div className="flex items-center space-x-3">
-                        <Lightning className="w-5 h-5 text-purple-600" />
-                        <span className="font-medium bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">IA & Analytics</span>
-                        <Sparkle className="w-3 h-3 text-yellow-500" />
+                        <Lightning className="w-5 h-5" />
+                        <span className="font-medium">IA & Analytics</span>
                       </div>
                       {isIAAnalyticsExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                     </button>
                     
                     {/* Subitens */}
                     {isIAAnalyticsExpanded && (
-                      <ul className="ml-6 mt-2 space-y-1 border-l-2 border-gradient-to-b from-purple-200 to-blue-200 pl-4">
+                      <ul className="ml-6 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-600 pl-4">
                         {iaAnalyticsMenuItems.map((subItem) => {
                           const isActive = pathname === subItem.href
                           return (
@@ -215,9 +213,10 @@ export function Sidebar() {
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors border-r-2 text-sm ${
                                   isActive
-                                    ? 'bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-purple-400'
-                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 border-transparent hover:text-purple-600'
+                                    ? ''
+                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 border-transparent'
                                 }`}
+                                style={isActive ? {backgroundColor: '#fef2f2', color: '#f63c6a', borderColor: '#f63c6a'} : {}}
                               >
                                 <subItem.icon className="w-4 h-4" />
                                 <span className="font-medium">{subItem.label}</span>
@@ -432,20 +431,17 @@ export function Sidebar() {
                 return (
                   <li key="ia-analytics-desktop" className="px-2 relative group">
                     <div
-                      className="relative flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 bg-gradient-to-r from-purple-100 to-blue-100 text-purple-600 hover:from-purple-200 hover:to-blue-200 cursor-pointer"
+                      className="relative flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
                       title="IA & Analytics"
                     >
                       <Lightning className="w-5 h-5" />
-                      <Sparkle className="w-2 h-2 absolute -top-1 -right-1 text-yellow-500" />
                     </div>
                     
                     {/* Dropdown Menu */}
                     <div className="absolute left-16 top-0 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                       <div className="p-2">
-                        <div className="text-xs font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent px-3 py-2 border-b border-gray-100 dark:border-gray-700 flex items-center">
-                          <Lightning className="w-3 h-3 mr-1 text-purple-600" />
+                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 px-3 py-2 border-b border-gray-100 dark:border-gray-700">
                           IA & ANALYTICS
-                          <Sparkle className="w-3 h-3 ml-1 text-yellow-500" />
                         </div>
                         <nav className="mt-2">
                           {iaAnalyticsMenuItems.map((subItem) => {
@@ -456,8 +452,8 @@ export function Sidebar() {
                                 href={subItem.href}
                                 className={`flex items-center space-x-3 px-3 py-2.5 rounded-md transition-all duration-200 text-sm ${
                                   isActive
-                                    ? 'bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-l-2 border-purple-600'
-                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 hover:text-purple-600'
+                                    ? 'bg-red-50 text-red-600 border-l-2 border-red-600'
+                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                                 }`}
                               >
                                 <subItem.icon className="w-4 h-4" />
