@@ -92,12 +92,12 @@ export default function Login() {
           timeout = setTimeout(typeChar, 40)
         } else {
           setIsTypingQuestion(false)
-          // Espera 800ms e começa a resposta
+          // Espera 2s e começa a resposta (mais tempo para ler)
           answerTimeout = setTimeout(() => {
             setShowAnswer(true)
             setIsTypingAnswer(true)
             typeAnswer()
-          }, 800)
+          }, 2000)
         }
       }
       
@@ -114,7 +114,7 @@ export default function Login() {
           timeout = setTimeout(typeChar, 35)
         } else {
           setIsTypingAnswer(false)
-          // Espera 4s e vai para próxima conversa
+          // Espera 8s e vai para próxima conversa (muito mais tempo para ler)
           nextConversationTimeout = setTimeout(() => {
             setDisplayedQuestion('')
             setDisplayedAnswer('')
@@ -122,7 +122,7 @@ export default function Login() {
             setIsTypingQuestion(true)
             setIsTypingAnswer(false)
             setCurrentPhraseIndex((prev) => (prev + 1) % conversations.length)
-          }, 4000)
+          }, 8000)
         }
       }
       
