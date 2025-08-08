@@ -45,7 +45,12 @@ import {
   Target,
   Mail,
   Activity,
-  Wrench
+  Wrench,
+  Brain,
+  MessageSquare,
+  Coins,
+  FileContract,
+  UserCog
 } from 'lucide-react'
 
 // OPÇÃO 1: Ícones mais modernos
@@ -90,21 +95,26 @@ const menuItemsAlternativo = [
   { icon: Wrench, label: 'Configurações', href: '/settings' }
 ]
 
-// OPÇÃO 3: Mix balanceado (descomente para usar)
-// const menuItems = [
-//   { icon: BarChart3, label: 'Dashboard', href: '/dashboard' },
-//   { icon: Building, label: 'Imóveis', href: '/properties' },
-//   { icon: Users, label: 'Proprietários', href: '/owners' },
-//   { icon: UserCog, label: 'Inquilinos', href: '/tenants' },
-//   { icon: FileContract, label: 'Contratos', href: '/contracts' },
-//   { icon: CreditCard, label: 'Pagamentos', href: '/payments' },
-//   { icon: Coins, label: 'Financeiro', href: '/financial' },
-//   { icon: Zap, label: 'Leads', href: '/leads' },
-//   { icon: MessageSquare, label: 'Chat OLX', href: '/olx-chat' },
-//   { icon: Brain, label: 'Analytics & IA', href: '/analytics' },
-//   { icon: UserPlus, label: 'Usuários', href: '/users' },
-//   { icon: Settings, label: 'Configurações', href: '/settings' }
-// ]
+// OPÇÃO 3: Mix balanceado - MODELO TERCEIRO
+const menuItemsTerceiro = [
+  { icon: BarChart3, label: 'Dashboard', href: '/dashboard' },
+  { icon: Bot, label: '🤖 Assistente IA', href: '/ai-assistant', featured: true },
+  { icon: TrendingUp, label: '📊 Pipeline Vendas', href: '/sales-pipeline', featured: true },
+  { icon: Calculator, label: '💰 Simulador Financeiro', href: '/simulador-financeiro', featured: true },
+  { icon: Brain, label: '📈 Analytics', href: '/analytics', featured: true },
+  { icon: MessageSquare, label: '💬 WhatsApp', href: '/whatsapp', featured: true },
+  { icon: Building, label: 'Gestão Imobiliária', href: '#', isDropdown: true },
+  { icon: Coins, label: 'Gestão Financeira', href: '#', isDropdown: true },
+  { icon: FileText, label: '📊 DIMOB', href: '/dimob', featured: true },
+  { icon: Target, label: 'Leads', href: '/leads' },
+  { icon: CreditCard, label: 'PIX Pagamento', href: '/pix' },
+  { icon: Wallet, label: 'Gateway', href: '/gateway' },
+  { icon: UserPlus, label: 'Usuários', href: '/users', adminOnly: true },
+  { icon: Wallet, label: 'Config Gateway', href: '/admin/gateway-settings', adminOnly: true },
+  { icon: TestTube, label: 'Teste Gateway', href: '/gateway-test', adminOnly: true },
+  { icon: Shield, label: 'Backup', href: '/admin/backup', adminOnly: true },
+  { icon: Settings, label: 'Configurações', href: '/settings' }
+]
 
 export function Sidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -208,7 +218,7 @@ export function Sidebar() {
 
         <nav className="flex-1 p-4">
           <ul className="space-y-2">
-            {menuItemsAlternativo.map((item) => {
+            {menuItemsTerceiro.map((item) => {
               // Ocultar itens adminOnly se não for admin
               if (item.adminOnly && !isAdmin) {
                 return null
@@ -224,7 +234,7 @@ export function Sidebar() {
                       className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                     >
                       <div className="flex items-center space-x-3">
-                        <Wrench className="w-5 h-5" />
+                        <Settings className="w-5 h-5" />
                         <span className="font-medium">Configurações</span>
                       </div>
                       {isConfigExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -269,7 +279,7 @@ export function Sidebar() {
                       className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                     >
                       <div className="flex items-center space-x-3">
-                        <HousePlus className="w-5 h-5" />
+                        <Building className="w-5 h-5" />
                         <span className="font-medium">Gestão Imobiliária</span>
                       </div>
                       {isImobiliariaExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -314,7 +324,7 @@ export function Sidebar() {
                       className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                     >
                       <div className="flex items-center space-x-3">
-                        <Banknote className="w-5 h-5" />
+                        <Coins className="w-5 h-5" />
                         <span className="font-medium">Gestão Financeira</span>
                       </div>
                       {isFinanceiroExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -404,7 +414,7 @@ export function Sidebar() {
         {/* Navigation */}
         <nav className="flex-1 py-4 flex flex-col">
           <ul className="space-y-1 flex-1">
-            {menuItemsAlternativo.map((item) => {
+            {menuItemsTerceiro.map((item) => {
               // Ocultar itens adminOnly se não for admin
               if (item.adminOnly && !isAdmin) {
                 return null
@@ -418,7 +428,7 @@ export function Sidebar() {
                       className="relative flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
                       title="Configurações"
                     >
-                      <Wrench className="w-5 h-5" />
+                      <Settings className="w-5 h-5" />
                     </div>
                     
                     {/* Dropdown Menu - Modelo Moderno */}
@@ -426,7 +436,7 @@ export function Sidebar() {
                       <div className="p-4">
                         <div className="flex items-center space-x-2 mb-4 pb-3 border-b border-gray-200/50 dark:border-gray-700/50">
                           <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                            <Wrench className="w-4 h-4 text-white" />
+                            <Settings className="w-4 h-4 text-white" />
                           </div>
                           <div>
                             <h3 className="text-sm font-bold text-gray-900 dark:text-white">Configurações</h3>
@@ -468,7 +478,7 @@ export function Sidebar() {
                       className="relative flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
                       title="Gestão Imobiliária"
                     >
-                      <HousePlus className="w-5 h-5" />
+                      <Building className="w-5 h-5" />
                     </div>
                     
                     {/* Dropdown Menu - Modelo Moderno */}
@@ -476,7 +486,7 @@ export function Sidebar() {
                       <div className="p-4">
                         <div className="flex items-center space-x-2 mb-4 pb-3 border-b border-gray-200/50 dark:border-gray-700/50">
                           <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-                            <HousePlus className="w-4 h-4 text-white" />
+                            <Building className="w-4 h-4 text-white" />
                           </div>
                           <div>
                             <h3 className="text-sm font-bold text-gray-900 dark:text-white">Gestão Imobiliária</h3>
@@ -518,7 +528,7 @@ export function Sidebar() {
                       className="relative flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
                       title="Gestão Financeira"
                     >
-                      <Banknote className="w-5 h-5" />
+                      <Coins className="w-5 h-5" />
                     </div>
                     
                     {/* Dropdown Menu - Modelo Moderno */}
@@ -526,7 +536,7 @@ export function Sidebar() {
                       <div className="p-4">
                         <div className="flex items-center space-x-2 mb-4 pb-3 border-b border-gray-200/50 dark:border-gray-700/50">
                           <div className="w-8 h-8 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-lg flex items-center justify-center">
-                            <Banknote className="w-4 h-4 text-white" />
+                            <Coins className="w-4 h-4 text-white" />
                           </div>
                           <div>
                             <h3 className="text-sm font-bold text-gray-900 dark:text-white">Gestão Financeira</h3>
