@@ -51,7 +51,6 @@ import {
   Coins,
   FileContract,
   UserCog,
-  Zap,
   Sparkles,
   Rocket,
   Crown,
