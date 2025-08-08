@@ -74,21 +74,10 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
     payments: {
       some: {
         status: 'PAID',
-        OR: [
-          {
-            paidDate: {
-              gte: startDate,
-              lte: endDate
-            }
-          },
-          {
-            paidDate: null,
-            dueDate: {
-              gte: startDate,
-              lte: endDate
-            }
-          }
-        ]
+        dueDate: {
+          gte: startDate,
+          lte: endDate
+        }
       }
     }
   }
@@ -110,26 +99,12 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
       payments: {
         where: {
           status: 'PAID',
-          OR: [
-            {
-              paidDate: {
-                gte: startDate,
-                lte: endDate
-              }
-            },
-            {
-              paidDate: null,
-              dueDate: {
-                gte: startDate,
-                lte: endDate
-              }
-            }
-          ]
+          dueDate: {
+            gte: startDate,
+            lte: endDate
+          }
         },
-        orderBy: [
-          { paidDate: 'asc' },
-          { dueDate: 'asc' }
-        ]
+        orderBy: { dueDate: 'asc' }
       }
     }
   })
@@ -155,21 +130,10 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
           userId: userId,
           property: ownerId ? { ownerId: ownerId } : undefined
         },
-        OR: [
-          {
-            paidDate: {
-              gte: startDate,
-              lte: endDate
-            }
-          },
-          {
-            paidDate: null,
-            dueDate: {
-              gte: startDate,
-              lte: endDate
-            }
-          }
-        ]
+        dueDate: {
+          gte: startDate,
+          lte: endDate
+        }
       },
       select: {
         status: true,
