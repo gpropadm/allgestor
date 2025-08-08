@@ -74,10 +74,21 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
     payments: {
       some: {
         status: 'PAID',
-        dueDate: {
-          gte: startDate,
-          lte: endDate
-        }
+        OR: [
+          {
+            paidDate: {
+              gte: startDate,
+              lte: endDate
+            }
+          },
+          {
+            paidDate: null,
+            dueDate: {
+              gte: startDate,
+              lte: endDate
+            }
+          }
+        ]
       }
     }
   }
@@ -99,12 +110,26 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
       payments: {
         where: {
           status: 'PAID',
-          dueDate: {
-            gte: startDate,
-            lte: endDate
-          }
+          OR: [
+            {
+              paidDate: {
+                gte: startDate,
+                lte: endDate
+              }
+            },
+            {
+              paidDate: null,
+              dueDate: {
+                gte: startDate,
+                lte: endDate
+              }
+            }
+          ]
         },
-        orderBy: { dueDate: 'asc' }
+        orderBy: [
+          { paidDate: 'asc' },
+          { dueDate: 'asc' }
+        ]
       }
     }
   })
@@ -130,10 +155,21 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
           userId: userId,
           property: ownerId ? { ownerId: ownerId } : undefined
         },
-        dueDate: {
-          gte: startDate,
-          lte: endDate
-        }
+        OR: [
+          {
+            paidDate: {
+              gte: startDate,
+              lte: endDate
+            }
+          },
+          {
+            paidDate: null,
+            dueDate: {
+              gte: startDate,
+              lte: endDate
+            }
+          }
+        ]
       },
       select: {
         status: true,
@@ -211,6 +247,7 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
       console.log(`  🔢 [DIMOB DEBUG] Processando 12 meses para contrato ${contrato.id}:`)
       
       const valoresMensais = Array.from({ length: 12 }, (_, mes) => {
+        // 🚨 IMPORTANTE: SEMPRE usar dueDate para competência fiscal (não paidDate)
         const pagamentosDoMes = contrato.payments.filter(p => p.dueDate.getMonth() === mes)
         const totalAluguel = pagamentosDoMes.reduce((acc, p) => acc + p.amount, 0)
         const totalComissao = totalAluguel * (contrato.administrationFeePercentage / 100)
