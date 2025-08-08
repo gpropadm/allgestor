@@ -38,4 +38,4 @@ CRM Imobiliário revolucionário com integração completa de IA através do **M
 Acesse: [ia.vercel.app](https://ia.vercel.app) (quando deployado)
 
 ---
-*Powered by Claude + MCP* 🤖
+*Powered by Claude + MCP* 🤖dummy change
