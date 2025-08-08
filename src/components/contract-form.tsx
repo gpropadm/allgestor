@@ -40,6 +40,7 @@ export function ContractForm({ isOpen, onClose, onSubmit, contract }: ContractFo
     rentAmount: '',
     depositAmount: '',
     administrationFeePercentage: '10',
+    includeInDimob: true,
     terms: '',
     status: 'ACTIVE'
   })
@@ -61,6 +62,7 @@ export function ContractForm({ isOpen, onClose, onSubmit, contract }: ContractFo
           rentAmount: contract.rentAmount?.toString() || '',
           depositAmount: contract.depositAmount?.toString() || '',
           administrationFeePercentage: contract.administrationFeePercentage?.toString() || '10',
+          includeInDimob: contract.includeInDimob !== undefined ? contract.includeInDimob : true,
           terms: contract.terms || '',
           status: contract.status || 'ACTIVE'
         })
@@ -130,6 +132,7 @@ export function ContractForm({ isOpen, onClose, onSubmit, contract }: ContractFo
       rentAmount: '',
       depositAmount: '',
       administrationFeePercentage: '10',
+      includeInDimob: true,
       terms: '',
       status: 'ACTIVE'
     })
@@ -419,6 +422,33 @@ export function ContractForm({ isOpen, onClose, onSubmit, contract }: ContractFo
                   <li>• Multa de 10% por atraso no pagamento</li>
                   <li>• Caução equivalente a 1 mês de aluguel</li>
                 </ul>
+              </div>
+            </div>
+
+            {/* Configurações DIMOB */}
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Declaração DIMOB</h3>
+              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-start space-x-3">
+                  <input
+                    type="checkbox"
+                    id="includeInDimob"
+                    checked={formData.includeInDimob}
+                    onChange={(e) => setFormData(prev => ({ ...prev, includeInDimob: e.target.checked }))}
+                    className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <div className="flex-1">
+                    <label htmlFor="includeInDimob" className="text-sm font-medium text-gray-900 cursor-pointer">
+                      Incluir este contrato na DIMOB
+                    </label>
+                    <p className="mt-1 text-sm text-gray-600">
+                      Marque esta opção para incluir as movimentações deste contrato na Declaração de Informações sobre Atividades Imobiliárias (DIMOB) da Receita Federal.
+                    </p>
+                    <p className="mt-2 text-xs text-yellow-800">
+                      ⚠️ Apenas contratos com movimentações financeiras no ano de referência serão efetivamente incluídos no arquivo DIMOB.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 

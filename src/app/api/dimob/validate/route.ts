@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuthWithCompany } from '@/lib/auth-middleware'
-import { gerarArquivoDimobTxt } from '@/lib/dimob-txt-generator'
 import { validateDimobData, formatValidationMessage } from '@/lib/dimob-validation'
 import { prisma } from '@/lib/db'
 
-// POST - Gerar arquivo DIMOB oficial com dados reais dos contratos
+// POST - Validar dados para DIMOB sem gerar arquivo
 export async function POST(request: NextRequest) {
   try {
-    console.log('=== DIMOB OFFICIAL GENERATOR API ===')
+    console.log('=== DIMOB VALIDATION API ===')
     const user = await requireAuthWithCompany(request)
     console.log('User ID:', user.id)
     
@@ -29,10 +28,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`🚀 Iniciando geração DIMOB para proprietário ${ownerId}, ano ${year}...`)
-    
-    // 1. Buscar dados necessários para validação
-    console.log('🔍 Carregando dados para validação...')
+    console.log(`🔍 Validando dados DIMOB para proprietário ${ownerId}, ano ${year}...`)
     
     // Buscar configurações da empresa
     const companySettings = await prisma.company.findFirst({
@@ -46,8 +42,17 @@ export async function POST(request: NextRequest) {
     
     if (!companySettings) {
       return NextResponse.json(
-        { error: 'Configurações da empresa não encontradas' },
-        { status: 400 }
+        { 
+          isValid: false,
+          error: 'Configurações da empresa não encontradas',
+          errors: [{
+            type: 'error',
+            message: 'Configurações da empresa não encontradas. Configure os dados da empresa primeiro.',
+            entity: 'Empresa'
+          }],
+          warnings: []
+        },
+        { status: 200 }
       )
     }
     
@@ -109,76 +114,41 @@ export async function POST(request: NextRequest) {
     
     console.log(`✅ ${contractsForDimob.length} contratos incluídos no DIMOB após filtros`)
     
-    // 2. Executar validações críticas
+    // Executar validações críticas
     console.log('🔎 Executando validações críticas...')
     const validationResult = validateDimobData(contractsForDimob, companySettings)
     
-    // 3. Se houver erros críticos, retornar sem gerar
-    if (!validationResult.isValid) {
-      console.log('❌ Validação falhou:', validationResult.errors.length, 'erros')
-      const validationMessage = formatValidationMessage(validationResult)
-      
-      return NextResponse.json(
-        { 
-          error: 'VALIDAÇÃO FALHHOU: Corrija os erros abaixo antes de gerar o DIMOB:\n\n' + validationMessage,
-          type: 'validation_error',
-          details: {
-            errors: validationResult.errors,
-            warnings: validationResult.warnings
-          }
-        },
-        { status: 400 }
-      )
-    }
+    console.log(`🎯 Validação concluída: ${validationResult.isValid ? 'SUCESSO' : 'ERRO'}`)
+    console.log(`   - Erros: ${validationResult.errors.length}`)
+    console.log(`   - Avisos: ${validationResult.warnings.length}`)
     
-    // 4. Se houver apenas avisos, log mas continuar
-    if (validationResult.warnings.length > 0) {
-      console.log('⚠️ Avisos encontrados:', validationResult.warnings.length)
-      validationResult.warnings.forEach(warning => {
-        console.log(`⚠️ ${warning.message}`)
-      })
-    }
-    
-    console.log('✅ Validação concluída com sucesso!')
-    
-    // 5. Gerar arquivo TXT usando a função oficial (modificada para aceitar ownerId)
-    const txtContent = await gerarArquivoDimobTxt(user.id, year, ownerId)
-    
-    console.log(`✅ DIMOB gerado com sucesso! Tamanho: ${txtContent.length} caracteres`)
-    
-    // Retornar como arquivo para download
-    const response = new NextResponse(txtContent, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Content-Disposition': `attachment; filename="DIMOB_${year}.txt"`,
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      }
+    // Retornar resultado estruturado
+    return NextResponse.json({
+      isValid: validationResult.isValid,
+      summary: {
+        totalContracts: contracts.length,
+        contractsForDimob: contractsForDimob.length,
+        totalErrors: validationResult.errors.length,
+        totalWarnings: validationResult.warnings.length
+      },
+      errors: validationResult.errors,
+      warnings: validationResult.warnings,
+      message: formatValidationMessage(validationResult),
+      year,
+      ownerId,
+      timestamp: new Date().toISOString()
     })
     
-    return response
   } catch (error) {
-    console.error('❌ Erro ao gerar DIMOB:', error)
+    console.error('❌ Erro ao validar dados DIMOB:', error)
     
-    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao gerar DIMOB'
-    
-    // Se for erro de validação com lista detalhada, manter formatação
-    if (errorMessage.includes('DADOS OBRIGATÓRIOS FALTANDO')) {
-      return NextResponse.json(
-        { 
-          error: errorMessage,
-          type: 'validation_error'
-        },
-        { status: 400 }
-      )
-    }
+    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao validar dados'
     
     return NextResponse.json(
       { 
+        isValid: false,
         error: errorMessage,
-        type: 'generation_error',
+        type: 'validation_system_error',
         timestamp: new Date().toISOString()
       },
       { status: 500 }

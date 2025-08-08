@@ -1,16 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Download, FileText, Calendar, Building, Users } from 'lucide-react'
+import { Download, FileText, Calendar, Building, Users, CheckCircle, AlertTriangle } from 'lucide-react'
 import { DashboardLayout } from '@/components/dashboard-layout'
 
 export default function DimobPage() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [selectedOwnerId, setSelectedOwnerId] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isValidating, setIsValidating] = useState(false)
   const [contracts, setContracts] = useState([])
   const [owners, setOwners] = useState([])
   const [settings, setSettings] = useState(null)
+  const [validationResult, setValidationResult] = useState(null)
 
   // Anos disponíveis (últimos 5 anos + próximo)
   const availableYears = Array.from({ length: 6 }, (_, i) => new Date().getFullYear() - 2 + i)
@@ -23,6 +25,7 @@ export default function DimobPage() {
   useEffect(() => {
     if (selectedOwnerId) {
       loadContracts()
+      setValidationResult(null) // Reset validation when changing selection
     }
   }, [selectedYear, selectedOwnerId])
 
@@ -66,6 +69,38 @@ export default function DimobPage() {
       }
     } catch (error) {
       console.error('Erro ao carregar contratos:', error)
+    }
+  }
+
+  const validateDimob = async () => {
+    if (!selectedOwnerId) {
+      alert('❌ Selecione um proprietário para validar!')
+      return
+    }
+
+    setIsValidating(true)
+    try {
+      const response = await fetch('/api/dimob/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          year: selectedYear,
+          ownerId: selectedOwnerId
+        })
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        setValidationResult(result)
+      } else {
+        const error = await response.json()
+        alert(`❌ Erro ao validar: ${error.error}`)
+      }
+    } catch (error) {
+      console.error('Erro ao validar DIMOB:', error)
+      alert('❌ Erro ao validar dados para DIMOB')
+    } finally {
+      setIsValidating(false)
     }
   }
 
@@ -171,7 +206,7 @@ export default function DimobPage() {
           Geração do Arquivo DIMOB
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Proprietário *
@@ -213,10 +248,30 @@ export default function DimobPage() {
             </select>
           </div>
 
-          <div className="md:col-span-2 flex items-end">
+          <div className="md:col-span-1 flex items-end">
+            <button
+              onClick={validateDimob}
+              disabled={isValidating || !selectedOwnerId}
+              className="w-full bg-amber-600 hover:bg-amber-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-medium flex items-center justify-center space-x-2 transition-colors"
+            >
+              {isValidating ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <span>Validando...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-5 h-5" />
+                  <span>Validar Dados</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="md:col-span-1 flex items-end">
             <button
               onClick={generateDimob}
-              disabled={isGenerating || !settings?.responsibleCpf || !settings?.municipalityCode || !selectedOwnerId}
+              disabled={isGenerating || !settings?.responsibleCpf || !settings?.municipalityCode || !selectedOwnerId || (validationResult && !validationResult.isValid)}
               className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-medium flex items-center justify-center space-x-2 transition-colors"
             >
               {isGenerating ? (
@@ -227,13 +282,92 @@ export default function DimobPage() {
               ) : (
                 <>
                   <Download className="w-5 h-5" />
-                  <span>Gerar Arquivo DIMOB.txt</span>
+                  <span>Gerar DIMOB.txt</span>
                 </>
               )}
             </button>
           </div>
         </div>
       </div>
+
+      {/* Resultado da Validação */}
+      {validationResult && (
+        <div className={`rounded-lg border p-6 ${
+          validationResult.isValid 
+            ? 'bg-green-50 border-green-200' 
+            : 'bg-red-50 border-red-200'
+        }`}>
+          <div className="flex items-center mb-4">
+            {validationResult.isValid ? (
+              <>
+                <CheckCircle className="w-6 h-6 text-green-600 mr-3" />
+                <h3 className="text-lg font-medium text-green-900">
+                  ✅ Dados válidos para geração DIMOB
+                </h3>
+              </>
+            ) : (
+              <>
+                <AlertTriangle className="w-6 h-6 text-red-600 mr-3" />
+                <h3 className="text-lg font-medium text-red-900">
+                  ❌ Erros encontrados - Correção necessária
+                </h3>
+              </>
+            )}
+          </div>
+          
+          {/* Resumo */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-600">{validationResult.summary?.totalContracts || 0}</div>
+              <div className="text-sm text-gray-600">Total Contratos</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">{validationResult.summary?.contractsForDimob || 0}</div>
+              <div className="text-sm text-gray-600">Para DIMOB</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-red-600">{validationResult.summary?.totalErrors || 0}</div>
+              <div className="text-sm text-gray-600">Erros Críticos</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-amber-600">{validationResult.summary?.totalWarnings || 0}</div>
+              <div className="text-sm text-gray-600">Avisos</div>
+            </div>
+          </div>
+          
+          {/* Detalhes dos erros */}
+          {validationResult.errors && validationResult.errors.length > 0 && (
+            <div className="mb-4">
+              <h4 className="font-medium text-red-900 mb-2">🚫 Erros que impedem a geração:</h4>
+              <div className="space-y-2">
+                {validationResult.errors.map((error, index) => (
+                  <div key={index} className="bg-red-100 border border-red-300 rounded p-3">
+                    <div className="text-sm text-red-800">
+                      <strong>{error.entity}:</strong> {error.message}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* Detalhes dos avisos */}
+          {validationResult.warnings && validationResult.warnings.length > 0 && (
+            <div>
+              <h4 className="font-medium text-amber-900 mb-2">⚠️ Avisos (não impedem a geração):</h4>
+              <div className="space-y-2">
+                {validationResult.warnings.map((warning, index) => (
+                  <div key={index} className="bg-amber-100 border border-amber-300 rounded p-3">
+                    <div className="text-sm text-amber-800">
+                      <strong>{warning.entity}:</strong> {warning.message}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Preview dos contratos */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-6">

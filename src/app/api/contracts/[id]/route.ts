@@ -57,6 +57,7 @@ export async function PUT(
         rentAmount: data.rentAmount,
         depositAmount: data.depositAmount,
         administrationFeePercentage: data.administrationFeePercentage || 10.0,
+        includeInDimob: data.includeInDimob !== undefined ? data.includeInDimob : true,
         terms: data.terms || null,
         status: data.status
       },
