@@ -289,35 +289,29 @@ function gerarConteudoDimob(data: DimobData, ano: number): string {
     conteudo += contrato.contrato.numero.padEnd(6, ' ').slice(0, 6) // Número Contrato (6 posições)
     conteudo += contrato.contrato.data // Data Contrato (8 posições)
     
-    // ✅ CORREÇÃO FINAL: Incluir APENAS os meses com pagamentos reais
-    // Não incluir meses zerados para evitar problemas na Receita Federal
-    console.log(`  🎯 [DIMOB] Incluindo apenas ${contrato.valoresMensais.length} meses com pagamentos reais`)
-    
-    contrato.valoresMensais.forEach(mes => {
-      conteudo += formatarValorR$(mes.aluguel) // Aluguel (14 posições)
-      conteudo += formatarValorR$(mes.comissao) // Comissão (14 posições)
-      conteudo += formatarValorR$(mes.imposto) // Imposto (14 posições)
-      console.log(`  📄 [DIMOB] Mês ${mes.mes}: Aluguel R$ ${mes.aluguel/100}, Comissão R$ ${mes.comissao/100}`)
+    // 🚨 CORREÇÃO: DIMOB exige exatamente 36 campos (12 meses × 3 valores)
+    // Criar array de 12 meses, preenchendo apenas os meses com dados reais
+    const mesesCompletos = Array(12).fill(null).map((_, index) => {
+      // Procurar se existe dados para este mês (index = 0 para Janeiro, etc)
+      const mesComDados = contrato.valoresMensais.find(mes => mes.mes === index + 1)
+      
+      if (mesComDados) {
+        console.log(`  ✅ [DIMOB] Mês ${index + 1}: R$ ${mesComDados.aluguel/100} (${mesComDados.comissao/100} comissão)`)
+        return mesComDados
+      } else {
+        // Mês sem dados = zeros (obrigatório para formato DIMOB)
+        return { mes: index + 1, aluguel: 0, comissao: 0, imposto: 0 }
+      }
     })
     
-    // Calcular quantos campos foram incluídos
-    const totalCampos = contrato.valoresMensais.length * 3
-    console.log(`  📊 [DIMOB] Total de campos incluídos: ${totalCampos} (${contrato.valoresMensais.length} meses × 3 valores)`)
+    // Gerar todos os 36 campos obrigatórios
+    mesesCompletos.forEach((mes, index) => {
+      conteudo += formatarValorR$(mes.aluguel) // Aluguel (14 posições)
+      conteudo += formatarValorR$(mes.comissao) // Comissão (14 posições) 
+      conteudo += formatarValorR$(mes.imposto) // Imposto (14 posições)
+    })
     
-    // ⚠️ ATENÇÃO: Verificando se formato DIMOB permite campos variáveis
-    // Se o padrão exigir 36 campos fixos, pode precisar de adaptação
-    
-    // DECISÃO CRÍTICA: Usar apenas meses com valores (conforme solicitado)
-    // Ignorar preenchimento com zeros para conformidade com solicitação
-    console.log(`  🎯 [DIMOB] CRITICAL: Usando ${contrato.valoresMensais.length} meses REAIS (sem padding zeros)`)
-    console.log(`  📋 [DIMOB] Se arquivo for rejeitado pela RF, pode precisar ajustar formato`)
-    
-    // Log de validação final
-    if (contrato.valoresMensais.length === 0) {
-      console.error(`  ❌ [DIMOB] ERRO: Contrato sem meses válidos!`)
-    } else {
-      console.log(`  ✅ [DIMOB] OK: ${contrato.valoresMensais.length} meses serão incluídos no arquivo`)
-    }
+    console.log(`  📄 [DIMOB] FORMATO CORRETO: 36 campos incluídos (12 meses obrigatórios)`)
     
     conteudo += contrato.imovel.tipo // Tipo Imóvel (1 posição)
     conteudo += contrato.imovel.endereco.padEnd(60, ' ').slice(0, 60) // Endereço (60 posições)
