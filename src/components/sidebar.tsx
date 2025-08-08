@@ -467,34 +467,26 @@ export function Sidebar() {
                       <Settings className="w-5 h-5" />
                     </div>
                     
-                    {/* Dropdown Menu - Modelo Moderno */}
-                    <div className="absolute left-16 top-0 w-64 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border-0 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-out transform scale-95 group-hover:scale-100 z-50">
-                      <div className="p-4">
-                        <div className="flex items-center space-x-2 mb-4 pb-3 border-b border-gray-200/50 dark:border-gray-700/50">
-                          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                            <Settings className="w-4 h-4 text-white" />
-                          </div>
-                          <div>
-                            <h3 className="text-sm font-bold text-gray-900 dark:text-white">Configurações</h3>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Sistema & Empresa</p>
-                          </div>
+                    {/* Dropdown Menu */}
+                    <div className="absolute left-16 top-0 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                      <div className="p-2">
+                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+                          CONFIGURAÇÕES
                         </div>
-                        <nav className="space-y-1">
+                        <nav className="mt-2">
                           {configMenuItems.map((subItem) => {
                             const isActive = pathname === subItem.href || pathname.includes(subItem.href.split('?')[0])
                             return (
                               <Link
                                 key={subItem.href}
                                 href={subItem.href}
-                                className={`group/item flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm ${
+                                className={`flex items-center space-x-3 px-3 py-2.5 rounded-md transition-all duration-200 text-sm ${
                                   isActive
-                                    ? 'bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-lg transform scale-105'
-                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-gray-700 dark:hover:to-gray-600 hover:scale-102'
+                                    ? 'bg-red-50 text-red-600 border-l-2 border-red-600'
+                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                                 }`}
                               >
-                                <div className={`p-1.5 rounded-lg ${isActive ? 'bg-white/20' : 'bg-gray-100 dark:bg-gray-700 group-hover/item:bg-blue-100 dark:group-hover/item:bg-gray-600'}`}>
-                                  <subItem.icon className="w-3.5 h-3.5" />
-                                </div>
+                                <subItem.icon className="w-4 h-4" />
                                 <span className="font-medium">{subItem.label}</span>
                               </Link>
                             )
@@ -517,34 +509,26 @@ export function Sidebar() {
                       <Home className="w-5 h-5" />
                     </div>
                     
-                    {/* Dropdown Menu - Modelo Moderno */}
-                    <div className="absolute left-16 top-0 w-64 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border-0 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-out transform scale-95 group-hover:scale-100 z-50">
-                      <div className="p-4">
-                        <div className="flex items-center space-x-2 mb-4 pb-3 border-b border-gray-200/50 dark:border-gray-700/50">
-                          <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-                            <Home className="w-4 h-4 text-white" />
-                          </div>
-                          <div>
-                            <h3 className="text-sm font-bold text-gray-900 dark:text-white">Gestão Imobiliária</h3>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Propriedades & Pessoas</p>
-                          </div>
+                    {/* Dropdown Menu */}
+                    <div className="absolute left-16 top-0 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                      <div className="p-2">
+                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+                          GESTÃO IMOBILIÁRIA
                         </div>
-                        <nav className="space-y-1">
+                        <nav className="mt-2">
                           {imobiliariaMenuItems.map((subItem) => {
                             const isActive = pathname === subItem.href
                             return (
                               <Link
                                 key={subItem.href}
                                 href={subItem.href}
-                                className={`group/item flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm ${
+                                className={`flex items-center space-x-3 px-3 py-2.5 rounded-md transition-all duration-200 text-sm ${
                                   isActive
-                                    ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg transform scale-105'
-                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 dark:hover:from-gray-700 dark:hover:to-gray-600 hover:scale-102'
+                                    ? 'bg-red-50 text-red-600 border-l-2 border-red-600'
+                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                                 }`}
                               >
-                                <div className={`p-1.5 rounded-lg ${isActive ? 'bg-white/20' : 'bg-gray-100 dark:bg-gray-700 group-hover/item:bg-green-100 dark:group-hover/item:bg-gray-600'}`}>
-                                  <subItem.icon className="w-3.5 h-3.5" />
-                                </div>
+                                <subItem.icon className="w-4 h-4" />
                                 <span className="font-medium">{subItem.label}</span>
                               </Link>
                             )
@@ -567,34 +551,26 @@ export function Sidebar() {
                       <Banknote className="w-5 h-5" />
                     </div>
                     
-                    {/* Dropdown Menu - Modelo Moderno */}
-                    <div className="absolute left-16 top-0 w-64 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border-0 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-out transform scale-95 group-hover:scale-100 z-50">
-                      <div className="p-4">
-                        <div className="flex items-center space-x-2 mb-4 pb-3 border-b border-gray-200/50 dark:border-gray-700/50">
-                          <div className="w-8 h-8 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-lg flex items-center justify-center">
-                            <Banknote className="w-4 h-4 text-white" />
-                          </div>
-                          <div>
-                            <h3 className="text-sm font-bold text-gray-900 dark:text-white">Gestão Financeira</h3>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Pagamentos & Relatórios</p>
-                          </div>
+                    {/* Dropdown Menu */}
+                    <div className="absolute left-16 top-0 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                      <div className="p-2">
+                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+                          GESTÃO FINANCEIRA
                         </div>
-                        <nav className="space-y-1">
+                        <nav className="mt-2">
                           {financeiroMenuItems.map((subItem) => {
                             const isActive = pathname === subItem.href
                             return (
                               <Link
                                 key={subItem.href}
                                 href={subItem.href}
-                                className={`group/item flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm ${
+                                className={`flex items-center space-x-3 px-3 py-2.5 rounded-md transition-all duration-200 text-sm ${
                                   isActive
-                                    ? 'bg-gradient-to-r from-yellow-500 to-orange-600 text-white shadow-lg transform scale-105'
-                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-50 dark:hover:from-gray-700 dark:hover:to-gray-600 hover:scale-102'
+                                    ? 'bg-red-50 text-red-600 border-l-2 border-red-600'
+                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                                 }`}
                               >
-                                <div className={`p-1.5 rounded-lg ${isActive ? 'bg-white/20' : 'bg-gray-100 dark:bg-gray-700 group-hover/item:bg-yellow-100 dark:group-hover/item:bg-gray-600'}`}>
-                                  <subItem.icon className="w-3.5 h-3.5" />
-                                </div>
+                                <subItem.icon className="w-4 h-4" />
                                 <span className="font-medium">{subItem.label}</span>
                               </Link>
                             )
