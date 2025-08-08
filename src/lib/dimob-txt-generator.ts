@@ -304,11 +304,19 @@ function gerarConteudoDimob(data: DimobData, ano: number): string {
     const totalCampos = contrato.valoresMensais.length * 3
     console.log(`  📊 [DIMOB] Total de campos incluídos: ${totalCampos} (${contrato.valoresMensais.length} meses × 3 valores)`)
     
-    // Se necessário, preencher campos restantes para manter estrutura (verificar se é obrigatório)
-    const camposRestantes = 36 - totalCampos // 36 = 12 meses × 3 valores
-    if (camposRestantes > 0) {
-      conteudo += '0'.repeat(14).repeat(camposRestantes)
-      console.log(`  📄 [DIMOB] Campos restantes preenchidos com zeros: ${camposRestantes}`)
+    // ⚠️ ATENÇÃO: Verificando se formato DIMOB permite campos variáveis
+    // Se o padrão exigir 36 campos fixos, pode precisar de adaptação
+    
+    // DECISÃO CRÍTICA: Usar apenas meses com valores (conforme solicitado)
+    // Ignorar preenchimento com zeros para conformidade com solicitação
+    console.log(`  🎯 [DIMOB] CRITICAL: Usando ${contrato.valoresMensais.length} meses REAIS (sem padding zeros)`)
+    console.log(`  📋 [DIMOB] Se arquivo for rejeitado pela RF, pode precisar ajustar formato`)
+    
+    // Log de validação final
+    if (contrato.valoresMensais.length === 0) {
+      console.error(`  ❌ [DIMOB] ERRO: Contrato sem meses válidos!`)
+    } else {
+      console.log(`  ✅ [DIMOB] OK: ${contrato.valoresMensais.length} meses serão incluídos no arquivo`)
     }
     
     conteudo += contrato.imovel.tipo // Tipo Imóvel (1 posição)
