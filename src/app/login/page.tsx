@@ -49,27 +49,27 @@ export default function Login() {
 
   const conversations = [
     {
-      question: "Como posso automatizar meu DIMOB?",
+      question: "Como posso automatizar meu DIMOB",
       answer: "Com IA integrada, geramos relatórios DIMOB completos em segundos, sem erros manuais."
     },
     {
-      question: "Onde encontro leads qualificados?",
+      question: "Onde encontro leads qualificados",
       answer: "Capturamos e qualificamos leads automaticamente de múltiplas fontes para você."
     },
     {
-      question: "Como organizar minha gestão imobiliária?",
+      question: "Como organizar minha gestão imobiliária",
       answer: "Sistema completo: contratos, pagamentos, inquilinos e proprietários em um só lugar."
     },
     {
-      question: "Como fechar mais negócios?",
+      question: "Como fechar mais negócios",
       answer: "IA analisa padrões e sugere as melhores oportunidades na hora certa."
     },
     {
-      question: "Posso digitalizar meus contratos?",
+      question: "Posso digitalizar meus contratos",
       answer: "Contratos digitais inteligentes com assinatura eletrônica e automação completa."
     },
     {
-      question: "Como ter relatórios que vendem?",
+      question: "Como ter relatórios que vendem",
       answer: "Relatórios personalizados que destacam seus resultados e conquistam clientes."
     }
   ]
@@ -141,7 +141,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left side - Brand Section (70%) */}
-      <div className="flex-1 lg:flex-[0.7] relative overflow-hidden" style={{ backgroundColor: '#ffffdb' }}>
+      <div className="hidden lg:block flex-1 lg:flex-[0.7] relative overflow-hidden" style={{ backgroundColor: '#ffffdb' }}>
         <div className="absolute inset-0 flex flex-col justify-center items-center px-8 lg:px-16">
           <div className="text-center max-w-4xl">
             {/* Logo */}
@@ -166,7 +166,7 @@ export default function Login() {
               {/* Answer */}
               {showAnswer && (
                 <div className="mt-6">
-                  <p className="text-lg lg:text-xl text-gray-600 font-light leading-relaxed">
+                  <p className="text-2xl lg:text-3xl font-medium leading-relaxed" style={{ color: '#fe7600' }}>
                     {displayedAnswer}
                     <span className={`inline-block w-1 ml-1 ${isTypingAnswer ? 'animate-pulse' : 'hidden'}`} 
                           style={{ backgroundColor: '#fe7600', height: '1.2em' }}></span>
@@ -187,8 +187,18 @@ export default function Login() {
       </div>
 
       {/* Right side - Login Form (30%) */}
-      <div className="w-full lg:flex-[0.3] bg-white flex items-center justify-center px-4 sm:px-8 py-8 lg:py-12 shadow-2xl">
+      <div className="w-full lg:flex-[0.3] bg-white flex items-center justify-center px-4 sm:px-8 py-8 lg:py-12 lg:shadow-2xl">
         <div className="w-full max-w-sm">
+          {/* Mobile Logo */}
+          <div className="lg:hidden text-center mb-8">
+            <div className="flex items-center justify-center mb-4">
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl mr-3" style={{ backgroundColor: '#fe7600' }}>
+                <Building2 className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-2xl font-bold" style={{ color: '#fe7600' }}>ALL-GESTOR</span>
+            </div>
+          </div>
+
           {/* Header */}
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Entrar</h2>
