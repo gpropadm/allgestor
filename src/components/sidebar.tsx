@@ -27,35 +27,99 @@ import {
   Bot,
   BarChart3,
   TrendingUp,
-  MessageCircle
+  MessageCircle,
+  ChevronDown,
+  ChevronRight,
+  Bell,
+  DollarSign,
+  Split,
+  Plug,
+  Link2,
+  ShieldCheck,
+  Briefcase
 } from 'lucide-react'
 
-// OPÇÃO 1: Ícones mais modernos
-const menuItems = [
+// Menu hierárquico estilo Discord/Slack
+const menuStructure = [
+  // Itens principais (não agrupados)
   { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
   { icon: Bot, label: '🤖 Assistente IA', href: '/ai-assistant', featured: true },
   { icon: TrendingUp, label: '📊 Pipeline Vendas', href: '/sales-pipeline', featured: true },
-  { icon: Calculator, label: '💰 Simulador Financeiro', href: '/simulador-financeiro', featured: true },
   { icon: BarChart3, label: '📈 Analytics', href: '/analytics', featured: true },
-  { icon: MessageCircle, label: '💬 WhatsApp', href: '/whatsapp', featured: true },
-  { icon: Users, label: 'Proprietários', href: '/owners' },
-  { icon: Building, label: 'Imóveis', href: '/properties' },
-  { icon: User, label: 'Inquilinos', href: '/tenants' },
-  { icon: FileText, label: 'Contratos', href: '/contracts' },
-  { icon: Receipt, label: 'Pagamentos', href: '/payments' },
-  { icon: FileText, label: '🧾 Recibos', href: '/recibos', featured: true },
-  { icon: FileText, label: '📄 Comprovantes', href: '/comprovantes', featured: true },
-  { icon: TrendingDown, label: 'Despesas', href: '/expenses' },
-  { icon: Calculator, label: 'Financeiro', href: '/financial' },
-  { icon: FileText, label: '📊 DIMOB', href: '/dimob', featured: true },
-  { icon: Zap, label: 'Leads', href: '/leads' },
-  { icon: CreditCard, label: 'PIX Pagamento', href: '/pix' },
-  { icon: Wallet, label: 'Gateway', href: '/gateway' },
-  { icon: UserPlus, label: 'Usuários', href: '/users', adminOnly: true },
-  { icon: Wallet, label: 'Config Gateway', href: '/admin/gateway-settings', adminOnly: true },
-  { icon: TestTube, label: 'Teste Gateway', href: '/gateway-test', adminOnly: true },
-  { icon: Shield, label: 'Backup', href: '/admin/backup', adminOnly: true },
-  { icon: Settings, label: 'Configurações', href: '/settings' }
+
+  // Categoria: Gestão
+  {
+    type: 'category',
+    icon: Briefcase,
+    label: 'Gestão',
+    children: [
+      { icon: Users, label: 'Proprietários', href: '/owners' },
+      { icon: Building, label: 'Imóveis', href: '/properties' },
+      { icon: User, label: 'Inquilinos', href: '/tenants' },
+      { icon: FileText, label: 'Contratos', href: '/contracts' },
+      { icon: Zap, label: 'Leads', href: '/leads' },
+    ]
+  },
+
+  // Categoria: Financeiro
+  {
+    type: 'category',
+    icon: DollarSign,
+    label: 'Financeiro',
+    children: [
+      { icon: Receipt, label: 'Pagamentos', href: '/payments' },
+      { icon: FileText, label: '🧾 Recibos', href: '/recibos', featured: true },
+      { icon: FileText, label: '📄 Comprovantes', href: '/comprovantes', featured: true },
+      { icon: TrendingDown, label: 'Despesas', href: '/expenses' },
+      { icon: Calculator, label: 'Financeiro', href: '/financial' },
+      { icon: Calculator, label: '💰 Simulador Financeiro', href: '/simulador-financeiro', featured: true },
+      { icon: FileText, label: '📊 DIMOB', href: '/dimob', featured: true },
+    ]
+  },
+
+  // Categoria: Pagamentos
+  {
+    type: 'category',
+    icon: CreditCard,
+    label: 'Pagamentos',
+    children: [
+      { icon: CreditCard, label: 'PIX Pagamento', href: '/pix' },
+      { icon: Wallet, label: 'Gateway', href: '/gateway' },
+      { icon: MessageCircle, label: '💬 WhatsApp', href: '/whatsapp', featured: true },
+    ]
+  },
+
+  // Categoria: Configurações
+  {
+    type: 'category',
+    icon: Settings,
+    label: 'Configurações',
+    children: [
+      { icon: User, label: 'Meu Perfil', href: '/settings' },
+      { icon: Building2, label: 'Empresa', href: '/settings?tab=empresa' },
+      { icon: Settings, label: 'Sistema', href: '/settings?tab=sistema' },
+      { icon: Bell, label: 'Notificações', href: '/settings?tab=notifications' },
+      { icon: DollarSign, label: 'R$ Financeiro', href: '/settings?tab=financeiro' },
+      { icon: Split, label: '$ ASAAS Split', href: '/settings?tab=split' },
+      { icon: Plug, label: 'APIs Externas', href: '/settings?tab=apis' },
+      { icon: Link2, label: 'Integrações', href: '/settings?tab=integracoes' },
+      { icon: ShieldCheck, label: 'Segurança', href: '/settings?tab=seguranca' },
+    ]
+  },
+
+  // Admin apenas
+  {
+    type: 'category',
+    icon: Shield,
+    label: 'Admin',
+    adminOnly: true,
+    children: [
+      { icon: UserPlus, label: 'Usuários', href: '/users' },
+      { icon: Wallet, label: 'Config Gateway', href: '/admin/gateway-settings' },
+      { icon: TestTube, label: 'Teste Gateway', href: '/gateway-test' },
+      { icon: Shield, label: 'Backup', href: '/admin/backup' },
+    ]
+  }
 ]
 
 // OPÇÃO 2: Ícones mais visuais (descomente para usar)
@@ -92,9 +156,18 @@ const menuItems = [
 
 export function Sidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [expandedCategories, setExpandedCategories] = useState<string[]>(['Gestão']) // Gestão aberta por padrão
   const pathname = usePathname()
   const { data: session } = useSession()
   const [isAdmin, setIsAdmin] = useState(false)
+
+  const toggleCategory = (categoryLabel: string) => {
+    setExpandedCategories(prev => 
+      prev.includes(categoryLabel) 
+        ? prev.filter(cat => cat !== categoryLabel)
+        : [...prev, categoryLabel]
+    )
+  }
 
   // Verificar se é admin usando a mesma lógica da página de settings
   const checkAdminStatus = async () => {
@@ -118,6 +191,63 @@ export function Sidebar() {
       checkAdminStatus()
     }
   }, [session])
+
+  // Componente para renderizar item do menu
+  const renderMenuItem = (item: any, isChild = false) => {
+    if (item.adminOnly && !isAdmin) return null
+    
+    const isActive = pathname === item.href
+    const isExpanded = expandedCategories.includes(item.label)
+
+    // Se é uma categoria
+    if (item.type === 'category') {
+      return (
+        <li key={item.label} className="mb-2">
+          {/* Header da categoria */}
+          <button
+            onClick={() => toggleCategory(item.label)}
+            className="flex items-center justify-between w-full px-4 py-3 text-left rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+          >
+            <div className="flex items-center space-x-3">
+              <item.icon className="w-5 h-5" />
+              <span className="font-medium">{item.label}</span>
+            </div>
+            {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+          </button>
+          
+          {/* Subitens */}
+          {isExpanded && (
+            <ul className="ml-6 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-600 pl-4">
+              {item.children.map((child: any) => renderMenuItem(child, true))}
+            </ul>
+          )}
+        </li>
+      )
+    }
+
+    // Item normal
+    return (
+      <li key={item.href}>
+        <Link
+          href={item.href}
+          onClick={() => setIsMobileMenuOpen(false)}
+          className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 border-r-2 ${
+            isActive
+              ? ''
+              : item.featured
+              ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border-blue-200 hover:from-blue-100 hover:to-blue-200'
+              : `text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-transparent ${
+                  isChild ? 'text-sm' : ''
+                }`
+          }`}
+          style={isActive ? {backgroundColor: '#fef2f2', color: '#f63c6a', borderColor: '#f63c6a'} : {}}
+        >
+          <item.icon className={`${isChild ? 'w-4 h-4' : 'w-5 h-5'}`} />
+          <span className={`font-medium ${isChild ? 'text-sm' : ''}`}>{item.label}</span>
+        </Link>
+      </li>
+    )
+  }
 
 
   return (
@@ -160,33 +290,7 @@ export function Sidebar() {
 
         <nav className="flex-1 p-4">
           <ul className="space-y-2">
-            {menuItems.map((item) => {
-              // Ocultar itens adminOnly se não for admin
-              if (item.adminOnly && !isAdmin) {
-                return null
-              }
-              
-              const isActive = pathname === item.href
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors border-r-2 ${
-                      isActive
-                        ? ''
-                        : item.featured
-                        ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border-blue-200 hover:from-blue-100 hover:to-blue-200'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-transparent'
-                    }`}
-                    style={isActive ? {backgroundColor: '#fef2f2', color: '#f63c6a', borderColor: '#f63c6a'} : {}}
-                  >
-                    <item.icon className="w-5 h-5" />
-                    <span className="font-medium">{item.label}</span>
-                  </Link>
-                </li>
-              )
-            })}
+            {menuStructure.map((item) => renderMenuItem(item))}
           </ul>
           
           {/* Logout Button */}
@@ -215,12 +319,26 @@ export function Sidebar() {
         {/* Navigation */}
         <nav className="flex-1 py-4 flex flex-col">
           <ul className="space-y-1 flex-1">
-            {menuItems.map((item) => {
-              // Ocultar itens adminOnly se não for admin
-              if (item.adminOnly && !isAdmin) {
-                return null
+            {menuStructure.map((item) => {
+              // Para desktop, mostrar apenas ícones das categorias ou itens principais
+              if (item.adminOnly && !isAdmin) return null
+              
+              // Se é categoria, mostrar o ícone da categoria
+              if (item.type === 'category') {
+                return (
+                  <li key={item.label} className="px-2">
+                    <button
+                      onClick={() => toggleCategory(item.label)}
+                      className="group relative flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
+                      title={item.label}
+                    >
+                      <item.icon className="w-5 h-5" />
+                    </button>
+                  </li>
+                )
               }
               
+              // Item normal
               const isActive = pathname === item.href
               return (
                 <li key={item.href} className="px-2">
@@ -235,7 +353,6 @@ export function Sidebar() {
                     title={item.label}
                   >
                     <item.icon className="w-5 h-5" />
-                    
                   </Link>
                 </li>
               )
