@@ -20,7 +20,6 @@ import {
   UserCircle,
   House,
   Users,
-  FileContract,
   Wallet,
   Money,
   Receipt,
@@ -45,7 +44,8 @@ import {
   X,
   ChevronDown,
   ChevronRight,
-  Building2
+  Building2,
+  FileText as FileContract
 } from 'lucide-react'
 
 // Nova configuração com ícones Phosphor otimizados
