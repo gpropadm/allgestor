@@ -139,9 +139,9 @@ export default function Login() {
   }, [currentPhraseIndex])
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left side - Brand Section (70%) */}
-      <div className="flex-[0.7] relative overflow-hidden" style={{ backgroundColor: '#ffffdb' }}>
+      <div className="flex-1 lg:flex-[0.7] relative overflow-hidden" style={{ backgroundColor: '#ffffdb' }}>
         <div className="absolute inset-0 flex flex-col justify-center items-center px-8 lg:px-16">
           <div className="text-center max-w-4xl">
             {/* Logo */}
@@ -153,33 +153,24 @@ export default function Login() {
             </div>
 
             {/* Conversation Simulation */}
-            <div className="mb-20 text-left max-w-4xl">
+            <div className="mb-20 text-left max-w-4xl px-4 lg:px-0">
               {/* Question */}
-              <div className="mb-6">
-                <div className="bg-gray-100 rounded-2xl p-6 inline-block max-w-3xl">
-                  <p className="text-2xl text-gray-800 font-medium">
-                    {displayedQuestion}
-                    <span className={`inline-block w-0.5 ml-1 ${isTypingQuestion ? 'animate-pulse' : 'hidden'}`} 
-                          style={{ backgroundColor: '#333', height: '1.2em' }}></span>
-                  </p>
-                </div>
+              <div className="mb-4">
+                <h1 className="text-5xl lg:text-6xl font-bold" style={{ color: '#fe7600' }}>
+                  {displayedQuestion}
+                  <span className={`inline-block w-2 ml-2 ${isTypingQuestion ? 'animate-pulse' : 'hidden'}`} 
+                        style={{ backgroundColor: '#fe7600', height: '1em' }}></span>
+                </h1>
               </div>
 
               {/* Answer */}
               {showAnswer && (
-                <div className="ml-0">
-                  <div className="flex items-start space-x-3">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full flex-shrink-0" style={{ backgroundColor: '#fe7600' }}>
-                      <Building2 className="w-4 h-4 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-xl text-gray-700 leading-relaxed">
-                        {displayedAnswer}
-                        <span className={`inline-block w-0.5 ml-1 ${isTypingAnswer ? 'animate-pulse' : 'hidden'}`} 
-                              style={{ backgroundColor: '#fe7600', height: '1.2em' }}></span>
-                      </p>
-                    </div>
-                  </div>
+                <div className="mt-6">
+                  <p className="text-lg lg:text-xl text-gray-600 font-light leading-relaxed">
+                    {displayedAnswer}
+                    <span className={`inline-block w-1 ml-1 ${isTypingAnswer ? 'animate-pulse' : 'hidden'}`} 
+                          style={{ backgroundColor: '#fe7600', height: '1.2em' }}></span>
+                  </p>
                 </div>
               )}
             </div>
@@ -196,7 +187,7 @@ export default function Login() {
       </div>
 
       {/* Right side - Login Form (30%) */}
-      <div className="flex-[0.3] bg-white flex items-center justify-center px-8 py-12 shadow-2xl">
+      <div className="w-full lg:flex-[0.3] bg-white flex items-center justify-center px-4 sm:px-8 py-8 lg:py-12 shadow-2xl">
         <div className="w-full max-w-sm">
           {/* Header */}
           <div className="text-center mb-8">
