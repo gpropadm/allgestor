@@ -106,12 +106,11 @@ export function Sidebar() {
 
   // Subitens de Configurações
   const configMenuItems = [
-    { icon: User, label: 'Meu Perfil', href: '/settings' },
     { icon: Building2, label: 'Empresa', href: '/settings?tab=empresa' },
     { icon: Settings, label: 'Sistema', href: '/settings?tab=sistema' },
     { icon: Bell, label: 'Notificações', href: '/settings?tab=notifications' },
-    { icon: DollarSign, label: 'R$ Financeiro', href: '/settings?tab=financeiro' },
-    { icon: CreditCard, label: '$ ASAAS Split', href: '/settings?tab=split' },
+    { icon: DollarSign, label: 'Financeiro', href: '/settings?tab=financeiro' },
+    { icon: CreditCard, label: 'ASAAS Split', href: '/settings?tab=split' },
     { icon: Plug, label: 'APIs Externas', href: '/settings?tab=apis' },
     { icon: Link2, label: 'Integrações', href: '/settings?tab=integracoes' },
     { icon: ShieldCheck, label: 'Segurança', href: '/settings?tab=seguranca' },
@@ -288,6 +287,48 @@ export function Sidebar() {
                 return null
               }
               
+              // Se é Configurações no desktop, criar dropdown hover
+              if (item.label === 'Configurações') {
+                return (
+                  <li key={item.href} className="px-2 relative group">
+                    <div
+                      className="relative flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
+                      title="Configurações"
+                    >
+                      <Settings className="w-5 h-5" />
+                    </div>
+                    
+                    {/* Dropdown Menu */}
+                    <div className="absolute left-16 top-0 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                      <div className="p-2">
+                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+                          CONFIGURAÇÕES
+                        </div>
+                        <nav className="mt-2">
+                          {configMenuItems.map((subItem) => {
+                            const isActive = pathname === subItem.href || pathname.includes(subItem.href.split('?')[0])
+                            return (
+                              <Link
+                                key={subItem.href}
+                                href={subItem.href}
+                                className={`flex items-center space-x-3 px-3 py-2.5 rounded-md transition-all duration-200 text-sm ${
+                                  isActive
+                                    ? 'bg-red-50 text-red-600 border-l-2 border-red-600'
+                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                }`}
+                              >
+                                <subItem.icon className="w-4 h-4" />
+                                <span className="font-medium">{subItem.label}</span>
+                              </Link>
+                            )
+                          })}
+                        </nav>
+                      </div>
+                    </div>
+                  </li>
+                )
+              }
+              
               const isActive = pathname === item.href
               return (
                 <li key={item.href} className="px-2">
@@ -302,7 +343,6 @@ export function Sidebar() {
                     title={item.label}
                   >
                     <item.icon className="w-5 h-5" />
-                    
                   </Link>
                 </li>
               )
