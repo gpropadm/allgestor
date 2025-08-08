@@ -180,23 +180,50 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
       console.log(`  📊 Taxa admin: ${contrato.administrationFeePercentage}%`)
       console.log(`  💰 Pagamentos encontrados: ${contrato.payments.length}`)
       
-      // Debug: mostrar todos os pagamentos e suas datas
+      // 🚨 DEBUG CRÍTICO: Mostrar TODOS os detalhes dos pagamentos
+      console.log(`  🔍 [DIMOB DEBUG] CONTRATO ${contrato.id}:`)
+      console.log(`  📅 Total de pagamentos encontrados: ${contrato.payments.length}`)
+      
       contrato.payments.forEach((p, i) => {
-        console.log(`  💰 Pagamento ${i + 1}: ${p.dueDate.toISOString().slice(0, 10)} - Mês: ${p.dueDate.getMonth() + 1} - R$ ${p.amount}`)
+        const dataFormatada = p.dueDate.toISOString().slice(0, 10)
+        const mesJS = p.dueDate.getMonth() // 0-11
+        const mesReal = p.dueDate.getMonth() + 1 // 1-12
+        const ano = p.dueDate.getFullYear()
+        
+        console.log(`  💰 Pagamento ${i + 1}:`)
+        console.log(`    📅 Data: ${dataFormatada}`)
+        console.log(`    🗓️  Mês JS (0-11): ${mesJS}`)
+        console.log(`    🗓️  Mês Real (1-12): ${mesReal}`)
+        console.log(`    📊 Ano: ${ano}`)
+        console.log(`    💵 Valor: R$ ${p.amount}`)
+        console.log(`    ✅ Status: ${p.status}`)
+        console.log('    ---')
       })
       
       // CORREÇÃO CRÍTICA: Só incluir meses com pagamentos reais para evitar zeros na Receita Federal
       const mesesComPagamentos = new Set(contrato.payments.map(p => p.dueDate.getMonth()))
       console.log(`  🎯 Meses com pagamentos: [${Array.from(mesesComPagamentos).map(m => m + 1).join(', ')}]`)
       
+      console.log(`  🔢 [DIMOB DEBUG] Processando 12 meses para contrato ${contrato.id}:`)
+      
       const valoresMensais = Array.from({ length: 12 }, (_, mes) => {
         const pagamentosDoMes = contrato.payments.filter(p => p.dueDate.getMonth() === mes)
         const totalAluguel = pagamentosDoMes.reduce((acc, p) => acc + p.amount, 0)
         const totalComissao = totalAluguel * (contrato.administrationFeePercentage / 100)
         
-        if (totalAluguel > 0) {
-          console.log(`  📅 Mês ${mes + 1}: ${pagamentosDoMes.length} pagamentos - Total: R$ ${totalAluguel} - Comissão: R$ ${totalComissao.toFixed(2)}`)
+        console.log(`  📊 [MÊS ${mes + 1}]:`)
+        console.log(`    🔍 Filtro: p.dueDate.getMonth() === ${mes}`)
+        console.log(`    💰 Pagamentos encontrados: ${pagamentosDoMes.length}`)
+        
+        if (pagamentosDoMes.length > 0) {
+          pagamentosDoMes.forEach((p, idx) => {
+            console.log(`      💵 Pag ${idx + 1}: ${p.dueDate.toISOString().slice(0, 10)} - R$ ${p.amount}`)
+          })
         }
+        
+        console.log(`    💰 Total Aluguel: R$ ${totalAluguel}`)
+        console.log(`    💼 Comissão (${contrato.administrationFeePercentage}%): R$ ${totalComissao.toFixed(2)}`)
+        console.log(`    ---`)
         
         return {
           mes: mes + 1, // mês 1-12 para referência
