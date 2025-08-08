@@ -99,30 +99,55 @@ export default function RecibosPage() {
     
     const buscaLower = filtros.busca.trim()
     
-    // Se não há busca, aceitar todos
+    // Filtro por busca de texto
     const matchBusca = !buscaLower || 
       safeIncludes(recibo.numeroRecibo, buscaLower) ||
       safeIncludes(recibo.proprietarioNome, buscaLower) ||
       safeIncludes(recibo.inquilinoNome, buscaLower) ||
       safeIncludes(recibo.imovelEndereco, buscaLower)
       
+    // Filtro por proprietário
     const proprietarioFilter = filtros.proprietario.trim()
     const matchProprietario = !proprietarioFilter ||
       safeIncludes(recibo.proprietarioNome, proprietarioFilter)
+    
+    // Filtro por ano/mês
+    let matchPeriodo = true
+    if (filtros.ano || filtros.mes) {
+      try {
+        const dataRecibo = new Date(recibo.competencia || recibo.dataPagamento)
+        
+        if (filtros.ano) {
+          const anoRecibo = dataRecibo.getFullYear().toString()
+          matchPeriodo = matchPeriodo && (anoRecibo === filtros.ano)
+        }
+        
+        if (filtros.mes) {
+          const mesRecibo = (dataRecibo.getMonth() + 1).toString()
+          matchPeriodo = matchPeriodo && (mesRecibo === filtros.mes)
+        }
+      } catch (error) {
+        console.log('Erro ao filtrar por data:', error)
+        matchPeriodo = false
+      }
+    }
       
     // Debug apenas quando há filtros ativos
-    if (buscaLower && recibo === recibos[0]) {
-      console.log('🔍 Debug filtro busca:', {
+    if ((buscaLower || filtros.mes || filtros.ano) && recibo === recibos[0]) {
+      console.log('🔍 Debug filtros:', {
         busca: buscaLower,
+        ano: filtros.ano,
+        mes: filtros.mes,
         numeroRecibo: recibo.numeroRecibo,
-        proprietario: recibo.proprietarioNome,
-        inquilino: recibo.inquilinoNome,
-        endereco: recibo.imovelEndereco,
-        matchBusca
+        competencia: recibo.competencia,
+        dataPagamento: recibo.dataPagamento,
+        matchBusca,
+        matchProprietario,
+        matchPeriodo
       })
     }
       
-    return matchBusca && matchProprietario
+    return matchBusca && matchProprietario && matchPeriodo
   })
   
   // Paginação
@@ -202,14 +227,14 @@ export default function RecibosPage() {
               <button 
                 onClick={() => setShowFiltros(!showFiltros)}
                 className={`text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors ${
-                  (filtros.busca || filtros.mes || filtros.proprietario) 
+                  (filtros.busca || filtros.mes || filtros.ano !== new Date().getFullYear().toString() || filtros.proprietario) 
                     ? 'bg-yellow-500/80 hover:bg-yellow-500' 
                     : 'bg-white/20 hover:bg-white/30'
                 }`}
               >
                 <Filter className="w-4 h-4" />
                 <span>Filtros</span>
-                {(filtros.busca || filtros.mes || filtros.proprietario) && (
+                {(filtros.busca || filtros.mes || filtros.ano !== new Date().getFullYear().toString() || filtros.proprietario) && (
                   <span className="bg-white/30 text-xs px-2 py-1 rounded-full">
                     Ativos
                   </span>
