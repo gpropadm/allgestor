@@ -254,7 +254,7 @@ export function Sidebar() {
 
         <nav className="flex-1 p-4">
           <ul className="space-y-2">
-            {menuItemsQuarto.map((item) => {
+            {menuItems.map((item) => {
               // Ocultar itens adminOnly se não for admin
               if (item.adminOnly && !isAdmin) {
                 return null
@@ -270,7 +270,7 @@ export function Sidebar() {
                       className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                     >
                       <div className="flex items-center space-x-3">
-                        <Gem className="w-5 h-5" />
+                        <Settings className="w-5 h-5" />
                         <span className="font-medium">Configurações</span>
                       </div>
                       {isConfigExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -315,7 +315,7 @@ export function Sidebar() {
                       className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                     >
                       <div className="flex items-center space-x-3">
-                        <Castle className="w-5 h-5" />
+                        <Home className="w-5 h-5" />
                         <span className="font-medium">Gestão Imobiliária</span>
                       </div>
                       {isImobiliariaExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -360,7 +360,7 @@ export function Sidebar() {
                       className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                     >
                       <div className="flex items-center space-x-3">
-                        <Crown className="w-5 h-5" />
+                        <Banknote className="w-5 h-5" />
                         <span className="font-medium">Gestão Financeira</span>
                       </div>
                       {isFinanceiroExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -450,7 +450,7 @@ export function Sidebar() {
         {/* Navigation */}
         <nav className="flex-1 py-4 flex flex-col">
           <ul className="space-y-1 flex-1">
-            {menuItemsQuarto.map((item) => {
+            {menuItems.map((item) => {
               // Ocultar itens adminOnly se não for admin
               if (item.adminOnly && !isAdmin) {
                 return null
@@ -464,7 +464,7 @@ export function Sidebar() {
                       className="relative flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
                       title="Configurações"
                     >
-                      <Gem className="w-5 h-5" />
+                      <Settings className="w-5 h-5" />
                     </div>
                     
                     {/* Dropdown Menu - Modelo Moderno */}
@@ -472,7 +472,7 @@ export function Sidebar() {
                       <div className="p-4">
                         <div className="flex items-center space-x-2 mb-4 pb-3 border-b border-gray-200/50 dark:border-gray-700/50">
                           <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                            <Gem className="w-4 h-4 text-white" />
+                            <Settings className="w-4 h-4 text-white" />
                           </div>
                           <div>
                             <h3 className="text-sm font-bold text-gray-900 dark:text-white">Configurações</h3>
@@ -514,7 +514,7 @@ export function Sidebar() {
                       className="relative flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
                       title="Gestão Imobiliária"
                     >
-                      <Castle className="w-5 h-5" />
+                      <Home className="w-5 h-5" />
                     </div>
                     
                     {/* Dropdown Menu - Modelo Moderno */}
@@ -522,7 +522,7 @@ export function Sidebar() {
                       <div className="p-4">
                         <div className="flex items-center space-x-2 mb-4 pb-3 border-b border-gray-200/50 dark:border-gray-700/50">
                           <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-                            <Castle className="w-4 h-4 text-white" />
+                            <Home className="w-4 h-4 text-white" />
                           </div>
                           <div>
                             <h3 className="text-sm font-bold text-gray-900 dark:text-white">Gestão Imobiliária</h3>
@@ -564,7 +564,7 @@ export function Sidebar() {
                       className="relative flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
                       title="Gestão Financeira"
                     >
-                      <Crown className="w-5 h-5" />
+                      <Banknote className="w-5 h-5" />
                     </div>
                     
                     {/* Dropdown Menu - Modelo Moderno */}
@@ -572,7 +572,7 @@ export function Sidebar() {
                       <div className="p-4">
                         <div className="flex items-center space-x-2 mb-4 pb-3 border-b border-gray-200/50 dark:border-gray-700/50">
                           <div className="w-8 h-8 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-lg flex items-center justify-center">
-                            <Crown className="w-4 h-4 text-white" />
+                            <Banknote className="w-4 h-4 text-white" />
                           </div>
                           <div>
                             <h3 className="text-sm font-bold text-gray-900 dark:text-white">Gestão Financeira</h3>
