@@ -24,6 +24,7 @@ interface DimobData {
       data: string
     }
     valoresMensais: Array<{
+      mes: number
       aluguel: number
       comissao: number
       imposto: number
@@ -106,6 +107,17 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
 
   console.log(`📄 [DIMOB] Encontrados ${contratos.length} contratos com pagamentos${ownerId ? ' para o proprietário especificado' : ''}`)
   
+  // ✅ VALIDAÇÃO CRÍTICA: Filtrar contratos sem pagamentos válidos
+  const contratosValidos = contratos.filter(contrato => {
+    const temPagamentos = contrato.payments.length > 0
+    if (!temPagamentos) {
+      console.log(`⚠️ [DIMOB] Contrato ${contrato.id} ignorado: sem pagamentos válidos`)
+    }
+    return temPagamentos
+  })
+  
+  console.log(`✅ [DIMOB] ${contratosValidos.length} contratos válidos após filtros`)
+  
   // Debug: mostrar quantos pagamentos TOTAIS existem para este proprietário/ano (incluindo não-PAID)
   if (contratos.length > 0) {
     const todosPayments = await prisma.payment.findMany({
@@ -141,7 +153,7 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
     }
   }
 
-  if (contratos.length === 0) {
+  if (contratosValidos.length === 0) {
     const errorMsg = ownerId 
       ? 'Nenhum contrato com pagamentos encontrado para este proprietário no ano especificado'
       : 'Nenhum contrato com pagamentos encontrado para o ano especificado'
@@ -149,7 +161,7 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
   }
 
   // Validar dados obrigatórios antes de gerar
-  await validarDadosDimob(empresa, contratos)
+  await validarDadosDimob(empresa, contratosValidos)
 
   // Preparar dados estruturados
   const dimobData: DimobData = {
@@ -161,7 +173,7 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
       codigoMunicipio: '    ', // 4 espaços em branco
       cpfResponsavel: empresa.responsibleCpf || '00000000000'
     },
-    contratos: contratos.map((contrato, index) => {
+    contratos: contratosValidos.map((contrato, index) => {
       // Calcular valores mensais
       console.log(`📊 [DIMOB] Contrato ${index + 1}:`)
       console.log(`  📅 Início: ${contrato.startDate.toISOString().slice(0, 10)}`)
@@ -173,21 +185,29 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
         console.log(`  💰 Pagamento ${i + 1}: ${p.dueDate.toISOString().slice(0, 10)} - Mês: ${p.dueDate.getMonth() + 1} - R$ ${p.amount}`)
       })
       
+      // CORREÇÃO CRÍTICA: Só incluir meses com pagamentos reais para evitar zeros na Receita Federal
+      const mesesComPagamentos = new Set(contrato.payments.map(p => p.dueDate.getMonth()))
+      console.log(`  🎯 Meses com pagamentos: [${Array.from(mesesComPagamentos).map(m => m + 1).join(', ')}]`)
+      
       const valoresMensais = Array.from({ length: 12 }, (_, mes) => {
         const pagamentosDoMes = contrato.payments.filter(p => p.dueDate.getMonth() === mes)
         const totalAluguel = pagamentosDoMes.reduce((acc, p) => acc + p.amount, 0)
         const totalComissao = totalAluguel * (contrato.administrationFeePercentage / 100)
         
-        if (totalAluguel > 0) {
-          console.log(`  📅 Mês ${mes + 1}: ${pagamentosDoMes.length} pagamentos - Total: R$ ${totalAluguel} - Comissão: R$ ${totalComissao.toFixed(2)}`)
+        // Se não há pagamentos neste mês, retornar null para filtrar depois
+        if (totalAluguel === 0) {
+          return null
         }
         
+        console.log(`  📅 Mês ${mes + 1}: ${pagamentosDoMes.length} pagamentos - Total: R$ ${totalAluguel} - Comissão: R$ ${totalComissao.toFixed(2)}`)
+        
         return {
+          mes: mes + 1, // mês 1-12 para referência
           aluguel: Math.round(totalAluguel * 100), // em centavos
           comissao: Math.round(totalComissao * 100), // em centavos
           imposto: 0 // normalmente zero para PF
         }
-      })
+      }).filter(mes => mes !== null) // REMOVE MESES ZERADOS
 
       return {
         sequencial: index + 1,
@@ -269,12 +289,27 @@ function gerarConteudoDimob(data: DimobData, ano: number): string {
     conteudo += contrato.contrato.numero.padEnd(6, ' ').slice(0, 6) // Número Contrato (6 posições)
     conteudo += contrato.contrato.data // Data Contrato (8 posições)
     
-    // 36 campos de valores (12 meses × 3 valores = 36 campos de 14 posições cada)
+    // ✅ CORREÇÃO FINAL: Incluir APENAS os meses com pagamentos reais
+    // Não incluir meses zerados para evitar problemas na Receita Federal
+    console.log(`  🎯 [DIMOB] Incluindo apenas ${contrato.valoresMensais.length} meses com pagamentos reais`)
+    
     contrato.valoresMensais.forEach(mes => {
       conteudo += formatarValorR$(mes.aluguel) // Aluguel (14 posições)
       conteudo += formatarValorR$(mes.comissao) // Comissão (14 posições)
       conteudo += formatarValorR$(mes.imposto) // Imposto (14 posições)
+      console.log(`  📄 [DIMOB] Mês ${mes.mes}: Aluguel R$ ${mes.aluguel/100}, Comissão R$ ${mes.comissao/100}`)
     })
+    
+    // Calcular quantos campos foram incluídos
+    const totalCampos = contrato.valoresMensais.length * 3
+    console.log(`  📊 [DIMOB] Total de campos incluídos: ${totalCampos} (${contrato.valoresMensais.length} meses × 3 valores)`)
+    
+    // Se necessário, preencher campos restantes para manter estrutura (verificar se é obrigatório)
+    const camposRestantes = 36 - totalCampos // 36 = 12 meses × 3 valores
+    if (camposRestantes > 0) {
+      conteudo += '0'.repeat(14).repeat(camposRestantes)
+      console.log(`  📄 [DIMOB] Campos restantes preenchidos com zeros: ${camposRestantes}`)
+    }
     
     conteudo += contrato.imovel.tipo // Tipo Imóvel (1 posição)
     conteudo += contrato.imovel.endereco.padEnd(60, ' ').slice(0, 60) // Endereço (60 posições)
@@ -354,25 +389,6 @@ function extrairCep(endereco: string): string {
   return '72000000' // CEP válido Brasília
 }
 
-/**
- * Obter código do município (simplificado - usar tabela IBGE real)
- */
-function obterCodigoMunicipio(cidade: string): string {
-  // Códigos DIMOB (4 dígitos) - usar tabela oficial
-  const codigos: { [key: string]: string } = {
-    'BRASILIA': '1001', // Tentativa código Brasília 
-    'SAO PAULO': '3101', // São Paulo
-    'RIO DE JANEIRO': '3301', // Rio de Janeiro
-    'BELO HORIZONTE': '3106', // Belo Horizonte
-    'SALVADOR': '2901', // Salvador
-    'FORTALEZA': '2301', // Fortaleza
-    'RECIFE': '2601', // Recife
-    'PORTO ALEGRE': '4301', // Porto Alegre
-    'CURITIBA': '4101' // Curitiba
-  }
-  
-  return codigos[cidade.toUpperCase()] || '0000' // Default: código vazio
-}
 
 /**
  * Validar se todos os campos obrigatórios para DIMOB estão preenchidos
