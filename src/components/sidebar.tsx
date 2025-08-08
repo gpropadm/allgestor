@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 // Phosphor Icons
 import {
-  ChartPieSlice,
+  Table,
   Robot,
   TrendUp,
   Calculator,
@@ -51,7 +51,7 @@ import {
 
 // Nova configuração com ícones Phosphor otimizados
 const menuItems = [
-  { icon: ChartPieSlice, label: 'Dashboard', href: '/dashboard' },
+  { icon: Table, label: 'Dashboard', href: '/dashboard' },
   { icon: WhatsappLogo, label: '💬 WhatsApp', href: '/whatsapp', featured: true },
   { icon: Buildings, label: 'Gestão Imobiliária', href: '#', isDropdown: true },
   { icon: Wallet, label: 'Gestão Financeira', href: '#', isDropdown: true },
