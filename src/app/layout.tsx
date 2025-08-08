@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 const montserrat = Montserrat({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "G-PROP - Gestão Imobiliária",
+  title: "ALL Gestor",
   description: "Sistema de gestão imobiliária profissional",
 };
 

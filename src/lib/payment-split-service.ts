@@ -1,4 +1,4 @@
-// Serviço de integração G-PROP + ASAAS Split
+// Serviço de integração ALL GESTOR + ASAAS Split
 // Gerencia automaticamente o split de pagamentos entre proprietário e imobiliária
 
 import { PrismaClient } from '@prisma/client'

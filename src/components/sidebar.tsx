@@ -151,7 +151,7 @@ export function Sidebar() {
             </div>
             <div>
               <h1 className="logo-font text-xl font-bold text-gray-900 dark:text-white tracking-tight">
-                G-PROP
+                ALL-GESTOR
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">Gestão Imobiliária</p>
             </div>
