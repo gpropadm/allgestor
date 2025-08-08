@@ -89,14 +89,38 @@ export default function RecibosPage() {
   
   // Filtrar recibos no frontend
   const recibosFiltrados = recibos.filter(recibo => {
-    const matchBusca = !filtros.busca || 
-      recibo.numeroRecibo.toLowerCase().includes(filtros.busca.toLowerCase()) ||
-      recibo.proprietarioNome.toLowerCase().includes(filtros.busca.toLowerCase()) ||
-      recibo.inquilinoNome.toLowerCase().includes(filtros.busca.toLowerCase()) ||
-      recibo.imovelEndereco.toLowerCase().includes(filtros.busca.toLowerCase())
+    // Helper para verificar se campo existe e fazer busca case-insensitive
+    const safeIncludes = (field: string | null | undefined, searchTerm: string) => {
+      if (!field || !searchTerm) return false
+      const fieldStr = field.toString().toLowerCase()
+      const searchStr = searchTerm.toLowerCase()
+      return fieldStr.includes(searchStr)
+    }
+    
+    const buscaLower = filtros.busca.trim()
+    
+    // Se não há busca, aceitar todos
+    const matchBusca = !buscaLower || 
+      safeIncludes(recibo.numeroRecibo, buscaLower) ||
+      safeIncludes(recibo.proprietarioNome, buscaLower) ||
+      safeIncludes(recibo.inquilinoNome, buscaLower) ||
+      safeIncludes(recibo.imovelEndereco, buscaLower)
       
-    const matchProprietario = !filtros.proprietario ||
-      recibo.proprietarioNome.toLowerCase().includes(filtros.proprietario.toLowerCase())
+    const proprietarioFilter = filtros.proprietario.trim()
+    const matchProprietario = !proprietarioFilter ||
+      safeIncludes(recibo.proprietarioNome, proprietarioFilter)
+      
+    // Debug apenas quando há filtros ativos
+    if (buscaLower && recibo === recibos[0]) {
+      console.log('🔍 Debug filtro busca:', {
+        busca: buscaLower,
+        numeroRecibo: recibo.numeroRecibo,
+        proprietario: recibo.proprietarioNome,
+        inquilino: recibo.inquilinoNome,
+        endereco: recibo.imovelEndereco,
+        matchBusca
+      })
+    }
       
     return matchBusca && matchProprietario
   })
@@ -177,10 +201,19 @@ export default function RecibosPage() {
             <div className="flex gap-2">
               <button 
                 onClick={() => setShowFiltros(!showFiltros)}
-                className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                className={`text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors ${
+                  (filtros.busca || filtros.mes || filtros.proprietario) 
+                    ? 'bg-yellow-500/80 hover:bg-yellow-500' 
+                    : 'bg-white/20 hover:bg-white/30'
+                }`}
               >
                 <Filter className="w-4 h-4" />
                 <span>Filtros</span>
+                {(filtros.busca || filtros.mes || filtros.proprietario) && (
+                  <span className="bg-white/30 text-xs px-2 py-1 rounded-full">
+                    Ativos
+                  </span>
+                )}
                 <ChevronDown className={`w-4 h-4 transition-transform ${showFiltros ? 'rotate-180' : ''}`} />
               </button>
               <button 
@@ -208,7 +241,9 @@ export default function RecibosPage() {
                     value={filtros.busca}
                     onChange={(e) => setFiltros(prev => ({ ...prev, busca: e.target.value }))}
                     placeholder="Número, proprietário, inquilino..."
-                    className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      filtros.busca ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+                    }`}
                   />
                 </div>
               </div>
