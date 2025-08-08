@@ -43,6 +43,7 @@ interface DimobData {
  */
 export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?: string): Promise<string> {
   console.log(`📄 [DIMOB OFICIAL] Gerando arquivo para ano ${ano}, usuário ${userId}${ownerId ? `, proprietário ${ownerId}` : ''}`)
+  console.log(`📅 [DIMOB] Buscando pagamentos entre: ${new Date(ano, 0, 1).toISOString().slice(0, 10)} e ${new Date(ano, 11, 31).toISOString().slice(0, 10)}`)
 
   // Buscar dados da empresa declarante
   const empresa = await prisma.company.findFirst({
@@ -104,6 +105,41 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
   })
 
   console.log(`📄 [DIMOB] Encontrados ${contratos.length} contratos com pagamentos${ownerId ? ' para o proprietário especificado' : ''}`)
+  
+  // Debug: mostrar quantos pagamentos TOTAIS existem para este proprietário/ano (incluindo não-PAID)
+  if (contratos.length > 0) {
+    const todosPayments = await prisma.payment.findMany({
+      where: {
+        contract: {
+          userId: userId,
+          property: ownerId ? { ownerId: ownerId } : undefined
+        },
+        dueDate: {
+          gte: new Date(ano, 0, 1),
+          lte: new Date(ano, 11, 31)
+        }
+      },
+      select: {
+        status: true,
+        dueDate: true,
+        amount: true
+      },
+      orderBy: { dueDate: 'asc' }
+    })
+    
+    console.log(`🔍 [DIMOB DEBUG] Total de pagamentos no ano ${ano}:`, todosPayments.length)
+    const statusCount = todosPayments.reduce((acc, p) => {
+      acc[p.status] = (acc[p.status] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+    console.log(`📊 [DIMOB DEBUG] Por status:`, statusCount)
+    
+    // Mostrar primeiros e últimos pagamentos
+    if (todosPayments.length > 0) {
+      console.log(`📅 [DIMOB DEBUG] Primeiro pagamento: ${todosPayments[0].dueDate.toISOString().slice(0, 10)} (${todosPayments[0].status})`)
+      console.log(`📅 [DIMOB DEBUG] Último pagamento: ${todosPayments[todosPayments.length-1].dueDate.toISOString().slice(0, 10)} (${todosPayments[todosPayments.length-1].status})`)
+    }
+  }
 
   if (contratos.length === 0) {
     const errorMsg = ownerId 
@@ -127,10 +163,24 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
     },
     contratos: contratos.map((contrato, index) => {
       // Calcular valores mensais
+      console.log(`📊 [DIMOB] Contrato ${index + 1}:`)
+      console.log(`  📅 Início: ${contrato.startDate.toISOString().slice(0, 10)}`)
+      console.log(`  📊 Taxa admin: ${contrato.administrationFeePercentage}%`)
+      console.log(`  💰 Pagamentos encontrados: ${contrato.payments.length}`)
+      
+      // Debug: mostrar todos os pagamentos e suas datas
+      contrato.payments.forEach((p, i) => {
+        console.log(`  💰 Pagamento ${i + 1}: ${p.dueDate.toISOString().slice(0, 10)} - Mês: ${p.dueDate.getMonth() + 1} - R$ ${p.amount}`)
+      })
+      
       const valoresMensais = Array.from({ length: 12 }, (_, mes) => {
         const pagamentosDoMes = contrato.payments.filter(p => p.dueDate.getMonth() === mes)
         const totalAluguel = pagamentosDoMes.reduce((acc, p) => acc + p.amount, 0)
         const totalComissao = totalAluguel * (contrato.administrationFeePercentage / 100)
+        
+        if (totalAluguel > 0) {
+          console.log(`  📅 Mês ${mes + 1}: ${pagamentosDoMes.length} pagamentos - Total: R$ ${totalAluguel} - Comissão: R$ ${totalComissao.toFixed(2)}`)
+        }
         
         return {
           aluguel: Math.round(totalAluguel * 100), // em centavos
