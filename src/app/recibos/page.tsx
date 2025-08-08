@@ -90,71 +90,68 @@ export default function RecibosPage() {
     }
   }
   
-  // Filtrar recibos no frontend
+  // Filtrar recibos no frontend - VERSÃO SIMPLIFICADA
+  console.log('🎯 Estado dos filtros:', filtros)
+  console.log('📋 Total de recibos para filtrar:', recibos.length)
+  
   const recibosFiltrados = recibos.filter(recibo => {
-    // Helper para verificar se campo existe e fazer busca case-insensitive
-    const safeIncludes = (field: string | null | undefined, searchTerm: string) => {
-      if (!field || !searchTerm) return false
-      const fieldStr = field.toString().toLowerCase()
-      const searchStr = searchTerm.toLowerCase()
-      return fieldStr.includes(searchStr)
+    console.log('🔍 Testando filtro para recibo:', recibo.numeroRecibo)
+    
+    // 1. Filtro por busca de texto
+    if (filtros.busca && filtros.busca.trim()) {
+      const busca = filtros.busca.toLowerCase().trim()
+      const temBusca = (
+        (recibo.numeroRecibo || '').toLowerCase().includes(busca) ||
+        (recibo.proprietarioNome || '').toLowerCase().includes(busca) ||
+        (recibo.inquilinoNome || '').toLowerCase().includes(busca) ||
+        (recibo.imovelEndereco || '').toLowerCase().includes(busca)
+      )
+      
+      console.log('  → Busca:', busca, 'Match:', temBusca)
+      if (!temBusca) return false
     }
     
-    const buscaLower = filtros.busca.trim()
-    
-    // Filtro por busca de texto
-    const matchBusca = !buscaLower || 
-      safeIncludes(recibo.numeroRecibo, buscaLower) ||
-      safeIncludes(recibo.proprietarioNome, buscaLower) ||
-      safeIncludes(recibo.inquilinoNome, buscaLower) ||
-      safeIncludes(recibo.imovelEndereco, buscaLower)
+    // 2. Filtro por proprietário
+    if (filtros.proprietario && filtros.proprietario.trim()) {
+      const proprietarioBusca = filtros.proprietario.toLowerCase().trim()
+      const temProprietario = (recibo.proprietarioNome || '').toLowerCase().includes(proprietarioBusca)
       
-    // Filtro por proprietário
-    const proprietarioFilter = filtros.proprietario.trim()
-    const matchProprietario = !proprietarioFilter ||
-      safeIncludes(recibo.proprietarioNome, proprietarioFilter)
+      console.log('  → Proprietário:', proprietarioBusca, 'Match:', temProprietario)
+      if (!temProprietario) return false
+    }
     
-    // Filtro por ano/mês
-    let matchPeriodo = true
-    if (filtros.ano && filtros.ano !== '' || filtros.mes && filtros.mes !== '') {
+    // 3. Filtro por ano
+    if (filtros.ano && filtros.ano !== '') {
       try {
         const dataRecibo = new Date(recibo.competencia || recibo.dataPagamento)
+        const anoRecibo = dataRecibo.getFullYear().toString()
+        const temAno = anoRecibo === filtros.ano
         
-        if (filtros.ano && filtros.ano !== '') {
-          const anoRecibo = dataRecibo.getFullYear().toString()
-          matchPeriodo = matchPeriodo && (anoRecibo === filtros.ano)
-        }
-        
-        if (filtros.mes && filtros.mes !== '') {
-          const mesRecibo = (dataRecibo.getMonth() + 1).toString()
-          matchPeriodo = matchPeriodo && (mesRecibo === filtros.mes)
-        }
-      } catch (error) {
-        console.log('Erro ao filtrar por data:', error, recibo)
-        matchPeriodo = false
+        console.log('  → Ano:', filtros.ano, 'Recibo ano:', anoRecibo, 'Match:', temAno)
+        if (!temAno) return false
+      } catch (e) {
+        console.log('  → Erro data ano:', e)
+        return false
       }
     }
-      
-    // Debug apenas quando há filtros ativos
-    if ((buscaLower || filtros.mes || filtros.ano || filtros.proprietario) && recibo === recibos[0]) {
-      console.log('🔍 Debug filtros completo:', {
-        filtros: filtros,
-        recibo: {
-          numero: recibo.numeroRecibo,
-          proprietario: recibo.proprietarioNome,
-          competencia: recibo.competencia,
-          dataPagamento: recibo.dataPagamento
-        },
-        resultados: {
-          matchBusca,
-          matchProprietario,
-          matchPeriodo,
-          final: matchBusca && matchProprietario && matchPeriodo
-        }
-      })
+    
+    // 4. Filtro por mês
+    if (filtros.mes && filtros.mes !== '') {
+      try {
+        const dataRecibo = new Date(recibo.competencia || recibo.dataPagamento)
+        const mesRecibo = (dataRecibo.getMonth() + 1).toString()
+        const temMes = mesRecibo === filtros.mes
+        
+        console.log('  → Mês:', filtros.mes, 'Recibo mês:', mesRecibo, 'Match:', temMes)
+        if (!temMes) return false
+      } catch (e) {
+        console.log('  → Erro data mês:', e)
+        return false
+      }
     }
-      
-    return matchBusca && matchProprietario && matchPeriodo
+    
+    console.log('  ✅ Recibo passou em todos os filtros')
+    return true
   })
   
   // Paginação
