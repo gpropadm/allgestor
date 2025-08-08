@@ -35,7 +35,8 @@ import {
   Plug,
   Link2,
   ShieldCheck,
-  Home
+  Home,
+  Banknote
 } from 'lucide-react'
 
 // OPÇÃO 1: Ícones mais modernos
@@ -47,12 +48,7 @@ const menuItems = [
   { icon: BarChart3, label: '📈 Analytics', href: '/analytics', featured: true },
   { icon: MessageCircle, label: '💬 WhatsApp', href: '/whatsapp', featured: true },
   { icon: Home, label: 'Gestão Imobiliária', href: '#', isDropdown: true },
-  { icon: FileText, label: 'Contratos', href: '/contracts' },
-  { icon: Receipt, label: 'Pagamentos', href: '/payments' },
-  { icon: FileText, label: '🧾 Recibos', href: '/recibos', featured: true },
-  { icon: FileText, label: '📄 Comprovantes', href: '/comprovantes', featured: true },
-  { icon: TrendingDown, label: 'Despesas', href: '/expenses' },
-  { icon: Calculator, label: 'Financeiro', href: '/financial' },
+  { icon: Banknote, label: 'Gestão Financeira', href: '#', isDropdown: true },
   { icon: FileText, label: '📊 DIMOB', href: '/dimob', featured: true },
   { icon: Zap, label: 'Leads', href: '/leads' },
   { icon: CreditCard, label: 'PIX Pagamento', href: '/pix' },
@@ -100,6 +96,7 @@ export function Sidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isConfigExpanded, setIsConfigExpanded] = useState(false)
   const [isImobiliariaExpanded, setIsImobiliariaExpanded] = useState(false)
+  const [isFinanceiroExpanded, setIsFinanceiroExpanded] = useState(false)
   const pathname = usePathname()
   const { data: session } = useSession()
   const [isAdmin, setIsAdmin] = useState(false)
@@ -121,6 +118,16 @@ export function Sidebar() {
     { icon: Users, label: 'Proprietários', href: '/owners' },
     { icon: Building, label: 'Imóveis', href: '/properties' },
     { icon: User, label: 'Inquilinos', href: '/tenants' },
+    { icon: FileText, label: 'Contratos', href: '/contracts' },
+  ]
+
+  // Subitens de Gestão Financeira
+  const financeiroMenuItems = [
+    { icon: Receipt, label: 'Pagamentos', href: '/payments' },
+    { icon: FileText, label: '🧾 Recibos', href: '/recibos' },
+    { icon: FileText, label: '📄 Comprovantes', href: '/comprovantes' },
+    { icon: TrendingDown, label: 'Despesas', href: '/expenses' },
+    { icon: Calculator, label: 'Financeiro', href: '/financial' },
   ]
 
   // Verificar se é admin usando a mesma lógica da página de settings
@@ -282,6 +289,51 @@ export function Sidebar() {
                   </li>
                 )
               }
+
+              // Se é Gestão Financeira, renderizar como expansível
+              if (item.label === 'Gestão Financeira') {
+                return (
+                  <li key="financeiro">
+                    {/* Header Gestão Financeira */}
+                    <button
+                      onClick={() => setIsFinanceiroExpanded(!isFinanceiroExpanded)}
+                      className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <Banknote className="w-5 h-5" />
+                        <span className="font-medium">Gestão Financeira</span>
+                      </div>
+                      {isFinanceiroExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                    </button>
+                    
+                    {/* Subitens */}
+                    {isFinanceiroExpanded && (
+                      <ul className="ml-6 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-600 pl-4">
+                        {financeiroMenuItems.map((subItem) => {
+                          const isActive = pathname === subItem.href
+                          return (
+                            <li key={subItem.href}>
+                              <Link
+                                href={subItem.href}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors border-r-2 text-sm ${
+                                  isActive
+                                    ? ''
+                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 border-transparent'
+                                }`}
+                                style={isActive ? {backgroundColor: '#fef2f2', color: '#f63c6a', borderColor: '#f63c6a'} : {}}
+                              >
+                                <subItem.icon className="w-4 h-4" />
+                                <span className="font-medium">{subItem.label}</span>
+                              </Link>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    )}
+                  </li>
+                )
+              }
               
               // Se é um item dropdown, não renderizar link
               if (item.isDropdown) {
@@ -405,6 +457,48 @@ export function Sidebar() {
                         </div>
                         <nav className="mt-2">
                           {imobiliariaMenuItems.map((subItem) => {
+                            const isActive = pathname === subItem.href
+                            return (
+                              <Link
+                                key={subItem.href}
+                                href={subItem.href}
+                                className={`flex items-center space-x-3 px-3 py-2.5 rounded-md transition-all duration-200 text-sm ${
+                                  isActive
+                                    ? 'bg-red-50 text-red-600 border-l-2 border-red-600'
+                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                }`}
+                              >
+                                <subItem.icon className="w-4 h-4" />
+                                <span className="font-medium">{subItem.label}</span>
+                              </Link>
+                            )
+                          })}
+                        </nav>
+                      </div>
+                    </div>
+                  </li>
+                )
+              }
+
+              // Se é Gestão Financeira no desktop, criar dropdown hover
+              if (item.label === 'Gestão Financeira') {
+                return (
+                  <li key={item.href} className="px-2 relative group">
+                    <div
+                      className="relative flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
+                      title="Gestão Financeira"
+                    >
+                      <Banknote className="w-5 h-5" />
+                    </div>
+                    
+                    {/* Dropdown Menu */}
+                    <div className="absolute left-16 top-0 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                      <div className="p-2">
+                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+                          GESTÃO FINANCEIRA
+                        </div>
+                        <nav className="mt-2">
+                          {financeiroMenuItems.map((subItem) => {
                             const isActive = pathname === subItem.href
                             return (
                               <Link
