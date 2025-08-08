@@ -50,7 +50,23 @@ import {
   MessageSquare,
   Coins,
   FileContract,
-  UserCog
+  UserCog,
+  Zap,
+  Sparkles,
+  Rocket,
+  Crown,
+  Gem,
+  Star,
+  Flame,
+  Castle,
+  Diamond,
+  MapPin,
+  Compass,
+  Globe,
+  Briefcase,
+  Archive,
+  BookOpen,
+  Layers
 } from 'lucide-react'
 
 // OPÇÃO 1: Ícones mais modernos
@@ -114,6 +130,27 @@ const menuItemsTerceiro = [
   { icon: TestTube, label: 'Teste Gateway', href: '/gateway-test', adminOnly: true },
   { icon: Shield, label: 'Backup', href: '/admin/backup', adminOnly: true },
   { icon: Settings, label: 'Configurações', href: '/settings' }
+]
+
+// OPÇÃO 4: Ícones únicos e criativos - MODELO QUARTO
+const menuItemsQuarto = [
+  { icon: Sparkles, label: 'Dashboard', href: '/dashboard' },
+  { icon: Rocket, label: '🤖 Assistente IA', href: '/ai-assistant', featured: true },
+  { icon: Flame, label: '📊 Pipeline Vendas', href: '/sales-pipeline', featured: true },
+  { icon: Diamond, label: '💰 Simulador Financeiro', href: '/simulador-financeiro', featured: true },
+  { icon: Star, label: '📈 Analytics', href: '/analytics', featured: true },
+  { icon: Globe, label: '💬 WhatsApp', href: '/whatsapp', featured: true },
+  { icon: Castle, label: 'Gestão Imobiliária', href: '#', isDropdown: true },
+  { icon: Crown, label: 'Gestão Financeira', href: '#', isDropdown: true },
+  { icon: BookOpen, label: 'DIMOB', href: '/dimob', featured: true },
+  { icon: Compass, label: 'Leads', href: '/leads' },
+  { icon: Zap, label: 'PIX Pagamento', href: '/pix' },
+  { icon: Layers, label: 'Gateway', href: '/gateway' },
+  { icon: UserPlus, label: 'Usuários', href: '/users', adminOnly: true },
+  { icon: Briefcase, label: 'Config Gateway', href: '/admin/gateway-settings', adminOnly: true },
+  { icon: TestTube, label: 'Teste Gateway', href: '/gateway-test', adminOnly: true },
+  { icon: Archive, label: 'Backup', href: '/admin/backup', adminOnly: true },
+  { icon: Gem, label: 'Configurações', href: '/settings' }
 ]
 
 export function Sidebar() {
@@ -218,7 +255,7 @@ export function Sidebar() {
 
         <nav className="flex-1 p-4">
           <ul className="space-y-2">
-            {menuItemsTerceiro.map((item) => {
+            {menuItemsQuarto.map((item) => {
               // Ocultar itens adminOnly se não for admin
               if (item.adminOnly && !isAdmin) {
                 return null
@@ -234,7 +271,7 @@ export function Sidebar() {
                       className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                     >
                       <div className="flex items-center space-x-3">
-                        <Settings className="w-5 h-5" />
+                        <Gem className="w-5 h-5" />
                         <span className="font-medium">Configurações</span>
                       </div>
                       {isConfigExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -279,7 +316,7 @@ export function Sidebar() {
                       className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                     >
                       <div className="flex items-center space-x-3">
-                        <Building className="w-5 h-5" />
+                        <Castle className="w-5 h-5" />
                         <span className="font-medium">Gestão Imobiliária</span>
                       </div>
                       {isImobiliariaExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -324,7 +361,7 @@ export function Sidebar() {
                       className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                     >
                       <div className="flex items-center space-x-3">
-                        <Coins className="w-5 h-5" />
+                        <Crown className="w-5 h-5" />
                         <span className="font-medium">Gestão Financeira</span>
                       </div>
                       {isFinanceiroExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -414,7 +451,7 @@ export function Sidebar() {
         {/* Navigation */}
         <nav className="flex-1 py-4 flex flex-col">
           <ul className="space-y-1 flex-1">
-            {menuItemsTerceiro.map((item) => {
+            {menuItemsQuarto.map((item) => {
               // Ocultar itens adminOnly se não for admin
               if (item.adminOnly && !isAdmin) {
                 return null
@@ -428,7 +465,7 @@ export function Sidebar() {
                       className="relative flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
                       title="Configurações"
                     >
-                      <Settings className="w-5 h-5" />
+                      <Gem className="w-5 h-5" />
                     </div>
                     
                     {/* Dropdown Menu - Modelo Moderno */}
@@ -436,7 +473,7 @@ export function Sidebar() {
                       <div className="p-4">
                         <div className="flex items-center space-x-2 mb-4 pb-3 border-b border-gray-200/50 dark:border-gray-700/50">
                           <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                            <Settings className="w-4 h-4 text-white" />
+                            <Gem className="w-4 h-4 text-white" />
                           </div>
                           <div>
                             <h3 className="text-sm font-bold text-gray-900 dark:text-white">Configurações</h3>
@@ -478,7 +515,7 @@ export function Sidebar() {
                       className="relative flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
                       title="Gestão Imobiliária"
                     >
-                      <Building className="w-5 h-5" />
+                      <Castle className="w-5 h-5" />
                     </div>
                     
                     {/* Dropdown Menu - Modelo Moderno */}
@@ -486,7 +523,7 @@ export function Sidebar() {
                       <div className="p-4">
                         <div className="flex items-center space-x-2 mb-4 pb-3 border-b border-gray-200/50 dark:border-gray-700/50">
                           <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-                            <Building className="w-4 h-4 text-white" />
+                            <Castle className="w-4 h-4 text-white" />
                           </div>
                           <div>
                             <h3 className="text-sm font-bold text-gray-900 dark:text-white">Gestão Imobiliária</h3>
@@ -528,7 +565,7 @@ export function Sidebar() {
                       className="relative flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
                       title="Gestão Financeira"
                     >
-                      <Coins className="w-5 h-5" />
+                      <Crown className="w-5 h-5" />
                     </div>
                     
                     {/* Dropdown Menu - Modelo Moderno */}
@@ -536,7 +573,7 @@ export function Sidebar() {
                       <div className="p-4">
                         <div className="flex items-center space-x-2 mb-4 pb-3 border-b border-gray-200/50 dark:border-gray-700/50">
                           <div className="w-8 h-8 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-lg flex items-center justify-center">
-                            <Coins className="w-4 h-4 text-white" />
+                            <Crown className="w-4 h-4 text-white" />
                           </div>
                           <div>
                             <h3 className="text-sm font-bold text-gray-900 dark:text-white">Gestão Financeira</h3>
