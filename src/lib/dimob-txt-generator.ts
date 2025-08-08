@@ -194,12 +194,9 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
         const totalAluguel = pagamentosDoMes.reduce((acc, p) => acc + p.amount, 0)
         const totalComissao = totalAluguel * (contrato.administrationFeePercentage / 100)
         
-        // Se não há pagamentos neste mês, retornar null para filtrar depois
-        if (totalAluguel === 0) {
-          return null
+        if (totalAluguel > 0) {
+          console.log(`  📅 Mês ${mes + 1}: ${pagamentosDoMes.length} pagamentos - Total: R$ ${totalAluguel} - Comissão: R$ ${totalComissao.toFixed(2)}`)
         }
-        
-        console.log(`  📅 Mês ${mes + 1}: ${pagamentosDoMes.length} pagamentos - Total: R$ ${totalAluguel} - Comissão: R$ ${totalComissao.toFixed(2)}`)
         
         return {
           mes: mes + 1, // mês 1-12 para referência
@@ -207,7 +204,7 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
           comissao: Math.round(totalComissao * 100), // em centavos
           imposto: 0 // normalmente zero para PF
         }
-      }).filter(mes => mes !== null) // REMOVE MESES ZERADOS
+      }) // MANTER TODOS OS 12 MESES (com zeros onde necessário)
 
       return {
         sequencial: index + 1,
@@ -290,22 +287,11 @@ function gerarConteudoDimob(data: DimobData, ano: number): string {
     conteudo += contrato.contrato.data // Data Contrato (8 posições)
     
     // 🚨 CORREÇÃO: DIMOB exige exatamente 36 campos (12 meses × 3 valores)
-    // Criar array de 12 meses, preenchendo apenas os meses com dados reais
-    const mesesCompletos = Array(12).fill(null).map((_, index) => {
-      // Procurar se existe dados para este mês (index = 0 para Janeiro, etc)
-      const mesComDados = contrato.valoresMensais.find(mes => mes.mes === index + 1)
-      
-      if (mesComDados) {
-        console.log(`  ✅ [DIMOB] Mês ${index + 1}: R$ ${mesComDados.aluguel/100} (${mesComDados.comissao/100} comissão)`)
-        return mesComDados
-      } else {
-        // Mês sem dados = zeros (obrigatório para formato DIMOB)
-        return { mes: index + 1, aluguel: 0, comissao: 0, imposto: 0 }
+    // valoresMensais já contém todos os 12 meses na ordem correta (Jan=1 a Dez=12)
+    contrato.valoresMensais.forEach((mes) => {
+      if (mes.aluguel > 0 || mes.comissao > 0) {
+        console.log(`  ✅ [DIMOB] Mês ${mes.mes}: R$ ${mes.aluguel/100} (R$ ${mes.comissao/100} comissão)`)
       }
-    })
-    
-    // Gerar todos os 36 campos obrigatórios
-    mesesCompletos.forEach((mes, index) => {
       conteudo += formatarValorR$(mes.aluguel) // Aluguel (14 posições)
       conteudo += formatarValorR$(mes.comissao) // Comissão (14 posições) 
       conteudo += formatarValorR$(mes.imposto) // Imposto (14 posições)
