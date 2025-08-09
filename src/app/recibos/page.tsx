@@ -36,6 +36,7 @@ export default function RecibosPage() {
   const [showFiltros, setShowFiltros] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
+  const [expandedRecibos, setExpandedRecibos] = useState<Set<string>>(new Set())
 
   // Verificar autenticação
   useEffect(() => {
@@ -90,69 +91,19 @@ export default function RecibosPage() {
     }
   }
   
-  // Filtrar recibos no frontend - VERSÃO SIMPLIFICADA
-  console.log('🎯 Estado dos filtros:', filtros)
-  console.log('📋 Total de recibos para filtrar:', recibos.length)
+  // Funções para expandir/recolher detalhes
+  const toggleExpanded = (reciboId: string) => {
+    const newExpanded = new Set(expandedRecibos)
+    if (newExpanded.has(reciboId)) {
+      newExpanded.delete(reciboId)
+    } else {
+      newExpanded.add(reciboId)
+    }
+    setExpandedRecibos(newExpanded)
+  }
   
-  const recibosFiltrados = recibos.filter(recibo => {
-    console.log('🔍 Testando filtro para recibo:', recibo.numeroRecibo)
-    
-    // 1. Filtro por busca de texto
-    if (filtros.busca && filtros.busca.trim()) {
-      const busca = filtros.busca.toLowerCase().trim()
-      const temBusca = (
-        (recibo.numeroRecibo || '').toLowerCase().includes(busca) ||
-        (recibo.proprietarioNome || '').toLowerCase().includes(busca) ||
-        (recibo.inquilinoNome || '').toLowerCase().includes(busca) ||
-        (recibo.imovelEndereco || '').toLowerCase().includes(busca)
-      )
-      
-      console.log('  → Busca:', busca, 'Match:', temBusca)
-      if (!temBusca) return false
-    }
-    
-    // 2. Filtro por proprietário
-    if (filtros.proprietario && filtros.proprietario.trim()) {
-      const proprietarioBusca = filtros.proprietario.toLowerCase().trim()
-      const temProprietario = (recibo.proprietarioNome || '').toLowerCase().includes(proprietarioBusca)
-      
-      console.log('  → Proprietário:', proprietarioBusca, 'Match:', temProprietario)
-      if (!temProprietario) return false
-    }
-    
-    // 3. Filtro por ano
-    if (filtros.ano && filtros.ano !== '') {
-      try {
-        const dataRecibo = new Date(recibo.competencia || recibo.dataPagamento)
-        const anoRecibo = dataRecibo.getFullYear().toString()
-        const temAno = anoRecibo === filtros.ano
-        
-        console.log('  → Ano:', filtros.ano, 'Recibo ano:', anoRecibo, 'Match:', temAno)
-        if (!temAno) return false
-      } catch (e) {
-        console.log('  → Erro data ano:', e)
-        return false
-      }
-    }
-    
-    // 4. Filtro por mês
-    if (filtros.mes && filtros.mes !== '') {
-      try {
-        const dataRecibo = new Date(recibo.competencia || recibo.dataPagamento)
-        const mesRecibo = (dataRecibo.getMonth() + 1).toString()
-        const temMes = mesRecibo === filtros.mes
-        
-        console.log('  → Mês:', filtros.mes, 'Recibo mês:', mesRecibo, 'Match:', temMes)
-        if (!temMes) return false
-      } catch (e) {
-        console.log('  → Erro data mês:', e)
-        return false
-      }
-    }
-    
-    console.log('  ✅ Recibo passou em todos os filtros')
-    return true
-  })
+  // Filtrar recibos no frontend - TEMPORARIAMENTE SEM FILTROS
+  const recibosFiltrados = recibos // Por enquanto, sem filtros até resolver o problema
   
   // Paginação
   const totalPages = Math.ceil(recibosFiltrados.length / itemsPerPage)
@@ -450,77 +401,115 @@ export default function RecibosPage() {
               </div>
             </div>
 
-            {/* Cards dos Recibos */}
+            {/* Cards dos Recibos - Layout Simplificado */}
             <div className="bg-white rounded-b-xl shadow-sm">
               <div className="divide-y divide-gray-200">
-                {recibosExibidos.map((recibo) => (
-                  <div key={recibo.id} className="p-6 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center justify-between">
-                      {/* Informações do Recibo */}
-                      <div className="flex items-center space-x-4">
-                        <div className="bg-blue-50 p-3 rounded-lg">
-                          <FileText className="w-6 h-6 text-blue-600" />
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-900 text-lg">
-                            {recibo.numeroRecibo}
+                {recibosExibidos.map((recibo) => {
+                  const isExpanded = expandedRecibos.has(recibo.id)
+                  
+                  return (
+                    <div key={recibo.id} className="transition-colors">
+                      {/* Header do Recibo - Sempre Visível */}
+                      <div 
+                        className="p-4 hover:bg-gray-50 cursor-pointer"
+                        onClick={() => toggleExpanded(recibo.id)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4 flex-1">
+                            <div className="bg-blue-50 p-3 rounded-lg">
+                              <FileText className="w-5 h-5 text-blue-600" />
+                            </div>
+                            
+                            {/* Informações do Contrato - Sempre Visível */}
+                            <div className="flex-1">
+                              <div className="font-semibold text-gray-900 text-lg mb-1">
+                                {recibo.numeroRecibo}
+                              </div>
+                              <div className="text-sm text-gray-600 space-y-1">
+                                <div><strong>Proprietário:</strong> {recibo.proprietarioNome}</div>
+                                <div><strong>Inquilino:</strong> {recibo.inquilinoNome}</div>
+                                <div><strong>Imóvel:</strong> {recibo.imovelEndereco}</div>
+                              </div>
+                            </div>
                           </div>
-                          <div className="text-sm text-gray-500">
-                            {new Date(recibo.dataPagamento).toLocaleDateString('pt-BR')} • 
-                            Competência: {recibo.competencia}
+
+                          {/* Ações */}
+                          <div className="flex items-center space-x-3">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                baixarRecibo(recibo.numeroRecibo)
+                              }}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                            >
+                              <Download className="w-4 h-4" />
+                              <span>PDF</span>
+                            </button>
+                            
+                            <div className="flex items-center">
+                              <ChevronDown 
+                                className={`w-5 h-5 text-gray-400 transition-transform ${
+                                  isExpanded ? 'rotate-180' : ''
+                                }`} 
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
 
-                      {/* Ações */}
-                      <div className="flex items-center space-x-3">
-                        <button
-                          onClick={() => baixarRecibo(recibo.numeroRecibo)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-                        >
-                          <Download className="w-4 h-4" />
-                          <span>Baixar PDF</span>
-                        </button>
-                      </div>
+                      {/* Detalhes Expandidos - Só Aparece Quando Clicado */}
+                      {isExpanded && (
+                        <div className="px-4 pb-4 bg-gray-50">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                            {/* Detalhes do Pagamento */}
+                            <div className="bg-white p-4 rounded-lg border">
+                              <h4 className="font-medium text-gray-900 mb-3">💰 Detalhes Financeiros</h4>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                  <span className="text-gray-600">Valor Total:</span>
+                                  <span className="font-medium text-gray-900">
+                                    R$ {recibo.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-gray-600">Taxa Administração:</span>
+                                  <span className="font-medium text-purple-600">
+                                    R$ {recibo.taxaAdministracao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between border-t pt-2">
+                                  <span className="text-gray-600">Valor Repassado:</span>
+                                  <span className="font-medium text-green-600">
+                                    R$ {recibo.valorRepassado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Detalhes da Data */}
+                            <div className="bg-white p-4 rounded-lg border">
+                              <h4 className="font-medium text-gray-900 mb-3">📅 Informações de Data</h4>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                  <span className="text-gray-600">Data Pagamento:</span>
+                                  <span className="font-medium text-gray-900">
+                                    {new Date(recibo.dataPagamento).toLocaleDateString('pt-BR')}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-gray-600">Competência:</span>
+                                  <span className="font-medium text-gray-900">
+                                    {recibo.competencia}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
-
-                    {/* Detalhes do Contrato */}
-                    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <h4 className="font-medium text-gray-900 mb-2">Contrato</h4>
-                        <div className="space-y-1 text-sm text-gray-600">
-                          <div><strong>Proprietário:</strong> {recibo.proprietarioNome}</div>
-                          <div><strong>Inquilino:</strong> {recibo.inquilinoNome}</div>
-                          <div><strong>Imóvel:</strong> {recibo.imovelEndereco}</div>
-                        </div>
-                      </div>
-
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <h4 className="font-medium text-gray-900 mb-2">Valores</h4>
-                        <div className="space-y-1 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Total:</span>
-                            <span className="font-medium text-gray-900">
-                              R$ {recibo.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Taxa Admin:</span>
-                            <span className="font-medium text-purple-600">
-                              R$ {recibo.taxaAdministracao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                            </span>
-                          </div>
-                          <div className="flex justify-between border-t pt-1">
-                            <span className="text-gray-600">Repassado:</span>
-                            <span className="font-medium text-green-600">
-                              R$ {recibo.valorRepassado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
 
