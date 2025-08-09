@@ -71,6 +71,7 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
   const whereCondition: any = {
     userId: userId,
     status: 'ACTIVE',
+    includeInDimob: true, // 🚨 CORREÇÃO: Filtrar apenas contratos marcados para inclusão no DIMOB
     payments: {
       some: {
         status: 'PAID',
@@ -136,13 +137,22 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
 
   console.log(`📄 [DIMOB] Encontrados ${contratos.length} contratos com pagamentos${ownerId ? ' para o proprietário especificado' : ''}`)
   
-  // ✅ VALIDAÇÃO CRÍTICA: Filtrar contratos sem pagamentos válidos
+  // ✅ VALIDAÇÃO CRÍTICA: Filtrar contratos sem pagamentos válidos e verificar includeInDimob
   const contratosValidos = contratos.filter(contrato => {
+    // Verificar se tem pagamentos válidos
     const temPagamentos = contrato.payments.length > 0
     if (!temPagamentos) {
       console.log(`⚠️ [DIMOB] Contrato ${contrato.id} ignorado: sem pagamentos válidos`)
+      return false
     }
-    return temPagamentos
+    
+    // Verificar se está marcado para inclusão no DIMOB (dupla validação)
+    if (contrato.includeInDimob === false) {
+      console.log(`⚠️ [DIMOB] Contrato ${contrato.id} ignorado: marcado para não incluir no DIMOB`)
+      return false
+    }
+    
+    return true
   })
   
   console.log(`✅ [DIMOB] ${contratosValidos.length} contratos válidos após filtros`)

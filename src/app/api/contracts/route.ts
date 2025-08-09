@@ -7,52 +7,75 @@ export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth(request)
     
-    // First get contracts
-    const contracts = await prisma.contract.findMany({
-      where: {
-        userId: user.id
+    // Parse query parameters for filtering
+    const { searchParams } = new URL(request.url)
+    const year = searchParams.get('year')
+    const status = searchParams.get('status')
+    const withPayments = searchParams.get('withPayments') === 'true'
+    const ownerId = searchParams.get('ownerId')
+    const includeInDimob = searchParams.get('includeInDimob')
+    
+    // Build where condition
+    const where: any = {
+      userId: user.id
+    }
+    
+    // Filter by status if provided
+    if (status) {
+      where.status = status
+    }
+    
+    // Filter by includeInDimob if provided
+    if (includeInDimob === 'true') {
+      where.includeInDimob = true
+    } else if (includeInDimob === 'false') {
+      where.includeInDimob = false
+    }
+    
+    // Filter by property owner if provided
+    if (ownerId) {
+      where.property = {
+        ownerId: ownerId
+      }
+    }
+    
+    // Get contracts with include for related data
+    const includeOptions: any = {
+      property: {
+        include: {
+          owner: true
+        }
       },
+      tenant: true
+    }
+    
+    // Include payments if requested, with year filter
+    if (withPayments) {
+      includeOptions.payments = {
+        where: year ? {
+          dueDate: {
+            gte: new Date(`${year}-01-01`),
+            lte: new Date(`${year}-12-31`)
+          }
+        } : {},
+        orderBy: { dueDate: 'asc' }
+      }
+    }
+    
+    const contracts = await prisma.contract.findMany({
+      where,
+      include: includeOptions,
       orderBy: {
         createdAt: 'desc'
       }
     })
 
-    // Then get related data manually to avoid schema conflicts
-    const enrichedContracts = await Promise.all(
-      contracts.map(async (contract) => {
-        try {
-          const property = await prisma.property.findUnique({
-            where: { id: contract.propertyId }
-          })
-          
-          const tenant = await prisma.tenant.findUnique({
-            where: { id: contract.tenantId }
-          })
-          
-          const owner = property ? await prisma.owner.findUnique({
-            where: { id: property.ownerId }
-          }) : null
-
-          return {
-            ...contract,
-            property: property ? {
-              ...property,
-              owner: owner || { id: '', name: 'Proprietário não encontrado', email: '' }
-            } : { id: '', title: 'Propriedade não encontrada', address: '', propertyType: '', owner: { id: '', name: 'Proprietário não encontrado', email: '' } },
-            tenant: tenant || { id: '', name: 'Inquilino não encontrado', email: '', phone: '' }
-          }
-        } catch (error) {
-          console.error('Error enriching contract:', error)
-          return {
-            ...contract,
-            property: { id: '', title: 'Erro ao carregar', address: '', propertyType: '', owner: { id: '', name: 'Erro', email: '' } },
-            tenant: { id: '', name: 'Erro ao carregar', email: '', phone: '' }
-          }
-        }
-      })
-    )
-
-    return NextResponse.json(enrichedContracts)
+    // Return contracts with the new structure that includes filters
+    return NextResponse.json({ 
+      contracts,
+      total: contracts.length,
+      filters: { year, status, withPayments, ownerId, includeInDimob }
+    })
   } catch (error) {
     console.error('Error fetching contracts:', error)
     if (error instanceof Error && error.message === 'Unauthorized') {

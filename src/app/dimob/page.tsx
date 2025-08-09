@@ -62,7 +62,7 @@ export default function DimobPage() {
     if (!selectedOwnerId) return
     
     try {
-      const response = await fetch(`/api/contracts?year=${selectedYear}&status=ACTIVE&withPayments=true&ownerId=${selectedOwnerId}`)
+      const response = await fetch(`/api/contracts?year=${selectedYear}&status=ACTIVE&withPayments=true&ownerId=${selectedOwnerId}&includeInDimob=true`)
       if (response.ok) {
         const data = await response.json()
         setContracts(data.contracts || [])
@@ -150,7 +150,10 @@ export default function DimobPage() {
     }
   }
 
-  const contractsWithPayments = contracts.filter(c => c.payments?.length > 0)
+  const contractsWithPayments = contracts.filter(c => 
+    c.payments?.length > 0 && 
+    c.includeInDimob !== false // Garantir que está marcado para inclusão no DIMOB
+  )
 
   return (
     <DashboardLayout>
