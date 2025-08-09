@@ -17,6 +17,7 @@ interface Recibo {
   proprietarioNome: string
   inquilinoNome: string
   imovelEndereco: string
+  contractId: string
 }
 
 export default function RecibosPage() {
@@ -36,7 +37,6 @@ export default function RecibosPage() {
   const [showFiltros, setShowFiltros] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
-  const [expandedRecibos, setExpandedRecibos] = useState<Set<string>>(new Set())
 
   // Verificar autenticação
   useEffect(() => {
@@ -91,15 +91,9 @@ export default function RecibosPage() {
     }
   }
   
-  // Funções para expandir/recolher detalhes
-  const toggleExpanded = (reciboId: string) => {
-    const newExpanded = new Set(expandedRecibos)
-    if (newExpanded.has(reciboId)) {
-      newExpanded.delete(reciboId)
-    } else {
-      newExpanded.add(reciboId)
-    }
-    setExpandedRecibos(newExpanded)
+  // Navegar para recibos do contrato específico
+  const verRecibosDoContrato = (contractId: string, proprietarioNome: string) => {
+    router.push(`/recibos/contrato/${contractId}?proprietario=${encodeURIComponent(proprietarioNome)}`)
   }
   
   // Filtrar recibos no frontend - TEMPORARIAMENTE SEM FILTROS
@@ -401,115 +395,57 @@ export default function RecibosPage() {
               </div>
             </div>
 
-            {/* Cards dos Recibos - Layout Simplificado */}
+            {/* Cards dos Recibos - Layout Simples */}
             <div className="bg-white rounded-b-xl shadow-sm">
               <div className="divide-y divide-gray-200">
-                {recibosExibidos.map((recibo) => {
-                  const isExpanded = expandedRecibos.has(recibo.id)
-                  
-                  return (
-                    <div key={recibo.id} className="transition-colors">
-                      {/* Header do Recibo - Sempre Visível */}
-                      <div 
-                        className="p-4 hover:bg-gray-50 cursor-pointer"
-                        onClick={() => toggleExpanded(recibo.id)}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4 flex-1">
-                            <div className="bg-blue-50 p-3 rounded-lg">
-                              <FileText className="w-5 h-5 text-blue-600" />
-                            </div>
-                            
-                            {/* Informações do Contrato - Sempre Visível */}
-                            <div className="flex-1">
-                              <div className="font-semibold text-gray-900 text-lg mb-1">
-                                {recibo.numeroRecibo}
-                              </div>
-                              <div className="text-sm text-gray-600 space-y-1">
-                                <div><strong>Proprietário:</strong> {recibo.proprietarioNome}</div>
-                                <div><strong>Inquilino:</strong> {recibo.inquilinoNome}</div>
-                                <div><strong>Imóvel:</strong> {recibo.imovelEndereco}</div>
-                              </div>
-                            </div>
+                {recibosExibidos.map((recibo) => (
+                  <div key={recibo.id} className="p-4 hover:bg-gray-50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4 flex-1">
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <FileText className="w-5 h-5 text-blue-600" />
+                        </div>
+                        
+                        {/* Informações do Contrato - Clicável */}
+                        <div 
+                          className="flex-1 cursor-pointer hover:text-blue-600 transition-colors"
+                          onClick={() => verRecibosDoContrato(recibo.contractId, recibo.proprietarioNome)}
+                          title="Clique para ver todos os recibos deste contrato"
+                        >
+                          <div className="font-semibold text-gray-900 text-lg mb-1">
+                            {recibo.numeroRecibo}
                           </div>
-
-                          {/* Ações */}
-                          <div className="flex items-center space-x-3">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                baixarRecibo(recibo.numeroRecibo)
-                              }}
-                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-                            >
-                              <Download className="w-4 h-4" />
-                              <span>PDF</span>
-                            </button>
-                            
-                            <div className="flex items-center">
-                              <ChevronDown 
-                                className={`w-5 h-5 text-gray-400 transition-transform ${
-                                  isExpanded ? 'rotate-180' : ''
-                                }`} 
-                              />
-                            </div>
+                          <div className="text-sm text-gray-600 space-y-1">
+                            <div><strong>Proprietário:</strong> {recibo.proprietarioNome}</div>
+                            <div><strong>Inquilino:</strong> {recibo.inquilinoNome}</div>
+                            <div><strong>Imóvel:</strong> {recibo.imovelEndereco}</div>
                           </div>
                         </div>
                       </div>
 
-                      {/* Detalhes Expandidos - Só Aparece Quando Clicado */}
-                      {isExpanded && (
-                        <div className="px-4 pb-4 bg-gray-50">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                            {/* Detalhes do Pagamento */}
-                            <div className="bg-white p-4 rounded-lg border">
-                              <h4 className="font-medium text-gray-900 mb-3">💰 Detalhes Financeiros</h4>
-                              <div className="space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">Valor Total:</span>
-                                  <span className="font-medium text-gray-900">
-                                    R$ {recibo.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">Taxa Administração:</span>
-                                  <span className="font-medium text-purple-600">
-                                    R$ {recibo.taxaAdministracao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between border-t pt-2">
-                                  <span className="text-gray-600">Valor Repassado:</span>
-                                  <span className="font-medium text-green-600">
-                                    R$ {recibo.valorRepassado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Detalhes da Data */}
-                            <div className="bg-white p-4 rounded-lg border">
-                              <h4 className="font-medium text-gray-900 mb-3">📅 Informações de Data</h4>
-                              <div className="space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">Data Pagamento:</span>
-                                  <span className="font-medium text-gray-900">
-                                    {new Date(recibo.dataPagamento).toLocaleDateString('pt-BR')}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">Competência:</span>
-                                  <span className="font-medium text-gray-900">
-                                    {recibo.competencia}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                      {/* Ações */}
+                      <div className="flex items-center space-x-3">
+                        <button
+                          onClick={() => baixarRecibo(recibo.numeroRecibo)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                          title="Baixar PDF deste recibo"
+                        >
+                          <Download className="w-4 h-4" />
+                          <span>PDF</span>
+                        </button>
+                        
+                        <button
+                          onClick={() => verRecibosDoContrato(recibo.contractId, recibo.proprietarioNome)}
+                          className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                          title="Ver todos os recibos deste contrato"
+                        >
+                          <Eye className="w-4 h-4" />
+                          <span>Ver Todos</span>
+                        </button>
+                      </div>
                     </div>
-                  )
-                })}
+                  </div>
+                ))}
               </div>
             </div>
 
