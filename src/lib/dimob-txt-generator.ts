@@ -336,9 +336,12 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
 function gerarConteudoDimob(data: DimobData, ano: number): string {
   let conteudo = ''
 
-  // === HEADER DA DECLARAÇÃO ===
-  conteudo += 'DIMOB' // Sistema (5 posições)
-  conteudo += ' '.repeat(369) // Reservado (369 espaços)
+  // === R00 - HEADER DA DECLARAÇÃO (ESPECIFICAÇÃO OFICIAL) ===
+  conteudo += 'R00' // Tipo de registro HEADER (3 posições)
+  conteudo += 'DIMOB' // Sistema (5 posições)  
+  conteudo += '30' // Versão do layout (2 posições)
+  conteudo += ano.toString() // Ano-calendário (4 posições)
+  conteudo += ' '.repeat(360) // Reservado (360 espaços para totalizar 374 chars)
   conteudo += '\r\n' // EOL
 
   // === R01 - DADOS INICIAIS ===
