@@ -132,7 +132,35 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  font-size: 13.6px; /* Tamanho base menor (era 16px) */
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Reduzir tamanhos de fonte globalmente */
+html {
+  font-size: 14px; /* Base menor para rem calculations */
+}
+
+/* Ajustar elementos comuns */
+h1 { font-size: 1.7rem; }    /* ~24px (era ~32px) */
+h2 { font-size: 1.4rem; }    /* ~20px (era ~24px) */
+h3 { font-size: 1.2rem; }    /* ~17px (era ~20px) */
+h4 { font-size: 1.1rem; }    /* ~15px (era ~18px) */
+h5 { font-size: 1rem; }      /* ~14px (era ~16px) */
+h6 { font-size: 0.9rem; }    /* ~13px (era ~14px) */
+
+p, div, span, a, button, input, select, textarea {
+  font-size: inherit;
+}
+
+/* Ajustar inputs e buttons especificamente */
+input, select, textarea, button {
+  font-size: 0.85rem; /* ~12px */
+}
+
+/* Tabelas menores */
+table, th, td {
+  font-size: 0.8rem; /* ~11px */
 }
 
 /* Toast animations */

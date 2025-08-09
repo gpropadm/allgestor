@@ -169,10 +169,10 @@ export function Sidebar() {
               <Buildings className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="logo-font text-xl font-bold text-gray-900 dark:text-white tracking-tight">
+              <h1 className="logo-font text-lg font-bold text-gray-900 dark:text-white tracking-tight">
                 ALL-GESTOR
               </h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Gestão Imobiliária</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Gestão Imobiliária</p>
             </div>
           </div>
         </div>
@@ -196,7 +196,7 @@ export function Sidebar() {
                     >
                       <div className="flex items-center space-x-3">
                         <Lightning className="w-5 h-5" />
-                        <span className="font-medium">IA & Analytics</span>
+                        <span className="text-sm font-medium">IA & Analytics</span>
                       </div>
                       {isIAAnalyticsExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                     </button>
@@ -218,7 +218,7 @@ export function Sidebar() {
                                 }`}
                               >
                                 <subItem.icon className="w-4 h-4" />
-                                <span className="font-medium">{subItem.label}</span>
+                                <span className="text-xs font-medium">{subItem.label}</span>
                               </Link>
                             </li>
                           )
@@ -240,7 +240,7 @@ export function Sidebar() {
                     >
                       <div className="flex items-center space-x-3">
                         <GearSix className="w-5 h-5" />
-                        <span className="font-medium">Configurações</span>
+                        <span className="text-sm font-medium">Configurações</span>
                       </div>
                       {isConfigExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                     </button>
@@ -262,7 +262,7 @@ export function Sidebar() {
                                 }`}
                               >
                                 <subItem.icon className="w-4 h-4" />
-                                <span className="font-medium">{subItem.label}</span>
+                                <span className="text-xs font-medium">{subItem.label}</span>
                               </Link>
                             </li>
                           )
@@ -284,7 +284,7 @@ export function Sidebar() {
                     >
                       <div className="flex items-center space-x-3">
                         <Buildings className="w-5 h-5" />
-                        <span className="font-medium">Gestão Imobiliária</span>
+                        <span className="text-sm font-medium">Gestão Imobiliária</span>
                       </div>
                       {isImobiliariaExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                     </button>
@@ -306,7 +306,7 @@ export function Sidebar() {
                                 }`}
                               >
                                 <subItem.icon className="w-4 h-4" />
-                                <span className="font-medium">{subItem.label}</span>
+                                <span className="text-xs font-medium">{subItem.label}</span>
                               </Link>
                             </li>
                           )
@@ -328,7 +328,7 @@ export function Sidebar() {
                     >
                       <div className="flex items-center space-x-3">
                         <Wallet className="w-5 h-5" />
-                        <span className="font-medium">Gestão Financeira</span>
+                        <span className="text-sm font-medium">Gestão Financeira</span>
                       </div>
                       {isFinanceiroExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                     </button>
@@ -350,7 +350,7 @@ export function Sidebar() {
                                 }`}
                               >
                                 <subItem.icon className="w-4 h-4" />
-                                <span className="font-medium">{subItem.label}</span>
+                                <span className="text-xs font-medium">{subItem.label}</span>
                               </Link>
                             </li>
                           )
@@ -382,7 +382,7 @@ export function Sidebar() {
                     }`}
                   >
                     <item.icon className="w-5 h-5" />
-                    <span className="font-medium">{item.label}</span>
+                    <span className="text-sm font-medium">{item.label}</span>
                   </Link>
                 </li>
               )
@@ -396,7 +396,7 @@ export function Sidebar() {
               className="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 w-full"
             >
               <Power className="w-5 h-5" />
-              <span className="font-medium">Sair</span>
+              <span className="text-sm font-medium">Sair</span>
             </button>
           </div>
         </nav>
@@ -452,7 +452,7 @@ export function Sidebar() {
                                 }`}
                               >
                                 <subItem.icon className="w-4 h-4" />
-                                <span className="font-medium">{subItem.label}</span>
+                                <span className="text-xs font-medium">{subItem.label}</span>
                               </Link>
                             )
                           })}
@@ -494,7 +494,7 @@ export function Sidebar() {
                                 }`}
                               >
                                 <subItem.icon className="w-4 h-4" />
-                                <span className="font-medium">{subItem.label}</span>
+                                <span className="text-xs font-medium">{subItem.label}</span>
                               </Link>
                             )
                           })}
@@ -536,7 +536,7 @@ export function Sidebar() {
                                 }`}
                               >
                                 <subItem.icon className="w-4 h-4" />
-                                <span className="font-medium">{subItem.label}</span>
+                                <span className="text-xs font-medium">{subItem.label}</span>
                               </Link>
                             )
                           })}
@@ -578,7 +578,7 @@ export function Sidebar() {
                                 }`}
                               >
                                 <subItem.icon className="w-4 h-4" />
-                                <span className="font-medium">{subItem.label}</span>
+                                <span className="text-xs font-medium">{subItem.label}</span>
                               </Link>
                             )
                           })}
