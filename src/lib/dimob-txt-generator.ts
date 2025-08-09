@@ -336,13 +336,10 @@ export async function gerarArquivoDimobTxt(userId: string, ano: number, ownerId?
 function gerarConteudoDimob(data: DimobData, ano: number): string {
   let conteudo = ''
 
-  // === R00 - HEADER DA DECLARAÇÃO (ESPECIFICAÇÃO OFICIAL) ===
-  conteudo += 'R00' // Tipo de registro HEADER (3 posições)
-  conteudo += 'DIMOB' // Sistema (5 posições)  
-  conteudo += '30' // Versão do layout (2 posições)
-  conteudo += ano.toString() // Ano-calendário (4 posições)
-  conteudo += ' '.repeat(360) // Reservado (360 espaços para totalizar 374 chars)
-  conteudo += '\r\n' // EOL
+  // === HEADER DA DECLARAÇÃO (ESPECIFICAÇÃO OFICIAL RFB) ===
+  conteudo += 'DIMOB' // Sistema (5 posições) - Constante "DIMOB"
+  conteudo += ' '.repeat(369) // Reservado (369 espaços em branco)
+  conteudo += '\r\n' // EOL (Delimitador de Registro)
 
   // === R01 - DADOS INICIAIS ===
   conteudo += 'R01' // Tipo (3 posições)
@@ -414,10 +411,10 @@ function gerarConteudoDimob(data: DimobData, ano: number): string {
     conteudo += '\r\n' // EOL
   })
 
-  // === T9 - TRAILER ===
-  conteudo += 'T9' // Tipo (2 posições)
-  conteudo += ' '.repeat(100) // Reservado (100 espaços)
-  conteudo += '\r\n' // EOL
+  // === T9 - TRAILER DA DECLARAÇÃO ===
+  conteudo += 'T9' // Tipo (2 posições) - Constante "T9"
+  conteudo += ' '.repeat(100) // Reservado (100 espaços em branco)
+  conteudo += '\r\n' // EOL (Delimitador de Registro)
 
   console.log(`📄 [DIMOB] Arquivo gerado: ${conteudo.split('\r\n').length - 1} linhas, ${data.contratos.length} contratos`)
   return conteudo
