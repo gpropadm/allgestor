@@ -39,6 +39,7 @@ export default function RecibosPage() {
   const itemsPerPage = 10
   const [showAllMonths, setShowAllMonths] = useState(false)
   const [expandedProprietarios, setExpandedProprietarios] = useState<Set<string>>(new Set())
+  const [expandedContratos, setExpandedContratos] = useState<Set<string>>(new Set())
 
   // Verificar autenticação
   useEffect(() => {
@@ -103,57 +104,73 @@ export default function RecibosPage() {
     }
     setExpandedProprietarios(newExpanded)
   }
+
+  // Função para alternar expansão de contrato específico
+  const toggleContratoExpansion = (contratoId: string) => {
+    const newExpanded = new Set(expandedContratos)
+    if (newExpanded.has(contratoId)) {
+      newExpanded.delete(contratoId)
+    } else {
+      newExpanded.add(contratoId)
+    }
+    setExpandedContratos(newExpanded)
+  }
   
   // Filtrar recibos igual ao sistema de payments
   const getFilteredRecibos = () => {
     let recibosToShow = recibos
     
     if (!showAllMonths) {
-      // Se há proprietários expandidos, incluir todos os recibos deles
-      if (expandedProprietarios.size > 0) {
-        const expandedRecibos: Recibo[] = []
-        const nonExpandedProprietarios = new Set<string>()
-        
-        recibos.forEach(recibo => {
-          const proprietarioNome = recibo.proprietarioNome
-          if (expandedProprietarios.has(proprietarioNome)) {
-            // Adicionar todos os recibos do proprietário expandido
-            expandedRecibos.push(recibo)
-          } else {
-            // Marcar proprietário como não expandido para mostrar só o mais recente
-            nonExpandedProprietarios.add(proprietarioNome)
-          }
+      const expandedRecibos: Recibo[] = []
+      const processedContratos = new Set<string>()
+      const processedProprietarios = new Set<string>()
+      
+      // 1. Primeiro, adicionar todos os recibos de contratos expandidos
+      expandedContratos.forEach(contratoId => {
+        const contratoRecibos = recibos.filter(r => r.contractId === contratoId)
+        contratoRecibos.forEach(recibo => {
+          expandedRecibos.push(recibo)
+          processedContratos.add(recibo.contractId)
         })
-        
-        // Para proprietários não expandidos, pegar apenas o recibo mais recente
-        nonExpandedProprietarios.forEach(proprietarioNome => {
-          const proprietarioRecibos = recibos.filter(r => r.proprietarioNome === proprietarioNome)
-          if (proprietarioRecibos.length > 0) {
-            const latest = proprietarioRecibos.reduce((latest, current) => 
-              new Date(current.dataPagamento) > new Date(latest.dataPagamento) ? current : latest
-            )
-            expandedRecibos.push(latest)
-          }
+      })
+      
+      // 2. Depois, adicionar todos os recibos de proprietários expandidos (exceto contratos já processados)
+      expandedProprietarios.forEach(proprietarioNome => {
+        const proprietarioRecibos = recibos.filter(r => 
+          r.proprietarioNome === proprietarioNome && !processedContratos.has(r.contractId)
+        )
+        proprietarioRecibos.forEach(recibo => {
+          expandedRecibos.push(recibo)
+          processedContratos.add(recibo.contractId)
         })
-        
-        recibosToShow = expandedRecibos
-      } else {
-        // Mostrar apenas o recibo mais recente por proprietário (mês atual)
-        const proprietariosUnicos = [...new Set(recibos.map(r => r.proprietarioNome))]
-        const recibosDoMesAtual: Recibo[] = []
-        
-        proprietariosUnicos.forEach(proprietarioNome => {
-          const proprietarioRecibos = recibos.filter(r => r.proprietarioNome === proprietarioNome)
-          if (proprietarioRecibos.length > 0) {
-            const latest = proprietarioRecibos.reduce((latest, current) => 
-              new Date(current.dataPagamento) > new Date(latest.dataPagamento) ? current : latest
-            )
-            recibosDoMesAtual.push(latest)
-          }
-        })
-        
-        recibosToShow = recibosDoMesAtual
-      }
+        processedProprietarios.add(proprietarioNome)
+      })
+      
+      // 3. Para proprietários/contratos não expandidos, mostrar apenas o mais recente
+      const proprietariosUnicos = [...new Set(recibos.map(r => r.proprietarioNome))]
+      proprietariosUnicos.forEach(proprietarioNome => {
+        if (!processedProprietarios.has(proprietarioNome)) {
+          // Agrupar por contrato e pegar o mais recente de cada
+          const proprietarioContratos = [...new Set(
+            recibos.filter(r => r.proprietarioNome === proprietarioNome).map(r => r.contractId)
+          )]
+          
+          proprietarioContratos.forEach(contratoId => {
+            if (!processedContratos.has(contratoId)) {
+              const contratoRecibos = recibos.filter(r => r.contractId === contratoId)
+              if (contratoRecibos.length > 0) {
+                const latest = contratoRecibos.reduce((latest, current) => 
+                  new Date(current.dataPagamento) > new Date(latest.dataPagamento) ? current : latest
+                )
+                expandedRecibos.push(latest)
+                processedContratos.add(contratoId)
+              }
+            }
+          })
+        }
+      })
+      
+      recibosToShow = expandedRecibos
     }
     
     return recibosToShow.sort((a, b) => new Date(b.dataPagamento).getTime() - new Date(a.dataPagamento).getTime())
@@ -255,10 +272,10 @@ export default function RecibosPage() {
                   </button>
                   {!showAllMonths && (
                     <p className="text-sm text-blue-100">
-                      💡 Clique no proprietário para ver todos os recibos dele
-                      {expandedProprietarios.size > 0 && (
+                      💡 Clique no <strong>recibo</strong> para ver todos do contrato | Clique no <strong>proprietário</strong> para ver todos dele
+                      {(expandedContratos.size > 0 || expandedProprietarios.size > 0) && (
                         <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs bg-white/20 text-white">
-                          {expandedProprietarios.size} expandido{expandedProprietarios.size > 1 ? 's' : ''}
+                          {expandedContratos.size + expandedProprietarios.size} expandido{(expandedContratos.size + expandedProprietarios.size) > 1 ? 's' : ''}
                         </span>
                       )}
                     </p>
@@ -495,8 +512,22 @@ export default function RecibosPage() {
                         
                         {/* Informações do Contrato */}
                         <div className="flex-1">
-                          <div className="font-semibold text-gray-900 text-lg mb-1">
-                            {recibo.numeroRecibo}
+                          <div className="mb-1">
+                            <button
+                              onClick={() => toggleContratoExpansion(recibo.contractId)}
+                              className="font-semibold text-gray-900 text-lg hover:text-blue-600 transition-colors cursor-pointer"
+                              title={`Clique para ${expandedContratos.has(recibo.contractId) ? 'recolher' : 'ver todos os recibos'} deste contrato`}
+                            >
+                              {recibo.numeroRecibo}
+                              <ChevronDown className={`inline w-4 h-4 ml-1 transition-transform ${
+                                expandedContratos.has(recibo.contractId) ? 'rotate-180' : ''
+                              }`} />
+                            </button>
+                            {expandedContratos.has(recibo.contractId) && (
+                              <div className="text-xs text-blue-600 mt-1">
+                                Mostrando todos os recibos deste contrato
+                              </div>
+                            )}
                           </div>
                           <div className="text-sm text-gray-600 space-y-1">
                             <div>
@@ -513,7 +544,7 @@ export default function RecibosPage() {
                               </button>
                               {expandedProprietarios.has(recibo.proprietarioNome) && (
                                 <div className="text-xs text-blue-600 mt-1">
-                                  Mostrando todos os recibos
+                                  Mostrando todos os recibos do proprietário
                                 </div>
                               )}
                             </div>
