@@ -211,12 +211,11 @@ export function Sidebar() {
                               <Link
                                 href={subItem.href}
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors border-r-2 text-sm ${
+                                className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors text-sm ${
                                   isActive
-                                    ? ''
-                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 border-transparent'
+                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
                                 }`}
-                                style={isActive ? {backgroundColor: '#fef2f2', color: '#f63c6a', borderColor: '#f63c6a'} : {}}
                               >
                                 <subItem.icon className="w-4 h-4" />
                                 <span className="font-medium">{subItem.label}</span>
@@ -256,12 +255,11 @@ export function Sidebar() {
                               <Link
                                 href={subItem.href}
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors border-r-2 text-sm ${
+                                className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors text-sm ${
                                   isActive
-                                    ? ''
-                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 border-transparent'
+                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
                                 }`}
-                                style={isActive ? {backgroundColor: '#fef2f2', color: '#f63c6a', borderColor: '#f63c6a'} : {}}
                               >
                                 <subItem.icon className="w-4 h-4" />
                                 <span className="font-medium">{subItem.label}</span>
@@ -301,12 +299,11 @@ export function Sidebar() {
                               <Link
                                 href={subItem.href}
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors border-r-2 text-sm ${
+                                className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors text-sm ${
                                   isActive
-                                    ? ''
-                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 border-transparent'
+                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
                                 }`}
-                                style={isActive ? {backgroundColor: '#fef2f2', color: '#f63c6a', borderColor: '#f63c6a'} : {}}
                               >
                                 <subItem.icon className="w-4 h-4" />
                                 <span className="font-medium">{subItem.label}</span>
@@ -346,12 +343,11 @@ export function Sidebar() {
                               <Link
                                 href={subItem.href}
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors border-r-2 text-sm ${
+                                className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors text-sm ${
                                   isActive
-                                    ? ''
-                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 border-transparent'
+                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
                                 }`}
-                                style={isActive ? {backgroundColor: '#fef2f2', color: '#f63c6a', borderColor: '#f63c6a'} : {}}
                               >
                                 <subItem.icon className="w-4 h-4" />
                                 <span className="font-medium">{subItem.label}</span>
@@ -377,14 +373,13 @@ export function Sidebar() {
                   <Link
                     href={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors border-r-2 ${
+                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
                       isActive
-                        ? ''
+                        ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                         : item.featured
                         ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border-blue-200 hover:from-blue-100 hover:to-blue-200'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-transparent'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                     }`}
-                    style={isActive ? {backgroundColor: '#fef2f2', color: '#f63c6a', borderColor: '#f63c6a'} : {}}
                   >
                     <item.icon className="w-5 h-5" />
                     <span className="font-medium">{item.label}</span>
@@ -452,7 +447,7 @@ export function Sidebar() {
                                 href={subItem.href}
                                 className={`flex items-center space-x-3 px-3 py-2.5 rounded-md transition-all duration-200 text-sm ${
                                   isActive
-                                    ? 'bg-red-50 text-red-600 border-l-2 border-red-600'
+                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                                 }`}
                               >
@@ -494,7 +489,7 @@ export function Sidebar() {
                                 href={subItem.href}
                                 className={`flex items-center space-x-3 px-3 py-2.5 rounded-md transition-all duration-200 text-sm ${
                                   isActive
-                                    ? 'bg-red-50 text-red-600 border-l-2 border-red-600'
+                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                                 }`}
                               >
@@ -536,7 +531,7 @@ export function Sidebar() {
                                 href={subItem.href}
                                 className={`flex items-center space-x-3 px-3 py-2.5 rounded-md transition-all duration-200 text-sm ${
                                   isActive
-                                    ? 'bg-red-50 text-red-600 border-l-2 border-red-600'
+                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                                 }`}
                               >
@@ -578,7 +573,7 @@ export function Sidebar() {
                                 href={subItem.href}
                                 className={`flex items-center space-x-3 px-3 py-2.5 rounded-md transition-all duration-200 text-sm ${
                                   isActive
-                                    ? 'bg-red-50 text-red-600 border-l-2 border-red-600'
+                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                                 }`}
                               >
@@ -606,10 +601,9 @@ export function Sidebar() {
                     href={item.href}
                     className={`group relative flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 ${
                       isActive
-                        ? ''
+                        ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100'
                     }`}
-                    style={isActive ? {backgroundColor: '#fef2f2', color: '#f63c6a'} : {}}
                     title={item.label}
                   >
                     <item.icon className="w-5 h-5" />
