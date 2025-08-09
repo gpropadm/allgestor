@@ -27,17 +27,13 @@ export default function RecibosPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   
-  // Estados para filtros
+  // Estados para filtros (simplificado)
   const [filtros, setFiltros] = useState({
-    busca: '',
-    ano: new Date().getFullYear().toString(),
-    mes: '',
-    proprietario: ''
+    busca: ''
   })
   const [showFiltros, setShowFiltros] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
-  const [showAllMonths, setShowAllMonths] = useState(false)
   const [expandedProprietarios, setExpandedProprietarios] = useState<Set<string>>(new Set())
   const [expandedContratos, setExpandedContratos] = useState<Set<string>>(new Set())
 
@@ -60,14 +56,8 @@ export default function RecibosPage() {
       setError('')
       setLoading(true)
       
-      // Construir URL com filtros
-      const params = new URLSearchParams()
-      if (filtros.ano && filtros.mes) {
-        params.append('ano', filtros.ano)
-        params.append('mes', filtros.mes)
-      }
-      
-      const url = `/api/recibos${params.toString() ? '?' + params.toString() : ''}`
+      // Buscar todos os recibos sem filtro de data
+      const url = `/api/recibos`
       const response = await fetch(url)
       
       if (response.status === 401) {
@@ -116,94 +106,29 @@ export default function RecibosPage() {
     setExpandedContratos(newExpanded)
   }
   
-  // Filtrar recibos igual ao sistema de payments
-  const getFilteredRecibos = () => {
-    let recibosToShow = recibos
-    
-    if (!showAllMonths) {
-      const expandedRecibos: Recibo[] = []
-      const processedContratos = new Set<string>()
-      const processedProprietarios = new Set<string>()
-      
-      // 1. Primeiro, adicionar todos os recibos de contratos expandidos
-      expandedContratos.forEach(contratoId => {
-        const contratoRecibos = recibos.filter(r => r.contractId === contratoId)
-        contratoRecibos.forEach(recibo => {
-          expandedRecibos.push(recibo)
-          processedContratos.add(recibo.contractId)
-        })
-      })
-      
-      // 2. Depois, adicionar todos os recibos de proprietários expandidos (exceto contratos já processados)
-      expandedProprietarios.forEach(proprietarioNome => {
-        const proprietarioRecibos = recibos.filter(r => 
-          r.proprietarioNome === proprietarioNome && !processedContratos.has(r.contractId)
-        )
-        proprietarioRecibos.forEach(recibo => {
-          expandedRecibos.push(recibo)
-          processedContratos.add(recibo.contractId)
-        })
-        processedProprietarios.add(proprietarioNome)
-      })
-      
-      // 3. Para proprietários/contratos não expandidos, mostrar apenas o mais recente
-      const proprietariosUnicos = [...new Set(recibos.map(r => r.proprietarioNome))]
-      proprietariosUnicos.forEach(proprietarioNome => {
-        if (!processedProprietarios.has(proprietarioNome)) {
-          // Agrupar por contrato e pegar o mais recente de cada
-          const proprietarioContratos = [...new Set(
-            recibos.filter(r => r.proprietarioNome === proprietarioNome).map(r => r.contractId)
-          )]
-          
-          proprietarioContratos.forEach(contratoId => {
-            if (!processedContratos.has(contratoId)) {
-              const contratoRecibos = recibos.filter(r => r.contractId === contratoId)
-              if (contratoRecibos.length > 0) {
-                const latest = contratoRecibos.reduce((latest, current) => 
-                  new Date(current.dataPagamento) > new Date(latest.dataPagamento) ? current : latest
-                )
-                expandedRecibos.push(latest)
-                processedContratos.add(contratoId)
-              }
-            }
-          })
-        }
-      })
-      
-      recibosToShow = expandedRecibos
-    }
-    
-    return recibosToShow.sort((a, b) => new Date(b.dataPagamento).getTime() - new Date(a.dataPagamento).getTime())
-  }
-
-  const recibosFiltrados = getFilteredRecibos()
+  // Filtrar recibos - VERSÃO SIMPLIFICADA
+  const recibosFiltrados = recibos
+    .filter(recibo => {
+      if (!filtros.busca) return true
+      const busca = filtros.busca.toLowerCase()
+      return (
+        recibo.numeroRecibo.toLowerCase().includes(busca) ||
+        recibo.proprietarioNome.toLowerCase().includes(busca) ||
+        recibo.inquilinoNome.toLowerCase().includes(busca) ||
+        recibo.imovelEndereco.toLowerCase().includes(busca)
+      )
+    })
+    .sort((a, b) => new Date(b.dataPagamento).getTime() - new Date(a.dataPagamento).getTime())
   
   // Paginação
   const totalPages = Math.ceil(recibosFiltrados.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const recibosExibidos = recibosFiltrados.slice(startIndex, startIndex + itemsPerPage)
   
-  // Proprietários únicos para o filtro (sempre de todos os recibos, não filtrados)
-  const proprietariosUnicos = [...new Set(recibos.map(r => r.proprietarioNome).filter(Boolean))].sort()
-  
-  // Debug proprietários apenas uma vez
-  useEffect(() => {
-    if (recibos.length > 0 && proprietariosUnicos.length > 0) {
-      console.log('👥 Proprietários únicos encontrados:', proprietariosUnicos)
-    }
-  }, [recibos.length, proprietariosUnicos.length])
-  
   // Reset página ao filtrar
   useEffect(() => {
     setCurrentPage(1)
-  }, [filtros])
-  
-  // Fetch quando filtros de período mudarem
-  useEffect(() => {
-    if (status === 'authenticated') {
-      fetchRecibos()
-    }
-  }, [filtros.ano, filtros.mes])
+  }, [filtros.busca])
 
   const baixarRecibo = async (numeroRecibo: string) => {
     try {
@@ -254,49 +179,22 @@ export default function RecibosPage() {
               <div>
                 <h1 className="text-3xl font-bold">📄 Gestão de Recibos</h1>
                 <p className="text-blue-100 mt-2">
-                  {showAllMonths 
-                    ? 'Mostrando todos os meses' 
-                    : `Mostrando apenas ${new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`
-                  }
+                  💡 Clique no <strong>recibo</strong> para ver todos do contrato | Clique no <strong>proprietário</strong> para ver todos dele
                 </p>
-                <div className="flex items-center space-x-4 mt-3">
-                  <button
-                    onClick={() => setShowAllMonths(!showAllMonths)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      showAllMonths
-                        ? 'bg-white/30 text-white hover:bg-white/40'
-                        : 'bg-white/20 text-white hover:bg-white/30'
-                    }`}
-                  >
-                    {showAllMonths ? '📅 Mostrar só este mês' : '📅 Ver todos os meses'}
-                  </button>
-                  {!showAllMonths && (
-                    <p className="text-sm text-blue-100">
-                      💡 Clique no <strong>recibo</strong> para ver todos do contrato | Clique no <strong>proprietário</strong> para ver todos dele
-                      {(expandedContratos.size > 0 || expandedProprietarios.size > 0) && (
-                        <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs bg-white/20 text-white">
-                          {expandedContratos.size + expandedProprietarios.size} expandido{(expandedContratos.size + expandedProprietarios.size) > 1 ? 's' : ''}
-                        </span>
-                      )}
-                    </p>
-                  )}
-                </div>
               </div>
             </div>
             <div className="flex gap-2">
               <button 
                 onClick={() => setShowFiltros(!showFiltros)}
                 className={`text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors ${
-                  (filtros.busca || filtros.mes || filtros.ano !== new Date().getFullYear().toString() || filtros.proprietario) 
-                    ? 'bg-yellow-500/80 hover:bg-yellow-500' 
-                    : 'bg-white/20 hover:bg-white/30'
+                  filtros.busca ? 'bg-yellow-500/80 hover:bg-yellow-500' : 'bg-white/20 hover:bg-white/30'
                 }`}
               >
                 <Filter className="w-4 h-4" />
-                <span>Filtros</span>
-                {(filtros.busca || filtros.mes || filtros.ano !== new Date().getFullYear().toString() || filtros.proprietario) && (
+                <span>Buscar</span>
+                {filtros.busca && (
                   <span className="bg-white/30 text-xs px-2 py-1 rounded-full">
-                    Ativos
+                    Ativo
                   </span>
                 )}
                 <ChevronDown className={`w-4 h-4 transition-transform ${showFiltros ? 'rotate-180' : ''}`} />
@@ -311,10 +209,10 @@ export default function RecibosPage() {
           </div>
         </div>
 
-        {/* Filtros */}
+        {/* Filtros Simplificados */}
         {showFiltros && (
           <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="max-w-md">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Buscar
@@ -324,63 +222,13 @@ export default function RecibosPage() {
                   <input
                     type="text"
                     value={filtros.busca}
-                    onChange={(e) => setFiltros(prev => ({ ...prev, busca: e.target.value }))}
+                    onChange={(e) => setFiltros({ busca: e.target.value })}
                     placeholder="Número, proprietário, inquilino..."
                     className={`pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                       filtros.busca ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
                     }`}
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ano
-                </label>
-                <select
-                  value={filtros.ano}
-                  onChange={(e) => setFiltros(prev => ({ ...prev, ano: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Todos os anos</option>
-                  {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
-                    <option key={year} value={year.toString()}>{year}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Mês
-                </label>
-                <select
-                  value={filtros.mes}
-                  onChange={(e) => setFiltros(prev => ({ ...prev, mes: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Todos os meses</option>
-                  {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
-                    <option key={month} value={month.toString()}>
-                      {new Date(2000, month - 1).toLocaleString('pt-BR', { month: 'long' })}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Proprietário
-                </label>
-                <select
-                  value={filtros.proprietario}
-                  onChange={(e) => setFiltros(prev => ({ ...prev, proprietario: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Todos os proprietários</option>
-                  {proprietariosUnicos.map(nome => (
-                    <option key={nome} value={nome}>{nome}</option>
-                  ))}
-                </select>
               </div>
             </div>
           </div>
@@ -456,6 +304,35 @@ export default function RecibosPage() {
           </div>
         </div>
 
+        {/* Indicador de filtros de expansão ativos */}
+        {(expandedContratos.size > 0 || expandedProprietarios.size > 0) && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Eye className="w-5 h-5 text-blue-600" />
+                <div>
+                  <h3 className="text-sm font-medium text-blue-800">
+                    Visualização filtrada ativa
+                  </h3>
+                  <p className="text-sm text-blue-700">
+                    {expandedContratos.size > 0 && `${expandedContratos.size} contrato(s) selecionado(s)`}
+                    {expandedProprietarios.size > 0 && `${expandedProprietarios.size} proprietário(s) selecionado(s)`}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setExpandedContratos(new Set())
+                  setExpandedProprietarios(new Set())
+                }}
+                className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+              >
+                Limpar filtros
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Lista de Recibos */}
         {recibos.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm p-12 text-center">
@@ -479,10 +356,10 @@ export default function RecibosPage() {
               Tente ajustar os filtros para encontrar o que procura.
             </p>
             <button 
-              onClick={() => setFiltros({ busca: '', ano: '', mes: '', proprietario: '' })}
+              onClick={() => setFiltros({ busca: '' })}
               className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors"
             >
-              Limpar filtros
+              Limpar busca
             </button>
           </div>
         ) : (
@@ -502,72 +379,107 @@ export default function RecibosPage() {
             {/* Cards dos Recibos - Layout Simples */}
             <div className="bg-white rounded-b-xl shadow-sm">
               <div className="divide-y divide-gray-200">
-                {recibosExibidos.map((recibo) => (
-                  <div key={recibo.id} className="p-4 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4 flex-1">
-                        <div className="bg-blue-50 p-3 rounded-lg">
-                          <FileText className="w-5 h-5 text-blue-600" />
-                        </div>
-                        
-                        {/* Informações do Contrato */}
-                        <div className="flex-1">
-                          <div className="mb-1">
-                            <button
-                              onClick={() => toggleContratoExpansion(recibo.contractId)}
-                              className="font-semibold text-gray-900 text-lg hover:text-blue-600 transition-colors cursor-pointer"
-                              title={`Clique para ${expandedContratos.has(recibo.contractId) ? 'recolher' : 'ver todos os recibos'} deste contrato`}
-                            >
-                              {recibo.numeroRecibo}
-                              <ChevronDown className={`inline w-4 h-4 ml-1 transition-transform ${
-                                expandedContratos.has(recibo.contractId) ? 'rotate-180' : ''
-                              }`} />
-                            </button>
-                            {expandedContratos.has(recibo.contractId) && (
-                              <div className="text-xs text-blue-600 mt-1">
-                                Mostrando todos os recibos deste contrato
-                              </div>
-                            )}
+                {(() => {
+                  // Lógica de exibição baseada nas expansões
+                  let recibosParaExibir = recibosExibidos
+                  
+                  // Se há contratos ou proprietários expandidos, usar filtros específicos mas manter paginação
+                  if (expandedContratos.size > 0) {
+                    // Aplicar filtro de contrato aos recibos paginados atuais
+                    recibosParaExibir = recibosExibidos.filter(recibo => 
+                      expandedContratos.has(recibo.contractId)
+                    )
+                    // Se não há recibos na página atual, mostrar todos os recibos expandidos sem paginação
+                    if (recibosParaExibir.length === 0) {
+                      recibosParaExibir = recibosFiltrados.filter(recibo => 
+                        expandedContratos.has(recibo.contractId)
+                      )
+                    }
+                  }
+                  // Se há proprietários expandidos, aplicar lógica similar
+                  else if (expandedProprietarios.size > 0) {
+                    recibosParaExibir = recibosExibidos.filter(recibo => 
+                      expandedProprietarios.has(recibo.proprietarioNome)
+                    )
+                    if (recibosParaExibir.length === 0) {
+                      recibosParaExibir = recibosFiltrados.filter(recibo => 
+                        expandedProprietarios.has(recibo.proprietarioNome)
+                      )
+                    }
+                  }
+                  
+                  return recibosParaExibir.map((recibo) => {
+                    const contractExpanded = expandedContratos.has(recibo.contractId)
+                    const proprietarioExpanded = expandedProprietarios.has(recibo.proprietarioNome)
+                  
+                  return (
+                    <div key={recibo.id} className="p-4 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4 flex-1">
+                          <div className="bg-blue-50 p-3 rounded-lg">
+                            <FileText className="w-5 h-5 text-blue-600" />
                           </div>
-                          <div className="text-sm text-gray-600 space-y-1">
-                            <div>
-                              <strong>Proprietário:</strong> 
+                          
+                          {/* Informações do Contrato */}
+                          <div className="flex-1">
+                            <div className="mb-1">
                               <button
-                                onClick={() => toggleProprietarioExpansion(recibo.proprietarioNome)}
-                                className="ml-1 text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
-                                title={`Clique para ${expandedProprietarios.has(recibo.proprietarioNome) ? 'recolher' : 'ver todos os recibos'} de ${recibo.proprietarioNome}`}
+                                onClick={() => toggleContratoExpansion(recibo.contractId)}
+                                className="font-semibold text-gray-900 text-lg hover:text-blue-600 transition-colors cursor-pointer"
+                                title={`Clique para ${contractExpanded ? 'recolher' : 'ver todos os recibos'} deste contrato`}
                               >
-                                {recibo.proprietarioNome}
-                                <ChevronDown className={`inline w-3 h-3 ml-1 transition-transform ${
-                                  expandedProprietarios.has(recibo.proprietarioNome) ? 'rotate-180' : ''
+                                {recibo.numeroRecibo}
+                                <ChevronDown className={`inline w-4 h-4 ml-1 transition-transform ${
+                                  contractExpanded ? 'rotate-180' : ''
                                 }`} />
                               </button>
-                              {expandedProprietarios.has(recibo.proprietarioNome) && (
+                              {contractExpanded && (
                                 <div className="text-xs text-blue-600 mt-1">
-                                  Mostrando todos os recibos do proprietário
+                                  Mostrando todos os recibos deste contrato
                                 </div>
                               )}
                             </div>
-                            <div><strong>Inquilino:</strong> {recibo.inquilinoNome}</div>
-                            <div><strong>Imóvel:</strong> {recibo.imovelEndereco}</div>
+                            <div className="text-sm text-gray-600 space-y-1">
+                              <div>
+                                <strong>Proprietário:</strong> 
+                                <button
+                                  onClick={() => toggleProprietarioExpansion(recibo.proprietarioNome)}
+                                  className="ml-1 text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
+                                  title={`Clique para ${proprietarioExpanded ? 'recolher' : 'ver todos os recibos'} de ${recibo.proprietarioNome}`}
+                                >
+                                  {recibo.proprietarioNome}
+                                  <ChevronDown className={`inline w-3 h-3 ml-1 transition-transform ${
+                                    proprietarioExpanded ? 'rotate-180' : ''
+                                  }`} />
+                                </button>
+                                {proprietarioExpanded && (
+                                  <div className="text-xs text-blue-600 mt-1">
+                                    Mostrando todos os recibos do proprietário
+                                  </div>
+                                )}
+                              </div>
+                              <div><strong>Inquilino:</strong> {recibo.inquilinoNome}</div>
+                              <div><strong>Imóvel:</strong> {recibo.imovelEndereco}</div>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Ações */}
-                      <div className="flex items-center space-x-3">
-                        <button
-                          onClick={() => baixarRecibo(recibo.numeroRecibo)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-                          title="Baixar PDF deste recibo"
-                        >
-                          <Download className="w-4 h-4" />
-                          <span>PDF</span>
-                        </button>
+                        {/* Ações */}
+                        <div className="flex items-center space-x-3">
+                          <button
+                            onClick={() => baixarRecibo(recibo.numeroRecibo)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                            title="Baixar PDF deste recibo"
+                          >
+                            <Download className="w-4 h-4" />
+                            <span>PDF</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                  })
+                })()}
               </div>
             </div>
 

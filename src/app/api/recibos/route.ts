@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
         r."proprietarioNome",
         r."inquilinoNome", 
         r."imovelEndereco",
+        r."contractId",
         r."pdfUrl"
       FROM recibos r
       WHERE r."userId" = $1
@@ -77,6 +78,7 @@ export async function GET(request: NextRequest) {
       proprietarioNome: String(r.proprietarioNome),
       inquilinoNome: String(r.inquilinoNome),
       imovelEndereco: String(r.imovelEndereco),
+      contractId: String(r.contractId),
       pdfUrl: r.pdfUrl
     })) : []
 
