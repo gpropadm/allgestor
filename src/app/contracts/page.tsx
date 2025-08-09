@@ -97,7 +97,8 @@ export default function Contracts() {
       const response = await fetch('/api/contracts')
       if (response.ok) {
         const data = await response.json()
-        setContracts(data)
+        // Handle both old format (array) and new format (object with contracts)
+        setContracts(Array.isArray(data) ? data : data.contracts || [])
       }
     } catch (error) {
       console.error('Error fetching contracts:', error)
