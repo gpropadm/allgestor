@@ -37,6 +37,8 @@ export default function RecibosPage() {
   const [showFiltros, setShowFiltros] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
+  const [showAllMonths, setShowAllMonths] = useState(false)
+  const [expandedProprietarios, setExpandedProprietarios] = useState<Set<string>>(new Set())
 
   // Verificar autenticação
   useEffect(() => {
@@ -91,13 +93,73 @@ export default function RecibosPage() {
     }
   }
   
-  // Navegar para recibos do contrato específico
-  const verRecibosDoContrato = (contractId: string, proprietarioNome: string) => {
-    router.push(`/recibos/contrato/${contractId}?proprietario=${encodeURIComponent(proprietarioNome)}`)
+  // Função para alternar expansão de proprietário (igual ao payments)
+  const toggleProprietarioExpansion = (proprietarioNome: string) => {
+    const newExpanded = new Set(expandedProprietarios)
+    if (newExpanded.has(proprietarioNome)) {
+      newExpanded.delete(proprietarioNome)
+    } else {
+      newExpanded.add(proprietarioNome)
+    }
+    setExpandedProprietarios(newExpanded)
   }
   
-  // Filtrar recibos no frontend - TEMPORARIAMENTE SEM FILTROS
-  const recibosFiltrados = recibos // Por enquanto, sem filtros até resolver o problema
+  // Filtrar recibos igual ao sistema de payments
+  const getFilteredRecibos = () => {
+    let recibosToShow = recibos
+    
+    if (!showAllMonths) {
+      // Se há proprietários expandidos, incluir todos os recibos deles
+      if (expandedProprietarios.size > 0) {
+        const expandedRecibos: Recibo[] = []
+        const nonExpandedProprietarios = new Set<string>()
+        
+        recibos.forEach(recibo => {
+          const proprietarioNome = recibo.proprietarioNome
+          if (expandedProprietarios.has(proprietarioNome)) {
+            // Adicionar todos os recibos do proprietário expandido
+            expandedRecibos.push(recibo)
+          } else {
+            // Marcar proprietário como não expandido para mostrar só o mais recente
+            nonExpandedProprietarios.add(proprietarioNome)
+          }
+        })
+        
+        // Para proprietários não expandidos, pegar apenas o recibo mais recente
+        nonExpandedProprietarios.forEach(proprietarioNome => {
+          const proprietarioRecibos = recibos.filter(r => r.proprietarioNome === proprietarioNome)
+          if (proprietarioRecibos.length > 0) {
+            const latest = proprietarioRecibos.reduce((latest, current) => 
+              new Date(current.dataPagamento) > new Date(latest.dataPagamento) ? current : latest
+            )
+            expandedRecibos.push(latest)
+          }
+        })
+        
+        recibosToShow = expandedRecibos
+      } else {
+        // Mostrar apenas o recibo mais recente por proprietário (mês atual)
+        const proprietariosUnicos = [...new Set(recibos.map(r => r.proprietarioNome))]
+        const recibosDoMesAtual: Recibo[] = []
+        
+        proprietariosUnicos.forEach(proprietarioNome => {
+          const proprietarioRecibos = recibos.filter(r => r.proprietarioNome === proprietarioNome)
+          if (proprietarioRecibos.length > 0) {
+            const latest = proprietarioRecibos.reduce((latest, current) => 
+              new Date(current.dataPagamento) > new Date(latest.dataPagamento) ? current : latest
+            )
+            recibosDoMesAtual.push(latest)
+          }
+        })
+        
+        recibosToShow = recibosDoMesAtual
+      }
+    }
+    
+    return recibosToShow.sort((a, b) => new Date(b.dataPagamento).getTime() - new Date(a.dataPagamento).getTime())
+  }
+
+  const recibosFiltrados = getFilteredRecibos()
   
   // Paginação
   const totalPages = Math.ceil(recibosFiltrados.length / itemsPerPage)
@@ -175,8 +237,33 @@ export default function RecibosPage() {
               <div>
                 <h1 className="text-3xl font-bold">📄 Gestão de Recibos</h1>
                 <p className="text-blue-100 mt-2">
-                  Recibos gerados automaticamente quando pagamentos são marcados como pagos
+                  {showAllMonths 
+                    ? 'Mostrando todos os meses' 
+                    : `Mostrando apenas ${new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`
+                  }
                 </p>
+                <div className="flex items-center space-x-4 mt-3">
+                  <button
+                    onClick={() => setShowAllMonths(!showAllMonths)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      showAllMonths
+                        ? 'bg-white/30 text-white hover:bg-white/40'
+                        : 'bg-white/20 text-white hover:bg-white/30'
+                    }`}
+                  >
+                    {showAllMonths ? '📅 Mostrar só este mês' : '📅 Ver todos os meses'}
+                  </button>
+                  {!showAllMonths && (
+                    <p className="text-sm text-blue-100">
+                      💡 Clique no proprietário para ver todos os recibos dele
+                      {expandedProprietarios.size > 0 && (
+                        <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs bg-white/20 text-white">
+                          {expandedProprietarios.size} expandido{expandedProprietarios.size > 1 ? 's' : ''}
+                        </span>
+                      )}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex gap-2">
@@ -406,17 +493,30 @@ export default function RecibosPage() {
                           <FileText className="w-5 h-5 text-blue-600" />
                         </div>
                         
-                        {/* Informações do Contrato - Clicável */}
-                        <div 
-                          className="flex-1 cursor-pointer hover:text-blue-600 transition-colors"
-                          onClick={() => verRecibosDoContrato(recibo.contractId, recibo.proprietarioNome)}
-                          title="Clique para ver todos os recibos deste contrato"
-                        >
+                        {/* Informações do Contrato */}
+                        <div className="flex-1">
                           <div className="font-semibold text-gray-900 text-lg mb-1">
                             {recibo.numeroRecibo}
                           </div>
                           <div className="text-sm text-gray-600 space-y-1">
-                            <div><strong>Proprietário:</strong> {recibo.proprietarioNome}</div>
+                            <div>
+                              <strong>Proprietário:</strong> 
+                              <button
+                                onClick={() => toggleProprietarioExpansion(recibo.proprietarioNome)}
+                                className="ml-1 text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
+                                title={`Clique para ${expandedProprietarios.has(recibo.proprietarioNome) ? 'recolher' : 'ver todos os recibos'} de ${recibo.proprietarioNome}`}
+                              >
+                                {recibo.proprietarioNome}
+                                <ChevronDown className={`inline w-3 h-3 ml-1 transition-transform ${
+                                  expandedProprietarios.has(recibo.proprietarioNome) ? 'rotate-180' : ''
+                                }`} />
+                              </button>
+                              {expandedProprietarios.has(recibo.proprietarioNome) && (
+                                <div className="text-xs text-blue-600 mt-1">
+                                  Mostrando todos os recibos
+                                </div>
+                              )}
+                            </div>
                             <div><strong>Inquilino:</strong> {recibo.inquilinoNome}</div>
                             <div><strong>Imóvel:</strong> {recibo.imovelEndereco}</div>
                           </div>
@@ -432,15 +532,6 @@ export default function RecibosPage() {
                         >
                           <Download className="w-4 h-4" />
                           <span>PDF</span>
-                        </button>
-                        
-                        <button
-                          onClick={() => verRecibosDoContrato(recibo.contractId, recibo.proprietarioNome)}
-                          className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-                          title="Ver todos os recibos deste contrato"
-                        >
-                          <Eye className="w-4 h-4" />
-                          <span>Ver Todos</span>
                         </button>
                       </div>
                     </div>
